@@ -27,7 +27,6 @@ public class SingerController {
 
     @GetMapping("/page")
     public ResponseEntity<?> pageSinger(Pageable pageable) {
-//        fix
         return new ResponseEntity<>(singerService.findAll(pageable), HttpStatus.OK);
     }
 

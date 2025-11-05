@@ -91,8 +91,6 @@ public class AlbumController {
             songAfter.add(songList.get(i));
 
         }
-//        songList.remove(song.get());
-        System.out.println("song lístr sau khi xoa"+songList.size());
         album.get().setSongList(songAfter);
         albumService.save(album.get());
         return new ResponseEntity<>(new ResponMessage("delete_success"), HttpStatus.OK);

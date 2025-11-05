@@ -12,14 +12,14 @@ import java.util.Date;
 @Component
 public class JwtProvider {
     private static final Logger logger = LoggerFactory.getLogger(JwtProvider.class);
-    private String jwtSecret = "chinh.nguyen@codegym.vn";
+    private String jwtSecret = "chinhcomhut010884chinhcomhut010884chinhcomhut010884chinhcomhut010884"; // 64 ký tự
     private int jwtExpiration = 86400;
     public String createToken(Authentication authentication){
         UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
         return Jwts.builder().setSubject(userPrinciple.getUsername())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(new Date().getTime()+jwtExpiration*1000))
-                .signWith(SignatureAlgorithm.HS512, jwtSecret)
+                .signWith(SignatureAlgorithm.HS256, jwtSecret)
                 .compact();
     }
     public boolean validateToken(String token){
