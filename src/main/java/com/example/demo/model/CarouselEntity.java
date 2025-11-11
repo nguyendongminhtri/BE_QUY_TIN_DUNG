@@ -20,6 +20,9 @@ public class CarouselEntity {
     private String description;
     private String content;
     private String imageUrl;
+    private String imageStoragePath;
+    @Column(name = "content_storage_paths", columnDefinition = "TEXT")
+    private String contentStoragePathsJson;
     private Boolean isShow = true;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

@@ -4,6 +4,8 @@ import com.example.demo.model.CarouselEntity;
 import com.example.demo.model.User;
 import com.example.demo.repository.ICarouselRepository;
 import com.example.demo.security.userprincal.UserDetailService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,9 +27,18 @@ public class CarouselServiceIMPL implements ICarouselService{
     }
 
     @Override
-    public void save(CarouselEntity carouselEntity) {
+    public void save(CarouselEntity carouselEntity)  {
         User user = userDetailService.getCurrentUser();
         carouselEntity.setUser(user);
+        ObjectMapper mapper = new ObjectMapper();
+        String jsonPaths = null;
+        try {
+            jsonPaths = mapper.writeValueAsString(carouselEntity.getContentStoragePathsJson());
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        carouselEntity.setContentStoragePathsJson(jsonPaths);
+
         carouselRepository.save(carouselEntity);
     }
 
@@ -43,7 +54,7 @@ public class CarouselServiceIMPL implements ICarouselService{
 
     @Override
     public void deleteById(Long id) {
-
+        carouselRepository.deleteById(id);
     }
 
     @Override

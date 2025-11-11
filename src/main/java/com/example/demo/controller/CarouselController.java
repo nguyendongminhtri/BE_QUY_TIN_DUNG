@@ -3,6 +3,7 @@ package com.example.demo.controller;
 import com.example.demo.dto.response.ResponMessage;
 import com.example.demo.model.CarouselEntity;
 import com.example.demo.service.carousel.ICarouselService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.Map;
+import java.util.Optional;
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -44,5 +46,22 @@ public class CarouselController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi khi cập nhật trạng thái");
         }
+    }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteCarousel(@PathVariable Long id) {
+        Optional<CarouselEntity> carouselEntity = carouselService.findById(id);
+        if(!carouselEntity.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        carouselService.deleteById(id);
+        return new ResponseEntity<>(new ResponMessage("delete_success"), HttpStatus.OK);
+    }
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getCarouselById(@PathVariable Long id) {
+        Optional<CarouselEntity> carouselEntity = carouselService.findById(id);
+        if(!carouselEntity.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(carouselEntity.get(), HttpStatus.OK);
     }
 }
