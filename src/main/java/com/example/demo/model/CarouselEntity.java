@@ -18,6 +18,7 @@ public class CarouselEntity {
     private Long id;
     private String title;
     private String description;
+    @Column(columnDefinition = "LONGTEXT")
     private String content;
     private String imageUrl;
     private String imageStoragePath;

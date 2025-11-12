@@ -47,37 +47,55 @@ public class AuthController {
     @Autowired
     JwtTokenFilter jwtTokenFilter;
     @PostMapping("/signup")
-    public ResponseEntity<?> register(@Valid @RequestBody SignUpForm signUpForm){
-        if(userService.existsByUsername(signUpForm.getUsername())){
+    public ResponseEntity<?> register(@Valid @RequestBody SignUpForm signUpForm) {
+        if (userService.existsByUsername(signUpForm.getUsername())) {
             return new ResponseEntity<>(new ResponMessage("no_user"), HttpStatus.OK);
         }
-        if(userService.existsByEmail(signUpForm.getEmail())){
+        if (userService.existsByEmail(signUpForm.getEmail())) {
             return new ResponseEntity<>(new ResponMessage("no_email"), HttpStatus.OK);
         }
-        User user = new User(signUpForm.getName(), signUpForm.getUsername(), signUpForm.getEmail(),passwordEncoder.encode(signUpForm.getPassword()));
+
+        User user = new User(
+                signUpForm.getName(),
+                signUpForm.getUsername(),
+                signUpForm.getEmail(),
+                passwordEncoder.encode(signUpForm.getPassword())
+        );
+
         Set<String> strRoles = signUpForm.getRoles();
         Set<Role> roles = new HashSet<>();
-        strRoles.forEach(role ->{
-            switch (role){
-                case "admin":
-                    Role adminRole = roleService.findByName(RoleName.ADMIN).orElseThrow(
-                            ()-> new RuntimeException("Role not found")
-                    );
-                    roles.add(adminRole);
-                    break;
-                case "pm":
-                    Role pmRole = roleService.findByName(RoleName.PM).orElseThrow( ()-> new RuntimeException("Role not found"));
-                    roles.add(pmRole);
-                    break;
-                default:
-                    Role userRole = roleService.findByName(RoleName.USER).orElseThrow( ()-> new RuntimeException("Role not found"));
-                    roles.add(userRole);
-            }
-        });
+
+        // Nếu không có roles từ client, gán mặc định là USER
+        if (strRoles == null || strRoles.isEmpty()) {
+            Role userRole = roleService.findByName(RoleName.USER)
+                    .orElseThrow(() -> new RuntimeException("Role USER not found"));
+            roles.add(userRole);
+        } else {
+            strRoles.forEach(role -> {
+                switch (role) {
+                    case "admin":
+                        Role adminRole = roleService.findByName(RoleName.ADMIN)
+                                .orElseThrow(() -> new RuntimeException("Role ADMIN not found"));
+                        roles.add(adminRole);
+                        break;
+                    case "pm":
+                        Role pmRole = roleService.findByName(RoleName.PM)
+                                .orElseThrow(() -> new RuntimeException("Role PM not found"));
+                        roles.add(pmRole);
+                        break;
+                    default:
+                        Role userRole = roleService.findByName(RoleName.USER)
+                                .orElseThrow(() -> new RuntimeException("Role USER not found"));
+                        roles.add(userRole);
+                }
+            });
+        }
+
         user.setRoles(roles);
         userService.save(user);
         return new ResponseEntity<>(new ResponMessage("yes"), HttpStatus.OK);
     }
+
     @PostMapping("/signin")
     public ResponseEntity<?> login(@Valid @RequestBody SignInForm signInForm){
         Authentication authentication = authenticationManager.authenticate(

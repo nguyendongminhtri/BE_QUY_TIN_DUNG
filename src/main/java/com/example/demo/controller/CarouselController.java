@@ -2,6 +2,7 @@ package com.example.demo.controller;
 
 import com.example.demo.dto.response.ResponMessage;
 import com.example.demo.model.CarouselEntity;
+import com.example.demo.model.Category;
 import com.example.demo.service.carousel.ICarouselService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,4 +65,23 @@ public class CarouselController {
         }
         return new ResponseEntity<>(carouselEntity.get(), HttpStatus.OK);
     }
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateCarousel(@PathVariable Long id, @RequestBody CarouselEntity updatedData) {
+        Optional<CarouselEntity> optionalCarousel = carouselService.findById(id);
+        if (!optionalCarousel.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ResponMessage("carousel_not_found"));
+        }
+        CarouselEntity existing = optionalCarousel.get();
+        existing.setTitle(updatedData.getTitle());
+        existing.setDescription(updatedData.getDescription());
+        existing.setContent(updatedData.getContent());
+        existing.setImageUrl(updatedData.getImageUrl());
+        existing.setImageStoragePath(updatedData.getImageStoragePath());
+        existing.setContentStoragePathsJson(updatedData.getContentStoragePathsJson());
+        existing.setIsShow(updatedData.getIsShow());
+        carouselService.save(existing);
+        return ResponseEntity.ok(new ResponMessage("update_success"));
+    }
+
 }
