@@ -9,14 +9,13 @@ import javax.persistence.*;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor(force = true)
-public class Category {
+public class CategoryEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @NonNull
     @Column(unique = true)
     private String name;
-    private String avatar;
     @ManyToOne
     User user;
 }

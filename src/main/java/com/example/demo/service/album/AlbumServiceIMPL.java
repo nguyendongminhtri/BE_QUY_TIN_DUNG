@@ -1,7 +1,7 @@
 package com.example.demo.service.album;
 
 import com.example.demo.model.Album;
-import com.example.demo.model.Song;
+import com.example.demo.model.NewsEntity;
 import com.example.demo.model.User;
 import com.example.demo.repository.IAlbumRepository;
 import com.example.demo.security.userprincal.UserDetailService;
@@ -63,7 +63,7 @@ public class AlbumServiceIMPL implements IAlbumService {
     }
 
     @Override
-    public List<Song> findByIdAlbum(Long id) {
+    public List<NewsEntity> findByIdAlbum(Long id) {
         return albumRepository.findByIdAlbum(id);
     }
 }

@@ -28,7 +28,7 @@ public class Album {
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "album_song",joinColumns = @JoinColumn(name = "albumId"), inverseJoinColumns = @JoinColumn(name = "songId"))
-    private List<Song> songList =  new ArrayList<>();
+    private List<NewsEntity> songList =  new ArrayList<>();
     @ManyToOne
     private User user;
 }

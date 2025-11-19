@@ -2,9 +2,9 @@ package com.example.demo.controller;
 
 import com.example.demo.dto.response.ResponMessage;
 import com.example.demo.model.Singer;
-import com.example.demo.model.Song;
+import com.example.demo.model.NewsEntity;
 import com.example.demo.service.singer.ISingerService;
-import com.example.demo.service.song.ISongService;
+import com.example.demo.service.news.INewsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -23,7 +23,7 @@ public class SingerController {
     @Autowired
     private ISingerService singerService;
     @Autowired
-    private ISongService songService;
+    private INewsService songService;
 
     @GetMapping("/page")
     public ResponseEntity<?> pageSinger(Pageable pageable) {
@@ -86,29 +86,5 @@ public class SingerController {
 //        singer.setId(singer1.get().getId());
         singerService.save(singer1.get());
         return new ResponseEntity<>(new ResponMessage("update_success"), HttpStatus.OK);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteSinger(@PathVariable Long id) {
-        Optional<Singer> singer = singerService.findById(id);
-        if (!singer.isPresent()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        List<Song> songList = songService.findAll();
-        for (int i = 0; i < songList.size(); i++) {
-            if (!songList.get(i).getSingerList().isEmpty()) {
-                List<Singer> singerList = songList.get(i).getSingerList(); /// tao mang trung gian
-                for (int j = 0; j < songList.get(i).getSingerList().size(); j++) {
-                    if (songList.get(i).getSingerList().get(j).getId() == id) {
-                        singerList.remove(singerList.get(j));
-                    }
-                }
-                songList.get(i).setSingerList(singerList);
-                songService.save(songList.get(i));
-
-            }
-        }
-        singerService.deleteById(id);
-        return new ResponseEntity<>(new ResponMessage("delete_success"), HttpStatus.OK);
     }
 }

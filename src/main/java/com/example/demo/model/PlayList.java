@@ -29,7 +29,7 @@ public class PlayList {
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "playlist_song",joinColumns = @JoinColumn(name = "playlistId"), inverseJoinColumns = @JoinColumn(name = "songId"))
-    private List<Song> songList =  new ArrayList<>();
+    private List<NewsEntity> songList =  new ArrayList<>();
     @ManyToOne
     private User user;
 }

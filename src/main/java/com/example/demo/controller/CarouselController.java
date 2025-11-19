@@ -2,9 +2,7 @@ package com.example.demo.controller;
 
 import com.example.demo.dto.response.ResponMessage;
 import com.example.demo.model.CarouselEntity;
-import com.example.demo.model.Category;
 import com.example.demo.service.carousel.ICarouselService;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

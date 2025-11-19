@@ -1,7 +1,7 @@
 package com.example.demo.service.playlist;
 
 import com.example.demo.model.PlayList;
-import com.example.demo.model.Song;
+import com.example.demo.model.NewsEntity;
 import com.example.demo.model.User;
 import com.example.demo.repository.IPlaylistRepository;
 import com.example.demo.security.userprincal.UserDetailService;
@@ -54,7 +54,7 @@ public class PlaylistServiceIMPL implements IPlaylistService {
     }
 
     @Override
-    public List<Song> findByIdPlayList(Long id) {
+    public List<NewsEntity> findByIdPlayList(Long id) {
         return playlistRepository.findByIdPlayList(id);
     }
 }
