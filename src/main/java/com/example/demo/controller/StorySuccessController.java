@@ -1,8 +1,8 @@
 package com.example.demo.controller;
-
 import com.example.demo.dto.response.ResponMessage;
 import com.example.demo.model.NewsEntity;
-import com.example.demo.service.news.INewsService;
+import com.example.demo.model.StorySuccessEntity;
+import com.example.demo.service.storysuccess.IStorySuccessService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,46 +15,41 @@ import javax.validation.Valid;
 import java.util.Map;
 import java.util.Optional;
 
-@CrossOrigin(origins = "*")
 @RestController
-@RequestMapping("/news")
-public class NewsController {
+@RequestMapping("/story-success")
+@CrossOrigin(origins = "*")
+public class StorySuccessController {
     @Autowired
-    private INewsService newsService;
-
-    @GetMapping("/page")
-    public ResponseEntity<?> pageSong(Pageable pageable) {
-        return new ResponseEntity<>(newsService.findAll(pageable), HttpStatus.OK);
-    }
-
-    @GetMapping
-    public ResponseEntity<?> listNews() {
-        return new ResponseEntity<>(newsService.findAll(), HttpStatus.OK);
-    }
+    private IStorySuccessService storySuccessService;
 
     @PostMapping
-    public ResponseEntity<?> createNews(@Valid @RequestBody NewsEntity newsEntity) {
-        newsService.save(newsEntity);
+    public ResponseEntity<?> createStorySuccess(@Valid @RequestBody StorySuccessEntity storySuccessEntity) {
+        storySuccessService.save(storySuccessEntity);
         return new ResponseEntity<>(new ResponMessage("create_success"), HttpStatus.OK);
     }
 
+    @GetMapping
+    public ResponseEntity<?> showListStorySuccess() {
+        return new ResponseEntity<>(storySuccessService.findAll(), HttpStatus.OK);
+    }
+
     @GetMapping("/{id}")
-    public ResponseEntity<?> getNewsById(@PathVariable Long id) {
-        Optional<NewsEntity> song = newsService.findById(id);
-        if (!song.isPresent()) {
+    public ResponseEntity<?> getStorySuccessById(@PathVariable Long id) {
+        Optional<StorySuccessEntity> storySuccessEntity = storySuccessService.findById(id);
+        if (!storySuccessEntity.isPresent()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        return new ResponseEntity<>(song, HttpStatus.OK);
+        return new ResponseEntity<>(storySuccessEntity, HttpStatus.OK);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateNews(@PathVariable Long id, @RequestBody NewsEntity updatedData) {
-        Optional<NewsEntity> optionalNews = newsService.findById(id);
+    public ResponseEntity<?> updateNews(@PathVariable Long id, @RequestBody StorySuccessEntity updatedData) {
+        Optional<StorySuccessEntity> optionalNews = storySuccessService.findById(id);
         if (!optionalNews.isPresent()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new ResponMessage("news_not_found"));
         }
-        NewsEntity existing = optionalNews.get();
+        StorySuccessEntity existing = optionalNews.get();
         existing.setTitle(updatedData.getTitle());
         existing.setDescription(updatedData.getDescription());
         existing.setContent(updatedData.getContent());
@@ -63,17 +58,17 @@ public class NewsController {
         existing.setContentStoragePathsJson(updatedData.getContentStoragePathsJson());
         existing.setIsShow(updatedData.getIsShow());
         existing.setCategory(updatedData.getCategory());
-        newsService.save(existing);
+        storySuccessService.save(existing);
         return ResponseEntity.ok(new ResponMessage("update_success"));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteNews(@PathVariable Long id) {
-        Optional<NewsEntity> song = newsService.findById(id);
+        Optional<StorySuccessEntity> song = storySuccessService.findById(id);
         if (!song.isPresent()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        newsService.deleteById(id);
+        storySuccessService.deleteById(id);
         return new ResponseEntity<>(new ResponMessage("delete_success"), HttpStatus.OK);
     }
 
@@ -88,7 +83,7 @@ public class NewsController {
         }
 
         try {
-            newsService.updateStatus(id, isShow);
+            storySuccessService.updateStatus(id, isShow);
             return new ResponseEntity<>(new ResponMessage("update_success"), HttpStatus.OK);
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy news với ID: " + id);
@@ -96,16 +91,14 @@ public class NewsController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi khi cập nhật trạng thái");
         }
     }
-
     @GetMapping("/by-category/{categoryId}")
-    public Page<NewsEntity> getNewsByCategory(@PathVariable Long categoryId, Pageable pageable) {
-        return newsService.findAllByCategoryId(categoryId, pageable);
+    public Page<StorySuccessEntity> getNewsByCategory(@PathVariable Long categoryId, Pageable pageable) {
+        return storySuccessService.findAllByCategoryId(categoryId, pageable);
     }
     @GetMapping("/by-category/{categoryId}/search")
-    public Page<NewsEntity> searchByCategory(@PathVariable Long categoryId,
-                                             @RequestParam String keyword,
-                                             Pageable pageable) {
-        return newsService.fullTextSearch(categoryId, keyword, pageable);
+    public Page<StorySuccessEntity> searchByCategory(@PathVariable Long categoryId,
+                                                     @RequestParam String keyword,
+                                                     Pageable pageable) {
+        return storySuccessService.fullTextSearch(categoryId, keyword, pageable);
     }
-
 }

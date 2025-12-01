@@ -2,7 +2,7 @@ package com.example.demo.security.userprincal;
 
 import com.example.demo.model.User;
 import com.example.demo.repository.IUserRepository;
-import com.example.demo.service.impl.UserServiceImpl;
+import com.example.demo.service.user.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -10,7 +10,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import javax.swing.text.html.Option;
 import javax.transaction.Transactional;
 import java.util.Optional;
 

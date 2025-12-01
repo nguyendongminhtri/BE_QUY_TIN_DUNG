@@ -59,6 +59,7 @@ public class CategoryController {
         }
         CategoryEntity updatedCategory = optionalCategory.get();
         updatedCategory.setName(category.getName());
+        updatedCategory.setType(category.getType());
         categoryService.save(updatedCategory);
         return new ResponseEntity<>(new ResponMessage("update_success"), HttpStatus.OK);
     }

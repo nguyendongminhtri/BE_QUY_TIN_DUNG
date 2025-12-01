@@ -3,6 +3,7 @@ package com.example.demo.model;
 import lombok.*;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @Table(name = "categories")
@@ -16,6 +17,8 @@ public class CategoryEntity {
     @NonNull
     @Column(unique = true)
     private String name;
+    @NonNull
+    private String type;
     @ManyToOne
     User user;
 }

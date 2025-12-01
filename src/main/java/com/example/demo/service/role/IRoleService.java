@@ -1,4 +1,4 @@
-package com.example.demo.service;
+package com.example.demo.service.role;
 
 import com.example.demo.model.Role;
 import com.example.demo.model.RoleName;

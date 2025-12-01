@@ -1,6 +1,4 @@
 package com.example.demo.service.news;
-
-import com.example.demo.model.CarouselEntity;
 import com.example.demo.model.CategoryEntity;
 import com.example.demo.model.NewsEntity;
 import com.example.demo.model.User;
@@ -72,14 +70,15 @@ public class NewsServiceIMPL implements INewsService {
     }
 
     @Override
+    public Page<NewsEntity> findAllByCategoryId(Long categoryId, Pageable pageable) {
+        return newsRepository.findAllByCategoryId(categoryId, pageable);
+    }
+
+    @Override
     public List<NewsEntity> findAllByCategoryId(Long categoryId) {
         return newsRepository.findAllByCategoryId(categoryId);
     }
 
-    @Override
-    public Page<NewsEntity> findAllByTitleContaining(String title, Pageable pageable) {
-        return newsRepository.findAllByTitleContaining(title,pageable);
-    }
     @Override
     public void updateStatus(Long id, Boolean isShow) {
         if (id == null || isShow == null) {
@@ -97,6 +96,11 @@ public class NewsServiceIMPL implements INewsService {
         newsEntity.setUser(user);
         newsEntity.setIsShow(isShow);
         newsRepository.save(newsEntity);
+    }
+
+    @Override
+    public Page<NewsEntity> fullTextSearch(Long categoryId, String keyword, Pageable pageable) {
+        return newsRepository.fullTextSearch(categoryId, keyword, pageable);
     }
 
 }
