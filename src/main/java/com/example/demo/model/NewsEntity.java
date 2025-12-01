@@ -18,8 +18,10 @@ public class NewsEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @NotNull
+    @Column(columnDefinition = "LONGTEXT")
     private String title;
     @NotNull
+    @Column(columnDefinition = "LONGTEXT")
     private String description;
     private String imageUrl;
     private String imageStoragePath;

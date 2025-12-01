@@ -9,11 +9,11 @@ import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "story_success")
+@Table(name = "product")
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class StorySuccessEntity {
+public class ProductEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
