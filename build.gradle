@@ -48,6 +48,21 @@ dependencies {
 
     // WAR packaging (external Tomcat)
     providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
+
+    // Apache POI core
+    implementation 'org.apache.poi:poi:5.2.3'
+
+    // Apache POI cho định dạng Office XML (.docx, .xlsx)
+    implementation 'org.apache.poi:poi-ooxml:5.2.3'
+
+    // Nếu cần xử lý hình ảnh, font, hoặc định dạng nâng cao
+    implementation 'org.apache.poi:poi-ooxml-full:5.2.3'
+
+    // Nếu cần xử lý file nén (đọc .docx như zip)
+    implementation 'org.apache.commons:commons-compress:1.21'
+
+    // Nếu cần xử lý ngày giờ hoặc các tiện ích Java 8+
+    implementation 'org.apache.commons:commons-lang3:3.12.0'
 }
 
 bootWar {
