@@ -1,6 +1,8 @@
 package com.example.demo.service.creditcontract;
 
+import com.example.demo.config.WordGenerator;
 import com.example.demo.dto.request.ContractRequest;
+import com.example.demo.model.AvatarEntity;
 import com.example.demo.model.CreditContractEntity;
 import com.example.demo.model.User;
 import com.example.demo.repository.ICreditContractRepository;
@@ -12,6 +14,9 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import javax.validation.constraints.NotNull;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.Files;
@@ -30,6 +35,7 @@ public class CreditContractServiceIMPL implements ICreditContractService{
     private ICreditContractRepository creditContractRepository;
     @Autowired
     private UserDetailService userDetailService;
+    private  WordGenerator wordGenerator;
     @Override
     public List<CreditContractEntity> findAll() {
         return List.of();
@@ -46,7 +52,10 @@ public class CreditContractServiceIMPL implements ICreditContractService{
     public Page<CreditContractEntity> findAll(Pageable pageable) {
         return null;
     }
-
+    // Sinh file preview (không lưu DB)
+    public byte[] generatePreview(ContractRequest dto, String fileType) {
+        return wordGenerator.generateWord(dto, fileType);
+    }
     @Override
     public Optional<CreditContractEntity> findById(Long id) {
         return Optional.empty();
@@ -60,7 +69,7 @@ public class CreditContractServiceIMPL implements ICreditContractService{
     @Value("${contract.files.dir}")
     private String contractFilesDir;
     @Override
-    public List<String> generateContractFiles(ContractRequest request) throws IOException {
+    public List<String> generateContractFilesPreview(ContractRequest request) throws IOException {
         User user = userDetailService.getCurrentUser();
         LocalDate date = LocalDate.parse(request.getContractDate());
 
@@ -78,14 +87,24 @@ public class CreditContractServiceIMPL implements ICreditContractService{
         return fileUrls;
     }
 
-    private String generateContractFile(ContractRequest request, LocalDate date, User user, String templateName) throws IOException {
+    @NotNull
+    private String generateContractFile(@NotNull ContractRequest request,
+                                        @NotNull LocalDate date,
+                                        @NotNull User user,
+                                        @NotNull String templateName) throws IOException {
+
         try (InputStream is = new ClassPathResource("templates/" + templateName).getInputStream();
              XWPFDocument doc = new XWPFDocument(is)) {
 
-            // 👉 Dùng chung hàm thay thế placeholder
+            // 👉 Thay thế placeholder
             replacePlaceholders(doc, request, date);
 
-            String fileName = templateName.replace(".docx", "") + "_" + user.getUsername() + "_" + System.currentTimeMillis() + ".docx";
+            // 👉 Tạo tên file duy nhất
+            String fileName = templateName.replace(".docx", "")
+                    + "_" + user.getId()
+                    + "_" + System.currentTimeMillis()
+                    + ".docx";
+
             Path outputPath = Paths.get(contractFilesDir, fileName);
             Files.createDirectories(outputPath.getParent());
 
@@ -93,16 +112,149 @@ public class CreditContractServiceIMPL implements ICreditContractService{
                 doc.write(os);
             }
 
-            // 👉 Lưu DB nếu cần (có thể thêm logic phân biệt file1/file2)
+            // 👉 Lưu DB nếu cần
             CreditContractEntity entity = new CreditContractEntity();
             entity.setUser(user);
             entity.setContractDate(date);
             entity.setFilePath(outputPath.toString());
             creditContractRepository.save(entity);
 
-            return "/files/" + fileName;
+            // 👉 Trả về URL công khai cho frontend
+            return ServletUriComponentsBuilder.fromCurrentContextPath()
+                    .path("/files/")
+                    .path(fileName)
+                    .toUriString();
         }
     }
+    public List<String> generateContractFilesExport(ContractRequest request) throws IOException {
+        User user = userDetailService.getCurrentUser();
+        LocalDate date = LocalDate.parse(request.getContractDate());
+
+        List<String> fileUrls = new ArrayList<>();
+
+        // File 1
+        fileUrls.add(generateContractFileExport(request, date, user, "File1.docx"));
+
+        // File 2
+        fileUrls.add(generateContractFileExport(request, date, user, "File2.docx"));
+
+        // File 3
+        fileUrls.add(generateContractFileExport(request, date, user, "File3.docx"));
+
+        return fileUrls;
+    }
+
+    @NotNull
+    public String generateContractFileExport(@NotNull ContractRequest request,
+                                             @NotNull LocalDate date,
+                                             @NotNull User user,
+                                             @NotNull String templateName) throws IOException {
+
+        try (InputStream is = new ClassPathResource("templates/" + templateName).getInputStream();
+             XWPFDocument doc = new XWPFDocument(is)) {
+
+            // Thay thế placeholder
+            replacePlaceholders(doc, request, date);
+
+            // Tạo tên file duy nhất
+            String fileName = templateName.replace(".docx", "")
+                    + "_export_" + user.getId()
+                    + "_" + System.currentTimeMillis()
+                    + ".docx";
+
+            Path outputPath = Paths.get(contractFilesDir, fileName);
+            Files.createDirectories(outputPath.getParent());
+
+            try (OutputStream os = Files.newOutputStream(outputPath)) {
+                doc.write(os);
+            }
+
+            // Map dữ liệu từ request sang entity
+            CreditContractEntity entity = new CreditContractEntity();
+            entity.setUser(user);
+            entity.setContractDate(date);
+
+            entity.setNguoiDaiDien(request.getNguoiDaiDien());
+            entity.setGtkh(request.getGtkh());
+            entity.setTenKhachHang(request.getTenKhachHang());
+            entity.setNamSinhKhachHang(request.getNamSinhKhachHang());
+            entity.setPhoneKhachHang(request.getPhoneKhachHang());
+            entity.setSoTheThanhVienKhachHang(request.getSoTheThanhVienKhachHang());
+            entity.setCccdKhachHang(request.getCccdKhachHang());
+            entity.setNgayCapCCCDKhachHang(request.getNgayCapCCCDKhachHang());
+            entity.setDiaChiThuongTruKhachHang(request.getDiaChiThuongTruKhachHang());
+            entity.setGtnt(request.getGtnt());
+            entity.setTenNguoiThan(request.getTenNguoiThan());
+            entity.setNamSinhNguoiThan(request.getNamSinhNguoiThan());
+            entity.setCccdNguoiThan(request.getCccdNguoiThan());
+            entity.setNgayCapCCCDNguoiThan(request.getNgayCapCCCDNguoiThan());
+            entity.setDiaChiThuongTruNguoiThan(request.getDiaChiThuongTruNguoiThan());
+            entity.setQuanHe(request.getQuanHe());
+            entity.setTienSo(request.getTienSo());
+            entity.setTienChu(request.getTienChu());
+            entity.setMuchDichVay(request.getMuchDichVay());
+            entity.setHanMuc(request.getHanMuc());
+            entity.setLaiSuat(request.getLaiSuat());
+            entity.setSoHopDongTheChapQSDD(request.getSoHopDongTheChapQSDD());
+
+            // Thông tin bìa đỏ
+            entity.setSerial(request.getSerial());
+            entity.setNoiCapSo(request.getNoiCapSo());
+            entity.setNgayCapSo(request.getNgayCapSo());
+            entity.setNoiDungVaoSo(request.getNoiDungVaoSo());
+            entity.setSoThuaDat(request.getSoThuaDat());
+            entity.setSoBanDo(request.getSoBanDo());
+            entity.setDiaChiThuaDat(request.getDiaChiThuaDat());
+            entity.setDienTichDatSo(request.getDienTichDatSo());
+            entity.setDienTichDatChu(request.getDienTichDatChu());
+            entity.setHinhThucSuDung(request.getHinhThucSuDung());
+            entity.setMuchDichSuDung(request.getMuchDichSuDung());
+            entity.setThoiHanSuDung(request.getThoiHanSuDung());
+            entity.setSoBienBanDinhGia(request.getSoBienBanDinhGia());
+            entity.setNoiDungThoaThuan(request.getNoiDungThoaThuan());
+            entity.setNguonGocSuDung(request.getNguonGocSuDung());
+            entity.setGhiChu(request.getGhiChu());
+
+            entity.setFilePath(outputPath.toString());
+
+            if (request.getFileAvatarUrls() != null) {
+                for (String url : request.getFileAvatarUrls()) {
+                    AvatarEntity avatar = new AvatarEntity();
+
+                    // Lưu trực tiếp URL để frontend hiển thị
+                    avatar.setFilePath(url);
+
+                    // Tách tên file từ URL (sau dấu '/')
+                    String fileNameAvatar = url.substring(url.lastIndexOf('/') + 1);
+                    avatar.setFileName(fileNameAvatar);
+
+                    // Nếu bạn biết loại file (jpg/png), có thể set cứng hoặc parse từ fileName
+                    if (fileNameAvatar.toLowerCase().endsWith(".png")) {
+                        avatar.setContentType("image/png");
+                    } else if (fileNameAvatar.toLowerCase().endsWith(".jpg") || fileNameAvatar.toLowerCase().endsWith(".jpeg")) {
+                        avatar.setContentType("image/jpeg");
+                    } else {
+                        avatar.setContentType("application/octet-stream"); // fallback
+                    }
+
+                    avatar.setCreditContract(entity);
+                    entity.getAvatars().add(avatar);
+                }
+            }
+
+
+
+            creditContractRepository.save(entity);
+
+            // Trả về URL công khai cho frontend
+//            return ServletUriComponentsBuilder.fromCurrentContextPath()
+//                    .path("/files/")
+//                    .path(fileName)
+//                    .toUriString();
+            return outputPath.toString();
+        }
+    }
+
     private void replacePlaceholders(XWPFDocument doc, ContractRequest request, LocalDate date) {
         Map<String, String> replacements = Map.ofEntries(
                 Map.entry("{{gd}}", Optional.ofNullable(request.getNguoiDaiDien()).orElse("")),

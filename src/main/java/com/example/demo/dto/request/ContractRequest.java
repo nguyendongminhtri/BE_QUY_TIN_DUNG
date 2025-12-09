@@ -3,6 +3,8 @@ package com.example.demo.dto.request;
 import lombok.Data;
 import lombok.ToString;
 
+import java.util.List;
+
 @Data
 @ToString
 public class ContractRequest {
@@ -49,4 +51,6 @@ public class ContractRequest {
     private String noiDungThoaThuan;
     private String nguonGocSuDung;
     private String ghiChu;
+    // 👉 Thêm trường để nhận danh sách avatar từ frontend
+    private List<String> fileAvatarUrls;
 }

@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "credit_contract")
@@ -73,4 +75,7 @@ public class CreditContractEntity {
     }
     @ManyToOne
     User user;
+    @OneToMany(mappedBy = "creditContract", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<AvatarEntity> avatars = new ArrayList<>();
+
 }
