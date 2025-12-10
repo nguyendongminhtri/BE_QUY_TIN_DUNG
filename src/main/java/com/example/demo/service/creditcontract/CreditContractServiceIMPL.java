@@ -323,17 +323,16 @@ public class CreditContractServiceIMPL implements ICreditContractService{
         List<XWPFRun> runs = new ArrayList<>(paragraph.getRuns());
         if (runs.isEmpty()) return;
 
-        // Bước 1: Ghép toàn bộ text của paragraph
+        // Ghép toàn bộ text của paragraph
         StringBuilder fullText = new StringBuilder();
         for (XWPFRun run : runs) {
             String text = run.getText(0);
             if (text != null) fullText.append(text);
         }
         String paragraphText = fullText.toString();
-
         if (paragraphText.isEmpty()) return;
 
-        // Bước 2: Thay thế tất cả placeholder trên toàn chuỗi
+        // Thay thế placeholder trên toàn chuỗi
         String replaced = paragraphText;
         for (Map.Entry<String, String> entry : replacements.entrySet()) {
             replaced = replaced.replace(entry.getKey(), entry.getValue());
@@ -352,20 +351,21 @@ public class CreditContractServiceIMPL implements ICreditContractService{
             return;
         }
 
-        // Bước 3: Gán lại text cho các run text, giữ nguyên run chứa shapes
+        // Gán lại text cho run đầu tiên, giữ nguyên định dạng
         boolean firstTextRun = true;
         for (XWPFRun run : runs) {
             if (run.getCTR() != null && run.getCTR().getDrawingList().size() > 0) {
-                // Run chứa shape → giữ nguyên
+                // Run chứa hình vẽ → giữ nguyên
                 continue;
             }
             if (firstTextRun) {
                 run.setText(replaced, 0); // gán toàn bộ text đã thay thế vào run đầu tiên
                 firstTextRun = false;
             } else {
-                run.setText("", 0); // các run text còn lại clear để tránh dư chữ
+                run.setText("", 0); // clear các run text còn lại
             }
         }
     }
+
 
 }
