@@ -43,16 +43,12 @@ public class CreditContractServiceIMPL implements ICreditContractService{
 
     @Override
     public void save(CreditContractEntity creditContractEntity) {
-//        User user = userDetailService.getCurrentUser();
-//        creditContractEntity.setUser(user);
-//        creditContractRepository.save(creditContractEntity);
     }
 
     @Override
     public Page<CreditContractEntity> findAll(Pageable pageable) {
         return null;
     }
-    // Sinh file preview (không lưu DB)
     public byte[] generatePreview(ContractRequest dto, String fileType) {
         return wordGenerator.generateWord(dto, fileType);
     }
@@ -112,13 +108,6 @@ public class CreditContractServiceIMPL implements ICreditContractService{
                 doc.write(os);
             }
 
-            // 👉 Lưu DB nếu cần
-            CreditContractEntity entity = new CreditContractEntity();
-            entity.setUser(user);
-            entity.setContractDate(date);
-            entity.setFilePath(outputPath.toString());
-            creditContractRepository.save(entity);
-
             // 👉 Trả về URL công khai cho frontend
             return ServletUriComponentsBuilder.fromCurrentContextPath()
                     .path("/files/")
@@ -140,7 +129,77 @@ public class CreditContractServiceIMPL implements ICreditContractService{
 
         // File 3
         fileUrls.add(generateContractFileExport(request, date, user, "File3.docx"));
+        // Map dữ liệu từ request sang entity
+        CreditContractEntity entity = new CreditContractEntity();
+        entity.setUser(user);
+        entity.setContractDate(date);
 
+        entity.setNguoiDaiDien(request.getNguoiDaiDien());
+        entity.setGtkh(request.getGtkh());
+        entity.setTenKhachHang(request.getTenKhachHang());
+        entity.setNamSinhKhachHang(request.getNamSinhKhachHang());
+        entity.setPhoneKhachHang(request.getPhoneKhachHang());
+        entity.setSoTheThanhVienKhachHang(request.getSoTheThanhVienKhachHang());
+        entity.setCccdKhachHang(request.getCccdKhachHang());
+        entity.setNgayCapCCCDKhachHang(request.getNgayCapCCCDKhachHang());
+        entity.setDiaChiThuongTruKhachHang(request.getDiaChiThuongTruKhachHang());
+        entity.setGtnt(request.getGtnt());
+        entity.setTenNguoiThan(request.getTenNguoiThan());
+        entity.setNamSinhNguoiThan(request.getNamSinhNguoiThan());
+        entity.setCccdNguoiThan(request.getCccdNguoiThan());
+        entity.setNgayCapCCCDNguoiThan(request.getNgayCapCCCDNguoiThan());
+        entity.setDiaChiThuongTruNguoiThan(request.getDiaChiThuongTruNguoiThan());
+        entity.setQuanHe(request.getQuanHe());
+        entity.setTienSo(request.getTienSo());
+        entity.setTienChu(request.getTienChu());
+        entity.setMuchDichVay(request.getMuchDichVay());
+        entity.setHanMuc(request.getHanMuc());
+        entity.setLaiSuat(request.getLaiSuat());
+        entity.setSoHopDongTheChapQSDD(request.getSoHopDongTheChapQSDD());
+
+        // Thông tin bìa đỏ
+        entity.setSerial(request.getSerial());
+        entity.setNoiCapSo(request.getNoiCapSo());
+        entity.setNgayCapSo(request.getNgayCapSo());
+        entity.setNoiDungVaoSo(request.getNoiDungVaoSo());
+        entity.setSoThuaDat(request.getSoThuaDat());
+        entity.setSoBanDo(request.getSoBanDo());
+        entity.setDiaChiThuaDat(request.getDiaChiThuaDat());
+        entity.setDienTichDatSo(request.getDienTichDatSo());
+        entity.setDienTichDatChu(request.getDienTichDatChu());
+        entity.setHinhThucSuDung(request.getHinhThucSuDung());
+        entity.setMuchDichSuDung(request.getMuchDichSuDung());
+        entity.setThoiHanSuDung(request.getThoiHanSuDung());
+        entity.setSoBienBanDinhGia(request.getSoBienBanDinhGia());
+        entity.setNoiDungThoaThuan(request.getNoiDungThoaThuan());
+        entity.setNguonGocSuDung(request.getNguonGocSuDung());
+        entity.setGhiChu(request.getGhiChu());
+
+        if (request.getFileAvatarUrls() != null) {
+            for (String url : request.getFileAvatarUrls()) {
+                AvatarEntity avatar = new AvatarEntity();
+
+                // Lưu trực tiếp URL để frontend hiển thị
+                avatar.setFilePath(url);
+
+                // Tách tên file từ URL (sau dấu '/')
+                String fileNameAvatar = url.substring(url.lastIndexOf('/') + 1);
+                avatar.setFileName(fileNameAvatar);
+
+                // Nếu bạn biết loại file (jpg/png), có thể set cứng hoặc parse từ fileName
+                if (fileNameAvatar.toLowerCase().endsWith(".png")) {
+                    avatar.setContentType("image/png");
+                } else if (fileNameAvatar.toLowerCase().endsWith(".jpg") || fileNameAvatar.toLowerCase().endsWith(".jpeg")) {
+                    avatar.setContentType("image/jpeg");
+                } else {
+                    avatar.setContentType("application/octet-stream"); // fallback
+                }
+
+                avatar.setCreditContract(entity);
+                entity.getAvatars().add(avatar);
+            }
+        }
+        creditContractRepository.save(entity);
         return fileUrls;
     }
 
@@ -169,82 +228,7 @@ public class CreditContractServiceIMPL implements ICreditContractService{
                 doc.write(os);
             }
 
-            // Map dữ liệu từ request sang entity
-            CreditContractEntity entity = new CreditContractEntity();
-            entity.setUser(user);
-            entity.setContractDate(date);
 
-            entity.setNguoiDaiDien(request.getNguoiDaiDien());
-            entity.setGtkh(request.getGtkh());
-            entity.setTenKhachHang(request.getTenKhachHang());
-            entity.setNamSinhKhachHang(request.getNamSinhKhachHang());
-            entity.setPhoneKhachHang(request.getPhoneKhachHang());
-            entity.setSoTheThanhVienKhachHang(request.getSoTheThanhVienKhachHang());
-            entity.setCccdKhachHang(request.getCccdKhachHang());
-            entity.setNgayCapCCCDKhachHang(request.getNgayCapCCCDKhachHang());
-            entity.setDiaChiThuongTruKhachHang(request.getDiaChiThuongTruKhachHang());
-            entity.setGtnt(request.getGtnt());
-            entity.setTenNguoiThan(request.getTenNguoiThan());
-            entity.setNamSinhNguoiThan(request.getNamSinhNguoiThan());
-            entity.setCccdNguoiThan(request.getCccdNguoiThan());
-            entity.setNgayCapCCCDNguoiThan(request.getNgayCapCCCDNguoiThan());
-            entity.setDiaChiThuongTruNguoiThan(request.getDiaChiThuongTruNguoiThan());
-            entity.setQuanHe(request.getQuanHe());
-            entity.setTienSo(request.getTienSo());
-            entity.setTienChu(request.getTienChu());
-            entity.setMuchDichVay(request.getMuchDichVay());
-            entity.setHanMuc(request.getHanMuc());
-            entity.setLaiSuat(request.getLaiSuat());
-            entity.setSoHopDongTheChapQSDD(request.getSoHopDongTheChapQSDD());
-
-            // Thông tin bìa đỏ
-            entity.setSerial(request.getSerial());
-            entity.setNoiCapSo(request.getNoiCapSo());
-            entity.setNgayCapSo(request.getNgayCapSo());
-            entity.setNoiDungVaoSo(request.getNoiDungVaoSo());
-            entity.setSoThuaDat(request.getSoThuaDat());
-            entity.setSoBanDo(request.getSoBanDo());
-            entity.setDiaChiThuaDat(request.getDiaChiThuaDat());
-            entity.setDienTichDatSo(request.getDienTichDatSo());
-            entity.setDienTichDatChu(request.getDienTichDatChu());
-            entity.setHinhThucSuDung(request.getHinhThucSuDung());
-            entity.setMuchDichSuDung(request.getMuchDichSuDung());
-            entity.setThoiHanSuDung(request.getThoiHanSuDung());
-            entity.setSoBienBanDinhGia(request.getSoBienBanDinhGia());
-            entity.setNoiDungThoaThuan(request.getNoiDungThoaThuan());
-            entity.setNguonGocSuDung(request.getNguonGocSuDung());
-            entity.setGhiChu(request.getGhiChu());
-
-            entity.setFilePath(outputPath.toString());
-
-            if (request.getFileAvatarUrls() != null) {
-                for (String url : request.getFileAvatarUrls()) {
-                    AvatarEntity avatar = new AvatarEntity();
-
-                    // Lưu trực tiếp URL để frontend hiển thị
-                    avatar.setFilePath(url);
-
-                    // Tách tên file từ URL (sau dấu '/')
-                    String fileNameAvatar = url.substring(url.lastIndexOf('/') + 1);
-                    avatar.setFileName(fileNameAvatar);
-
-                    // Nếu bạn biết loại file (jpg/png), có thể set cứng hoặc parse từ fileName
-                    if (fileNameAvatar.toLowerCase().endsWith(".png")) {
-                        avatar.setContentType("image/png");
-                    } else if (fileNameAvatar.toLowerCase().endsWith(".jpg") || fileNameAvatar.toLowerCase().endsWith(".jpeg")) {
-                        avatar.setContentType("image/jpeg");
-                    } else {
-                        avatar.setContentType("application/octet-stream"); // fallback
-                    }
-
-                    avatar.setCreditContract(entity);
-                    entity.getAvatars().add(avatar);
-                }
-            }
-
-
-
-            creditContractRepository.save(entity);
 
             // Trả về URL công khai cho frontend
 //            return ServletUriComponentsBuilder.fromCurrentContextPath()

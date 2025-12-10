@@ -61,7 +61,7 @@ public class CreditContractEntity {
     private String nguonGocSuDung;
     private String ghiChu;
 
-    private String filePath;
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     @PrePersist
