@@ -11,4 +11,5 @@ import java.util.List;
 public interface ICreditContractService extends IGenericService<CreditContractEntity> {
      List<String> generateContractFilesPreview(ContractRequest request) throws IOException;
      List<String> generateContractFilesExport(ContractRequest request) throws IOException;
+     List<String> updateContractFilesExport(Long id, ContractRequest request) throws IOException;
 }

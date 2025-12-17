@@ -1,48 +1,71 @@
-package com.example.demo.controller;
+    package com.example.demo.controller;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+    import com.example.demo.model.FileMetadataEntity;
+    import com.example.demo.repository.IFileMetadataRepository;
+    import org.springframework.beans.factory.annotation.Autowired;
+    import org.springframework.beans.factory.annotation.Value;
+    import org.springframework.http.ResponseEntity;
+    import org.springframework.web.bind.annotation.*;
+    import org.springframework.web.multipart.MultipartFile;
+    import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
+    import java.io.IOException;
+    import java.net.URLDecoder;
+    import java.net.URLEncoder;
+    import java.nio.charset.StandardCharsets;
+    import java.nio.file.Files;
+    import java.nio.file.Path;
+    import java.nio.file.Paths;
+    import java.time.LocalDateTime;
+    import java.util.ArrayList;
+    import java.util.List;
 
-@RestController
-@RequestMapping("/api/files")
-@CrossOrigin(origins = "*")
-public class FileUploadController {
+    @RestController
+    @RequestMapping("/files")
+    @CrossOrigin(origins = "*")
+    public class FileUploadController {
 
-    @Value("${contract.uploads.dir}")
-    private String uploadDir;
+        @Value("${contract.temp.dir}")
+        private String tempDir;
 
-    @PostMapping("/upload")
-    public ResponseEntity<List<String>> uploadFiles(@RequestParam("files") List<MultipartFile> files) {
-        List<String> urls = new ArrayList<>();
+        @Autowired
+        private IFileMetadataRepository fileMetadataRepository;
+        @PostMapping("/upload")
+        public ResponseEntity<List<FileMetadataEntity>> uploadFiles(@RequestParam("files") List<MultipartFile> files) {
+            List<FileMetadataEntity> metadataList = new ArrayList<>();
 
-        for (MultipartFile file : files) {
-            try {
-                // Tạo tên file duy nhất
-                String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-                Path path = Paths.get(uploadDir, fileName);
-                Files.createDirectories(path.getParent());
-                Files.write(path, file.getBytes());
+            for (MultipartFile file : files) {
+                try {
+                    // Decode tên file gốc để lưu trên ổ đĩa
+                    String originalFileName = URLDecoder.decode(file.getOriginalFilename(), StandardCharsets.UTF_8);
+                    String fileName = System.currentTimeMillis() + "_" + originalFileName;
 
-                // Trả về URL đầy đủ để frontend hiển thị
-                String fileUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
-                        .path("/uploads/")
-                        .path(fileName)
-                        .toUriString();
-                urls.add(fileUrl);
-            } catch (IOException e) {
-                e.printStackTrace();
+                    // Ghi file vào tempDir
+                    Path path = Paths.get(tempDir, fileName);
+                    Files.createDirectories(path.getParent());
+                    Files.write(path, file.getBytes());
+
+                    FileMetadataEntity metadata = new FileMetadataEntity();
+                    metadata.setFileName(fileName);
+                    metadata.setFilePath(path.toString()); // đường dẫn vật lý
+                    metadata.setStatus("TEMP");
+                    metadata.setCreatedAt(LocalDateTime.now());
+
+                    // Tạo URL public (KHÔNG encode trước, để UriComponentsBuilder tự encode)
+                    String fileUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
+                            .path("/temp/")
+                            .path(fileName)   // để nguyên tên file
+                            .toUriString();
+                    metadata.setFilePath(fileUrl); // dùng field riêng cho URL
+
+                    fileMetadataRepository.save(metadata);
+                    metadataList.add(metadata);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
+
+            return ResponseEntity.ok(metadataList);
         }
-        return ResponseEntity.ok(urls);
+
     }
-}

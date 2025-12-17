@@ -1,5 +1,5 @@
 package com.example.demo.model;
-
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -61,6 +61,11 @@ public class CreditContractEntity {
     private String nguonGocSuDung;
     private String ghiChu;
 
+    private String choVay;
+    private String loaiVay;
+    @Column(columnDefinition = "TEXT")
+    private String tableJson;
+
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -76,6 +81,7 @@ public class CreditContractEntity {
     @ManyToOne
     User user;
     @OneToMany(mappedBy = "creditContract", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<AvatarEntity> avatars = new ArrayList<>();
+    @JsonManagedReference
+    private List<AvatarEntity> avatars = new ArrayList();
 
 }

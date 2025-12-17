@@ -1,44 +1,58 @@
 package com.example.demo.service.creditcontract;
 
-import com.example.demo.config.WordGenerator;
 import com.example.demo.dto.request.ContractRequest;
+import com.example.demo.dto.request.TableRequest;
+import com.example.demo.mapper.ContractMapper;
 import com.example.demo.model.AvatarEntity;
 import com.example.demo.model.CreditContractEntity;
 import com.example.demo.model.User;
 import com.example.demo.repository.ICreditContractRepository;
+import com.example.demo.repository.IFileMetadataRepository;
 import com.example.demo.security.userprincal.UserDetailService;
 import org.apache.poi.xwpf.usermodel.*;
+import org.apache.xmlbeans.XmlCursor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.validation.constraints.NotNull;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.Files;
 import java.io.OutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+
 @Service
-public class CreditContractServiceIMPL implements ICreditContractService{
+public class CreditContractServiceIMPL implements ICreditContractService {
     @Autowired
     private ICreditContractRepository creditContractRepository;
     @Autowired
     private UserDetailService userDetailService;
-    private  WordGenerator wordGenerator;
+    @Autowired
+    private IFileMetadataRepository fileMetadataRepository;
+    @Autowired
+    private ContractMapper contractMapper;
+
     @Override
     public List<CreditContractEntity> findAll() {
-        return List.of();
+        return creditContractRepository.findAll();
     }
 
     @Override
@@ -49,12 +63,10 @@ public class CreditContractServiceIMPL implements ICreditContractService{
     public Page<CreditContractEntity> findAll(Pageable pageable) {
         return null;
     }
-    public byte[] generatePreview(ContractRequest dto, String fileType) {
-        return wordGenerator.generateWord(dto, fileType);
-    }
+
     @Override
     public Optional<CreditContractEntity> findById(Long id) {
-        return Optional.empty();
+        return creditContractRepository.findById(id);
     }
 
     @Override
@@ -64,38 +76,76 @@ public class CreditContractServiceIMPL implements ICreditContractService{
 
     @Value("${contract.files.dir}")
     private String contractFilesDir;
+
+    @Value("${contract.temp.dir}")
+    private String tempDir;
+
+    @Value("${contract.uploads.dir}")
+    private String uploadDir;
+
+    // 👉 Preview: chỉ sinh file, không lưu DB
     @Override
     public List<String> generateContractFilesPreview(ContractRequest request) throws IOException {
         User user = userDetailService.getCurrentUser();
         LocalDate date = LocalDate.parse(request.getContractDate());
 
         List<String> fileUrls = new ArrayList<>();
-
-        // File 1
         fileUrls.add(generateContractFile(request, date, user, "File1.docx"));
-
-        // File 2
         fileUrls.add(generateContractFile(request, date, user, "File2.docx"));
-
-        // File 3
         fileUrls.add(generateContractFile(request, date, user, "File3.docx"));
 
         return fileUrls;
     }
 
-    @NotNull
-    private String generateContractFile(@NotNull ContractRequest request,
-                                        @NotNull LocalDate date,
-                                        @NotNull User user,
-                                        @NotNull String templateName) throws IOException {
+    // 👉 Export: tạo mới hợp đồng và lưu DB
+    @Transactional
+    public List<String> generateContractFilesExport(ContractRequest request) throws IOException {
+        User user = userDetailService.getCurrentUser();
+        LocalDate date = LocalDate.parse(request.getContractDate());
 
+// Cách 1: OffsetDateTime
+//        LocalDate date = OffsetDateTime.parse(request.getContractDate()).toLocalDate();
+        CreditContractEntity entity = new CreditContractEntity();
+        contractMapper.mapRequestToEntity(request, entity, user, date);
+        contractMapper.processAvatars(request, entity, tempDir, uploadDir, fileMetadataRepository);
+
+        List<String> fileUrls = new ArrayList<>();
+        fileUrls.add(generateContractFileExport(request, date, user, "File1.docx"));
+        fileUrls.add(generateContractFileExport(request, date, user, "File2.docx"));
+        fileUrls.add(generateContractFileExport(request, date, user, "File3.docx"));
+
+        creditContractRepository.save(entity);
+        return fileUrls;
+    }
+
+    // 👉 Export: update hợp đồng đã có
+    @Transactional
+    public List<String> updateContractFilesExport(Long id, ContractRequest request) throws IOException {
+        User user = userDetailService.getCurrentUser();
+        LocalDate date = LocalDate.parse(request.getContractDate());
+
+        CreditContractEntity entity = creditContractRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy hợp đồng"));
+
+        contractMapper.mapRequestToEntity(request, entity, user, date);
+        contractMapper.processAvatars(request, entity, tempDir, uploadDir, fileMetadataRepository);
+
+        List<String> fileUrls = new ArrayList<>();
+        fileUrls.add(generateContractFileExport(request, date, user, "File1.docx"));
+        fileUrls.add(generateContractFileExport(request, date, user, "File2.docx"));
+        fileUrls.add(generateContractFileExport(request, date, user, "File3.docx"));
+
+        creditContractRepository.save(entity);
+        return fileUrls;
+    }
+
+    // 👉 Hàm generate file (preview)
+    private String generateContractFile(ContractRequest request, LocalDate date, User user, String templateName) throws IOException {
         try (InputStream is = new ClassPathResource("templates/" + templateName).getInputStream();
              XWPFDocument doc = new XWPFDocument(is)) {
 
-            // 👉 Thay thế placeholder
             replacePlaceholders(doc, request, date);
 
-            // 👉 Tạo tên file duy nhất
             String fileName = templateName.replace(".docx", "")
                     + "_" + user.getId()
                     + "_" + System.currentTimeMillis()
@@ -108,99 +158,11 @@ public class CreditContractServiceIMPL implements ICreditContractService{
                 doc.write(os);
             }
 
-            // 👉 Trả về URL công khai cho frontend
             return ServletUriComponentsBuilder.fromCurrentContextPath()
                     .path("/files/")
                     .path(fileName)
                     .toUriString();
         }
-    }
-    public List<String> generateContractFilesExport(ContractRequest request) throws IOException {
-        User user = userDetailService.getCurrentUser();
-        LocalDate date = LocalDate.parse(request.getContractDate());
-
-        List<String> fileUrls = new ArrayList<>();
-
-        // File 1
-        fileUrls.add(generateContractFileExport(request, date, user, "File1.docx"));
-
-        // File 2
-        fileUrls.add(generateContractFileExport(request, date, user, "File2.docx"));
-
-        // File 3
-        fileUrls.add(generateContractFileExport(request, date, user, "File3.docx"));
-        // Map dữ liệu từ request sang entity
-        CreditContractEntity entity = new CreditContractEntity();
-        entity.setUser(user);
-        entity.setContractDate(date);
-
-        entity.setNguoiDaiDien(request.getNguoiDaiDien());
-        entity.setGtkh(request.getGtkh());
-        entity.setTenKhachHang(request.getTenKhachHang());
-        entity.setNamSinhKhachHang(request.getNamSinhKhachHang());
-        entity.setPhoneKhachHang(request.getPhoneKhachHang());
-        entity.setSoTheThanhVienKhachHang(request.getSoTheThanhVienKhachHang());
-        entity.setCccdKhachHang(request.getCccdKhachHang());
-        entity.setNgayCapCCCDKhachHang(request.getNgayCapCCCDKhachHang());
-        entity.setDiaChiThuongTruKhachHang(request.getDiaChiThuongTruKhachHang());
-        entity.setGtnt(request.getGtnt());
-        entity.setTenNguoiThan(request.getTenNguoiThan());
-        entity.setNamSinhNguoiThan(request.getNamSinhNguoiThan());
-        entity.setCccdNguoiThan(request.getCccdNguoiThan());
-        entity.setNgayCapCCCDNguoiThan(request.getNgayCapCCCDNguoiThan());
-        entity.setDiaChiThuongTruNguoiThan(request.getDiaChiThuongTruNguoiThan());
-        entity.setQuanHe(request.getQuanHe());
-        entity.setTienSo(request.getTienSo());
-        entity.setTienChu(request.getTienChu());
-        entity.setMuchDichVay(request.getMuchDichVay());
-        entity.setHanMuc(request.getHanMuc());
-        entity.setLaiSuat(request.getLaiSuat());
-        entity.setSoHopDongTheChapQSDD(request.getSoHopDongTheChapQSDD());
-
-        // Thông tin bìa đỏ
-        entity.setSerial(request.getSerial());
-        entity.setNoiCapSo(request.getNoiCapSo());
-        entity.setNgayCapSo(request.getNgayCapSo());
-        entity.setNoiDungVaoSo(request.getNoiDungVaoSo());
-        entity.setSoThuaDat(request.getSoThuaDat());
-        entity.setSoBanDo(request.getSoBanDo());
-        entity.setDiaChiThuaDat(request.getDiaChiThuaDat());
-        entity.setDienTichDatSo(request.getDienTichDatSo());
-        entity.setDienTichDatChu(request.getDienTichDatChu());
-        entity.setHinhThucSuDung(request.getHinhThucSuDung());
-        entity.setMuchDichSuDung(request.getMuchDichSuDung());
-        entity.setThoiHanSuDung(request.getThoiHanSuDung());
-        entity.setSoBienBanDinhGia(request.getSoBienBanDinhGia());
-        entity.setNoiDungThoaThuan(request.getNoiDungThoaThuan());
-        entity.setNguonGocSuDung(request.getNguonGocSuDung());
-        entity.setGhiChu(request.getGhiChu());
-
-        if (request.getFileAvatarUrls() != null) {
-            for (String url : request.getFileAvatarUrls()) {
-                AvatarEntity avatar = new AvatarEntity();
-
-                // Lưu trực tiếp URL để frontend hiển thị
-                avatar.setFilePath(url);
-
-                // Tách tên file từ URL (sau dấu '/')
-                String fileNameAvatar = url.substring(url.lastIndexOf('/') + 1);
-                avatar.setFileName(fileNameAvatar);
-
-                // Nếu bạn biết loại file (jpg/png), có thể set cứng hoặc parse từ fileName
-                if (fileNameAvatar.toLowerCase().endsWith(".png")) {
-                    avatar.setContentType("image/png");
-                } else if (fileNameAvatar.toLowerCase().endsWith(".jpg") || fileNameAvatar.toLowerCase().endsWith(".jpeg")) {
-                    avatar.setContentType("image/jpeg");
-                } else {
-                    avatar.setContentType("application/octet-stream"); // fallback
-                }
-
-                avatar.setCreditContract(entity);
-                entity.getAvatars().add(avatar);
-            }
-        }
-        creditContractRepository.save(entity);
-        return fileUrls;
     }
 
     @NotNull
@@ -208,14 +170,11 @@ public class CreditContractServiceIMPL implements ICreditContractService{
                                              @NotNull LocalDate date,
                                              @NotNull User user,
                                              @NotNull String templateName) throws IOException {
-
         try (InputStream is = new ClassPathResource("templates/" + templateName).getInputStream();
              XWPFDocument doc = new XWPFDocument(is)) {
 
-            // Thay thế placeholder
             replacePlaceholders(doc, request, date);
 
-            // Tạo tên file duy nhất
             String fileName = templateName.replace(".docx", "")
                     + "_export_" + user.getId()
                     + "_" + System.currentTimeMillis()
@@ -228,18 +187,14 @@ public class CreditContractServiceIMPL implements ICreditContractService{
                 doc.write(os);
             }
 
-
-
-            // Trả về URL công khai cho frontend
-//            return ServletUriComponentsBuilder.fromCurrentContextPath()
-//                    .path("/files/")
-//                    .path(fileName)
-//                    .toUriString();
+            // ✅ Trả về đường dẫn vật lý
             return outputPath.toString();
         }
     }
 
+
     private void replacePlaceholders(XWPFDocument doc, ContractRequest request, LocalDate date) {
+        System.err.println("request --> "+request);
         Map<String, String> replacements = Map.ofEntries(
                 Map.entry("{{gd}}", Optional.ofNullable(request.getNguoiDaiDien()).orElse("")),
                 Map.entry("{{gtkh}}", Optional.ofNullable(request.getGtkh()).orElse("")),
@@ -279,11 +234,42 @@ public class CreditContractServiceIMPL implements ICreditContractService{
                 Map.entry("{{ndtt}}", Optional.ofNullable(request.getNoiDungThoaThuan()).orElse("")),
                 Map.entry("{{ngsd}}", Optional.ofNullable(request.getNguonGocSuDung()).orElse("")),
                 Map.entry("{{gc}}", Optional.ofNullable(request.getGhiChu()).orElse("")),
+                Map.entry("{{chv}}", Optional.ofNullable(request.getChoVay()).orElse("")),
+                Map.entry("{{lv}}", Optional.ofNullable(request.getLoaiVay()).orElse("")),
                 Map.entry("{{day}}", String.format("%02d", date.getDayOfMonth())),
                 Map.entry("{{month}}", String.format("%02d", date.getMonthValue())),
                 Map.entry("{{year}}", String.valueOf(date.getYear()))
         );
 
+// Tìm paragraph có placeholder
+        for (XWPFParagraph para : new ArrayList<>(doc.getParagraphs())) {
+            String text = para.getText();
+            if (text != null && text.contains("{{TABLE_PLACEHOLDER}}")) {
+                for (int i = para.getRuns().size() - 1; i >= 0; i--) {
+                    para.removeRun(i);
+                }
+
+                XmlCursor cursor = para.getCTP().newCursor();
+                // Không cần toNextToken, giữ nguyên cursor tại paragraph
+                XWPFTable table = doc.insertNewTbl(cursor);
+
+                if (table != null) {
+                    fillInsertedTable(table, request.getTableRequest());
+                } else {
+                    System.err.println("Không tạo được bảng tại {{TABLE_PLACEHOLDER}}");
+                }
+
+                // Xóa paragraph placeholder
+                IBody body = para.getBody();
+                if (body instanceof XWPFDocument d) {
+                    int pos = d.getPosOfParagraph(para);
+                    if (pos >= 0) d.removeBodyElement(pos);
+                } else if (body instanceof XWPFTableCell cell) {
+                    int idx = cell.getParagraphs().indexOf(para);
+                    if (idx >= 0) cell.removeParagraph(idx);
+                }
+            }
+        }
         // Duyệt trên bản copy để tránh ConcurrentModificationException
         List<XWPFParagraph> docParas = new ArrayList<>(doc.getParagraphs());
         for (XWPFParagraph paragraph : docParas) {
@@ -303,11 +289,18 @@ public class CreditContractServiceIMPL implements ICreditContractService{
         }
     }
 
+private void copyStyle(XWPFRun source, XWPFRun target) {
+    if (source.getCTR() != null && source.getCTR().getRPr() != null) {
+        target.getCTR().setRPr(source.getCTR().getRPr());
+    }
+}
+
+    // Hàm xử lý paragraph
     private void processParagraph(XWPFParagraph paragraph, Map<String, String> replacements) {
         List<XWPFRun> runs = new ArrayList<>(paragraph.getRuns());
         if (runs.isEmpty()) return;
 
-        // Ghép toàn bộ text của paragraph
+        // Ghép toàn bộ text
         StringBuilder fullText = new StringBuilder();
         for (XWPFRun run : runs) {
             String text = run.getText(0);
@@ -316,14 +309,14 @@ public class CreditContractServiceIMPL implements ICreditContractService{
         String paragraphText = fullText.toString();
         if (paragraphText.isEmpty()) return;
 
-        // Thay thế placeholder trên toàn chuỗi
-        String replaced = paragraphText;
+        // Thay thế toàn bộ đoạn văn
+        String replacedText = paragraphText;
         for (Map.Entry<String, String> entry : replacements.entrySet()) {
-            replaced = replaced.replace(entry.getKey(), entry.getValue());
+            replacedText = replacedText.replace(entry.getKey(), entry.getValue());
         }
 
         // Nếu sau thay thế rỗng → xóa paragraph
-        if (replaced.trim().isEmpty()) {
+        if (replacedText.trim().isEmpty()) {
             IBody body = paragraph.getBody();
             if (body instanceof XWPFDocument doc) {
                 int pos = doc.getPosOfParagraph(paragraph);
@@ -335,21 +328,95 @@ public class CreditContractServiceIMPL implements ICreditContractService{
             return;
         }
 
-        // Gán lại text cho run đầu tiên, giữ nguyên định dạng
-        boolean firstTextRun = true;
+        // Xóa toàn bộ run cũ
         for (XWPFRun run : runs) {
-            if (run.getCTR() != null && run.getCTR().getDrawingList().size() > 0) {
-                // Run chứa hình vẽ → giữ nguyên
-                continue;
+            run.setText("", 0);
+        }
+
+        // Run gốc để copy style
+        XWPFRun baseRun = runs.get(0);
+
+        // Xử lý riêng cho {{lv}}
+        String lvValue = replacements.get("{{lv}}");
+        if (lvValue != null && replacedText.contains(lvValue)) {
+            int idx = replacedText.indexOf(lvValue);
+
+            // Phần trước {{lv}}
+            if (idx > 0) {
+                XWPFRun runNormalBefore = paragraph.createRun();
+                copyStyle(baseRun, runNormalBefore); // giữ nguyên style template
+                runNormalBefore.setText(replacedText.substring(0, idx));
             }
-            if (firstTextRun) {
-                run.setText(replaced, 0); // gán toàn bộ text đã thay thế vào run đầu tiên
-                firstTextRun = false;
-            } else {
-                run.setText("", 0); // clear các run text còn lại
+
+            // Phần {{lv}} → bold
+            XWPFRun runBold = paragraph.createRun();
+            copyStyle(baseRun, runBold); // giữ nguyên style template
+            runBold.setBold(true);       // ép bold riêng cho {{lv}}
+            runBold.setText(lvValue);
+
+            // Phần sau {{lv}}
+            if (idx + lvValue.length() < replacedText.length()) {
+                XWPFRun runNormalAfter = paragraph.createRun();
+                copyStyle(baseRun, runNormalAfter); // giữ nguyên style template
+                runNormalAfter.setText(replacedText.substring(idx + lvValue.length()));
             }
+        } else {
+            // Nếu không có {{lv}} thì gán toàn bộ vào run thường
+            XWPFRun runNormal = paragraph.createRun();
+            copyStyle(baseRun, runNormal); // giữ nguyên style template
+            runNormal.setText(replacedText);
         }
     }
 
+    private void fillInsertedTable(XWPFTable table, TableRequest tableRequest) {
+        if (table == null || tableRequest == null || !tableRequest.isDrawTable()) return;
 
+        int colCount = 3;
+        int dataRowCount = tableRequest.getRows().size();
+        int totalRows = dataRowCount + 1; // +1 header
+
+        // Căn giữa và set width
+        table.setTableAlignment(TableRowAlign.CENTER);
+        table.setWidth("8000"); // full A4 width
+
+        // Header row
+        XWPFTableRow headerRow = table.getRow(0);
+        while (headerRow.getTableCells().size() < colCount) {
+            headerRow.addNewTableCell();
+        }
+
+        // Tạo thêm hàng dữ liệu
+        while (table.getNumberOfRows() < totalRows) {
+            XWPFTableRow newRow = table.createRow();
+            while (newRow.getTableCells().size() < colCount) {
+                newRow.addNewTableCell();
+            }
+        }
+
+        // Header
+        for (int c = 0; c < colCount; c++) {
+            XWPFParagraph para = headerRow.getCell(c).getParagraphs().get(0);
+            para.setAlignment(ParagraphAlignment.CENTER);
+            for (int i = para.getRuns().size() - 1; i >= 0; i--) para.removeRun(i);
+            XWPFRun run = para.createRun();
+            run.setBold(true);
+            run.setFontFamily("Times New Roman");
+            run.setFontSize(13);
+            run.setText(tableRequest.getHeaders().get(c));
+        }
+
+        // Dữ liệu
+        for (int r = 0; r < dataRowCount; r++) {
+            XWPFTableRow row = table.getRow(r + 1);
+            for (int c = 0; c < colCount; c++) {
+                XWPFParagraph para = row.getCell(c).getParagraphs().get(0);
+                para.setAlignment(ParagraphAlignment.CENTER);
+                for (int i = para.getRuns().size() - 1; i >= 0; i--) para.removeRun(i);
+                XWPFRun run = para.createRun();
+                run.setFontFamily("Times New Roman");
+                run.setFontSize(13);
+                run.setText(tableRequest.getRows().get(r).get(c));
+            }
+        }
+    }
 }

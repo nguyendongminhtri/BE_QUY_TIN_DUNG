@@ -10,6 +10,8 @@ public class WebConfig implements WebMvcConfigurer {
     private String contractFilesDir;
     @Value("${contract.uploads.dir}")
     private String contractUploadsDir;
+    @Value("${contract.temp.dir}")
+    private String tempDir;
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/files/**")
@@ -17,6 +19,8 @@ public class WebConfig implements WebMvcConfigurer {
         // Cho file upload multiple
         registry.addResourceHandler("/uploads/**")
                 .addResourceLocations("file:" + contractUploadsDir + "/");
+        registry.addResourceHandler("/temp/**")
+                .addResourceLocations("file:" + tempDir + "/");
 
     }
 }

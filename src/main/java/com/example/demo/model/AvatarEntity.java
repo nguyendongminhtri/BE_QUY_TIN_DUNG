@@ -1,5 +1,6 @@
 package com.example.demo.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,13 +18,15 @@ public class AvatarEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String filePath;     // đường dẫn file trên Firebase
+    private String filePath;
+    private String fileUrl;
     private String fileName;     // tên file gốc
     private String contentType;  // loại file (image/png, image/jpeg,...)
     private LocalDateTime uploadedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "credit_contract_id")
+    @JsonBackReference
     private CreditContractEntity creditContract;
 
     @PrePersist
