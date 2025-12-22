@@ -63,6 +63,8 @@ public class CreditContractEntity {
 
     private String choVay;
     private String loaiVay;
+    // 👉 Thêm trường checkOption
+    private Boolean checkOption;
     @Column(columnDefinition = "TEXT")
     private String tableJson;
 

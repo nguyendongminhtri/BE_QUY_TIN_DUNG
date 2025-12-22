@@ -52,6 +52,8 @@ public class ContractRequest {
     private String ghiChu;
     private String choVay;
     private String loaiVay;
+    // 👉 Thêm trường checkOption
+    private Boolean checkOption;
     private List<FileMetadataDto> fileAvatarUrls;
     private TableRequest tableRequest;
 }

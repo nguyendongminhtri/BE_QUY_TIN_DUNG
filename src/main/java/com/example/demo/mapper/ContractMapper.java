@@ -75,6 +75,7 @@ public class ContractMapper {
         entity.setGhiChu(request.getGhiChu());
         entity.setChoVay(request.getChoVay());
         entity.setLoaiVay(request.getLoaiVay());
+        entity.setCheckOption(request.getCheckOption());
         // Ánh xạ dữ liệu bảng sang JSON
         if (request.getTableRequest() != null) {
             try {
@@ -127,8 +128,18 @@ public class ContractMapper {
                 Path tempPath = Paths.get(tempDir, fileNameAvatar);
                 Path finalPath = Paths.get(uploadDir, fileNameAvatar);
 
-                Files.createDirectories(finalPath.getParent());
-                Files.move(tempPath, finalPath, StandardCopyOption.REPLACE_EXISTING);
+                // Nếu file đã tồn tại ở uploadDir thì bỏ qua move
+                if (Files.exists(finalPath)) {
+                    System.out.println("File đã tồn tại trong uploads, bỏ qua move: " + fileNameAvatar);
+                } else {
+                    // Chỉ move nếu file còn trong temp
+                    if (Files.exists(tempPath)) {
+                        Files.createDirectories(finalPath.getParent());
+                        Files.move(tempPath, finalPath, StandardCopyOption.REPLACE_EXISTING);
+                    } else {
+                        System.out.println("Không tìm thấy file trong temp: " + fileNameAvatar);
+                    }
+                }
 
                 String finalUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
                         .path("/uploads/")
