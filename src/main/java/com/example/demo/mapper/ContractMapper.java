@@ -76,6 +76,19 @@ public class ContractMapper {
         entity.setChoVay(request.getChoVay());
         entity.setLoaiVay(request.getLoaiVay());
         entity.setCheckOption(request.getCheckOption());
+        entity.setCheckGhiChu(request.getCheckGhiChu());
+        entity.setCheckNguonGocSuDung(request.getCheckNguonGocSuDung());
+        entity.setSoHopDongTD(request.getSoHopDongTD());
+        entity.setNgayKetThucKyHanVay(request.getNgayKetThucKyHanVay());
+        entity.setDungTenBiaDo1(request.getDungTenBiaDo1());
+        entity.setCheckNguoiDungTenBiaDo2(request.getCheckNguoiDungTenBiaDo2());
+        entity.setDungTenBiaDo2(request.getDungTenBiaDo2());
+        entity.setLandItems(request.getLandItems());
+        entity.setThoiHanVay(request.getThoiHanVay());
+        entity.setCheckNhaCoDinh(request.getCheckNhaCoDinh());
+        entity.setNhaCoDinh(request.getNhaCoDinh());
+        entity.setTongTaiSanBD(request.getTongTaiSanBD());
+        entity.setTongTaiSanBDChu(request.getTongTaiSanBDChu());
         // Ánh xạ dữ liệu bảng sang JSON
         if (request.getTableRequest() != null) {
             try {

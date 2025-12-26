@@ -65,9 +65,22 @@ public class CreditContractEntity {
     private String loaiVay;
     // 👉 Thêm trường checkOption
     private Boolean checkOption;
+    private Boolean checkGhiChu;
+    private Boolean checkNguonGocSuDung;
     @Column(columnDefinition = "TEXT")
     private String tableJson;
-
+    private String soHopDongTD;
+    private String ngayKetThucKyHanVay;
+    private String dungTenBiaDo1;
+    private Boolean checkNguoiDungTenBiaDo2;
+    private String dungTenBiaDo2;
+    @Column(columnDefinition = "TEXT")
+    private String landItems;
+    private String thoiHanVay;
+    private Boolean checkNhaCoDinh;
+    private String nhaCoDinh;
+    private String tongTaiSanBD;
+    private String tongTaiSanBDChu;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

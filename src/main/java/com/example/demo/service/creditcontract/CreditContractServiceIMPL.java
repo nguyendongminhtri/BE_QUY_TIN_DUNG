@@ -87,6 +87,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         fileUrls.add(generateContractFile(request, date, user, "File1.docx"));
         fileUrls.add(generateContractFile(request, date, user, "File2.docx"));
         fileUrls.add(generateContractFile(request, date, user, "File3.docx"));
+        fileUrls.add(generateContractFile(request, date, user, "File4.docx"));
 
         return fileUrls;
     }
@@ -105,6 +106,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         fileUrls.add(generateContractFileExport(request, date, user, "File1.docx"));
         fileUrls.add(generateContractFileExport(request, date, user, "File2.docx"));
         fileUrls.add(generateContractFileExport(request, date, user, "File3.docx"));
+        fileUrls.add(generateContractFileExport(request, date, user, "File4.docx"));
 
         creditContractRepository.save(entity);
         return fileUrls;
@@ -126,6 +128,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         fileUrls.add(generateContractFileExport(request, date, user, "File1.docx"));
         fileUrls.add(generateContractFileExport(request, date, user, "File2.docx"));
         fileUrls.add(generateContractFileExport(request, date, user, "File3.docx"));
+        fileUrls.add(generateContractFileExport(request, date, user, "File4.docx"));
 
         creditContractRepository.save(entity);
         return fileUrls;
@@ -189,6 +192,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         System.err.println("request --> "+request);
         Map<String, String> replacements = Map.ofEntries(
                 Map.entry("{{gd}}", Optional.ofNullable(request.getNguoiDaiDien()).orElse("")),
+                Map.entry("{{shdtd}}", Optional.ofNullable(request.getSoHopDongTD()).orElse("")),
                 Map.entry("{{gtkh}}", Optional.ofNullable(request.getGtkh()).orElse("")),
                 Map.entry("{{kh}}", Optional.ofNullable(request.getTenKhachHang()).orElse("")),
                 Map.entry("{{nskh}}", Optional.ofNullable(request.getNamSinhKhachHang()).orElse("")),
@@ -209,6 +213,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
                 Map.entry("{{mdvay}}", Optional.ofNullable(request.getMuchDichVay()).orElse("")),
                 Map.entry("{{hm}}", Optional.ofNullable(request.getHanMuc()).orElse("")),
                 Map.entry("{{ls}}", Optional.ofNullable(request.getLaiSuat()).orElse("")),
+                Map.entry("{{nkt}}", Optional.ofNullable(request.getNgayKetThucKyHanVay()).orElse("")),
                 Map.entry("{{shdtc}}", Optional.ofNullable(request.getSoHopDongTheChapQSDD()).orElse("")),
                 Map.entry("{{seri}}", Optional.ofNullable(request.getSerial()).orElse("")),
                 Map.entry("{{nc}}", Optional.ofNullable(request.getNoiCapSo()).orElse("")),
@@ -227,7 +232,14 @@ public class CreditContractServiceIMPL implements ICreditContractService {
                 Map.entry("{{ngsd}}", Optional.ofNullable(request.getNguonGocSuDung()).orElse("")),
                 Map.entry("{{gc}}", Optional.ofNullable(request.getGhiChu()).orElse("")),
                 Map.entry("{{chv}}", Optional.ofNullable(request.getChoVay()).orElse("")),
+                Map.entry("{{khbd}}", Optional.ofNullable(request.getDungTenBiaDo1()).orElse("")),
+                Map.entry("{{ntbd}}", Optional.ofNullable(request.getDungTenBiaDo2()).orElse("")),
                 Map.entry("{{lv}}", Optional.ofNullable(request.getLoaiVay()).orElse("")),
+                Map.entry("{{land_items}}", Optional.ofNullable(request.getLandItems()).orElse("")),
+                Map.entry("{{thv}}", Optional.ofNullable(request.getLandItems()).orElse("")),
+                Map.entry("{{ncd}}", Optional.ofNullable(request.getNhaCoDinh()).orElse("")),
+                Map.entry("{{tsbds}}", Optional.ofNullable(request.getTongTaiSanBD()).orElse("")),
+                Map.entry("{{tsbdc}}", Optional.ofNullable(request.getTongTaiSanBDChu()).orElse("")),
                 Map.entry("{{day}}", String.format("%02d", date.getDayOfMonth())),
                 Map.entry("{{month}}", String.format("%02d", date.getMonthValue())),
                 Map.entry("{{year}}", String.valueOf(date.getYear()))

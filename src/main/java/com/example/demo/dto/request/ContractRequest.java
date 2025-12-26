@@ -52,8 +52,21 @@ public class ContractRequest {
     private String ghiChu;
     private String choVay;
     private String loaiVay;
+    private String soHopDongTD;
     // 👉 Thêm trường checkOption
     private Boolean checkOption;
+    private Boolean checkGhiChu;
+    private Boolean checkNguonGocSuDung;
     private List<FileMetadataDto> fileAvatarUrls;
     private TableRequest tableRequest;
+    private String ngayKetThucKyHanVay;
+    private String dungTenBiaDo1;
+    private Boolean checkNguoiDungTenBiaDo2;
+    private String dungTenBiaDo2;
+    private String landItems;
+    private String thoiHanVay;
+    private String nhaCoDinh;
+    private Boolean checkNhaCoDinh;
+    private String tongTaiSanBD;
+    private String tongTaiSanBDChu;
 }
