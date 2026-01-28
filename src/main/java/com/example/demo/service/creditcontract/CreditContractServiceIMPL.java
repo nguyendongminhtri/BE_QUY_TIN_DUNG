@@ -4,6 +4,7 @@ import com.example.demo.dto.request.ContractRequest;
 import com.example.demo.dto.request.TableRequest;
 import com.example.demo.mapper.ContractMapper;
 import com.example.demo.model.CreditContractEntity;
+import com.example.demo.model.FileMetadataEntity;
 import com.example.demo.model.User;
 import com.example.demo.repository.ICreditContractRepository;
 import com.example.demo.repository.IFileMetadataRepository;
@@ -27,10 +28,7 @@ import java.io.OutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 
 @Service
@@ -41,6 +39,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
     private UserDetailService userDetailService;
     @Autowired
     private IFileMetadataRepository fileMetadataRepository;
+
     @Autowired
     private ContractMapper contractMapper;
 
@@ -61,11 +60,6 @@ public class CreditContractServiceIMPL implements ICreditContractService {
     @Override
     public Optional<CreditContractEntity> findById(Long id) {
         return creditContractRepository.findById(id);
-    }
-
-    @Override
-    public void deleteById(Long id) {
-
     }
 
     @Value("${contract.files.dir}")
@@ -189,62 +183,136 @@ public class CreditContractServiceIMPL implements ICreditContractService {
 
 
     private void replacePlaceholders(XWPFDocument doc, ContractRequest request, LocalDate date) {
-        System.err.println("request --> "+request);
-        Map<String, String> replacements = Map.ofEntries(
-                Map.entry("{{gd}}", Optional.ofNullable(request.getNguoiDaiDien()).orElse("")),
-                Map.entry("{{shdtd}}", Optional.ofNullable(request.getSoHopDongTD()).orElse("")),
-                Map.entry("{{gtkh}}", Optional.ofNullable(request.getGtkh()).orElse("")),
-                Map.entry("{{kh}}", Optional.ofNullable(request.getTenKhachHang()).orElse("")),
-                Map.entry("{{nskh}}", Optional.ofNullable(request.getNamSinhKhachHang()).orElse("")),
-                Map.entry("{{sdtkh}}", Optional.ofNullable(request.getPhoneKhachHang()).orElse("")),
-                Map.entry("{{sttv}}", Optional.ofNullable(request.getSoTheThanhVienKhachHang()).orElse("")),
-                Map.entry("{{cccdkh}}", Optional.ofNullable(request.getCccdKhachHang()).orElse("")),
-                Map.entry("{{nckh}}", Optional.ofNullable(request.getNgayCapCCCDKhachHang()).orElse("")),
-                Map.entry("{{ttkh}}", Optional.ofNullable(request.getDiaChiThuongTruKhachHang()).orElse("")),
-                Map.entry("{{gtnt}}", Optional.ofNullable(request.getGtnt()).orElse("")),
-                Map.entry("{{ntkh}}", Optional.ofNullable(request.getTenNguoiThan()).orElse("")),
-                Map.entry("{{nsnt}}", Optional.ofNullable(request.getNamSinhNguoiThan()).orElse("")),
-                Map.entry("{{cccdnt}}", Optional.ofNullable(request.getCccdNguoiThan()).orElse("")),
-                Map.entry("{{ncnt}}", Optional.ofNullable(request.getNgayCapCCCDNguoiThan()).orElse("")),
-                Map.entry("{{ttnt}}", Optional.ofNullable(request.getDiaChiThuongTruNguoiThan()).orElse("")),
-                Map.entry("{{qh}}", Optional.ofNullable(request.getQuanHe()).orElse("")),
-                Map.entry("{{tienso}}", Optional.ofNullable(request.getTienSo()).orElse("")),
-                Map.entry("{{tc}}", Optional.ofNullable(request.getTienChu()).orElse("")),
-                Map.entry("{{mdvay}}", Optional.ofNullable(request.getMuchDichVay()).orElse("")),
-                Map.entry("{{hm}}", Optional.ofNullable(request.getHanMuc()).orElse("")),
-                Map.entry("{{ls}}", Optional.ofNullable(request.getLaiSuat()).orElse("")),
-                Map.entry("{{nkt}}", Optional.ofNullable(request.getNgayKetThucKyHanVay()).orElse("")),
-                Map.entry("{{shdtc}}", Optional.ofNullable(request.getSoHopDongTheChapQSDD()).orElse("")),
-                Map.entry("{{seri}}", Optional.ofNullable(request.getSerial()).orElse("")),
-                Map.entry("{{nc}}", Optional.ofNullable(request.getNoiCapSo()).orElse("")),
-                Map.entry("{{ngc}}", Optional.ofNullable(request.getNgayCapSo()).orElse("")),
-                Map.entry("{{vsmt}}", Optional.ofNullable(request.getNoiDungVaoSo()).orElse("")),
-                Map.entry("{{std}}", Optional.ofNullable(request.getSoThuaDat()).orElse("")),
-                Map.entry("{{sbd}}", Optional.ofNullable(request.getSoBanDo()).orElse("")),
-                Map.entry("{{dctd}}", Optional.ofNullable(request.getDiaChiThuaDat()).orElse("")),
-                Map.entry("{{dt}}", Optional.ofNullable(request.getDienTichDatSo()).orElse("")),
-                Map.entry("{{dtc}}", Optional.ofNullable(request.getDienTichDatChu()).orElse("")),
-                Map.entry("{{htsd}}", Optional.ofNullable(request.getHinhThucSuDung()).orElse("")),
-                Map.entry("{{mdsd}}", Optional.ofNullable(request.getMuchDichSuDung()).orElse("")),
-                Map.entry("{{thsd}}", Optional.ofNullable(request.getThoiHanSuDung()).orElse("")),
-                Map.entry("{{bbdg}}", Optional.ofNullable(request.getSoBienBanDinhGia()).orElse("")),
-                Map.entry("{{ndtt}}", Optional.ofNullable(request.getNoiDungThoaThuan()).orElse("")),
-                Map.entry("{{ngsd}}", Optional.ofNullable(request.getNguonGocSuDung()).orElse("")),
-                Map.entry("{{gc}}", Optional.ofNullable(request.getGhiChu()).orElse("")),
-                Map.entry("{{chv}}", Optional.ofNullable(request.getChoVay()).orElse("")),
-                Map.entry("{{khbd}}", Optional.ofNullable(request.getDungTenBiaDo1()).orElse("")),
-                Map.entry("{{ntbd}}", Optional.ofNullable(request.getDungTenBiaDo2()).orElse("")),
-                Map.entry("{{lv}}", Optional.ofNullable(request.getLoaiVay()).orElse("")),
-                Map.entry("{{land_items}}", Optional.ofNullable(request.getLandItems()).orElse("")),
-                Map.entry("{{thv}}", Optional.ofNullable(request.getLandItems()).orElse("")),
-                Map.entry("{{ncd}}", Optional.ofNullable(request.getNhaCoDinh()).orElse("")),
-                Map.entry("{{tsbds}}", Optional.ofNullable(request.getTongTaiSanBD()).orElse("")),
-                Map.entry("{{tsbdc}}", Optional.ofNullable(request.getTongTaiSanBDChu()).orElse("")),
-                Map.entry("{{day}}", String.format("%02d", date.getDayOfMonth())),
-                Map.entry("{{month}}", String.format("%02d", date.getMonthValue())),
-                Map.entry("{{year}}", String.valueOf(date.getYear()))
-        );
-
+        System.err.println("request --> " + request);
+        Map<String, String> replacements = new HashMap<>(); // Các placeholder mặc định
+//        replacements.put("{{gd}}", Optional.ofNullable(request.getNguoiDaiDien()).orElse(""));
+        replacements.put("{{shdtd}}", Optional.ofNullable(request.getSoHopDongTD()).orElse(""));
+        replacements.put("{{gtkh}}", Optional.ofNullable(request.getGtkh()).orElse(""));
+        replacements.put("{{gtkht}}", Optional.ofNullable(request.getGtkh().toLowerCase()).orElse(""));
+        replacements.put("{{kh}}", Optional.ofNullable(request.getTenKhachHang()).orElse(""));
+        replacements.put("{{nskh}}", Optional.ofNullable(request.getNamSinhKhachHang()).orElse(""));
+        replacements.put("{{sdtkh}}", Optional.ofNullable(request.getPhoneKhachHang()).orElse(""));
+        replacements.put("{{sttv}}", Optional.ofNullable(request.getSoTheThanhVienKhachHang()).orElse(""));
+        replacements.put("{{cccdkh}}", Optional.ofNullable(request.getCccdKhachHang()).orElse(""));
+        replacements.put("{{nckh}}", Optional.ofNullable(request.getNgayCapCCCDKhachHang()).orElse(""));
+        replacements.put("{{nccccdkh}}", Optional.ofNullable(request.getNoiCapCCCDKhachHang()).orElse(""));
+        replacements.put("{{ttkh}}", Optional.ofNullable(request.getDiaChiThuongTruKhachHang()).orElse(""));
+        replacements.put("{{gtnt}}", Optional.ofNullable(request.getGtnt()).orElse(""));
+        replacements.put("{{ntkh}}", Optional.ofNullable(request.getTenNguoiThan()).orElse(""));
+        replacements.put("{{nsnt}}", Optional.ofNullable(request.getNamSinhNguoiThan()).orElse(""));
+        replacements.put("{{cccdnt}}", Optional.ofNullable(request.getCccdNguoiThan()).orElse(""));
+        replacements.put("{{ncnt}}", Optional.ofNullable(request.getNgayCapCCCDNguoiThan()).orElse(""));
+        replacements.put("{{nccccdnt}}", Optional.ofNullable(request.getNoiCapCCCDNguoiThan()).orElse(""));
+        replacements.put("{{ttnt}}", Optional.ofNullable(request.getDiaChiThuongTruNguoiThan()).orElse(""));
+        replacements.put("{{qh}}", Optional.ofNullable(request.getQuanHe()).orElse(""));
+        replacements.put("{{tienso}}", Optional.ofNullable(request.getTienSo()).orElse(""));
+        replacements.put("{{tc}}", Optional.ofNullable(request.getTienChu()).orElse(""));
+        replacements.put("{{mdvay}}", Optional.ofNullable(request.getMuchDichVay()).orElse(""));
+        replacements.put("{{hm}}", Optional.ofNullable(request.getHanMuc()).orElse(""));
+        replacements.put("{{ls}}", Optional.ofNullable(request.getLaiSuat()).orElse(""));
+        replacements.put("{{nkt}}", Optional.ofNullable(request.getNgayKetThucKyHanVay()).orElse(""));
+        replacements.put("{{shdtc}}", Optional.ofNullable(request.getSoHopDongTheChapQSDD()).orElse(""));
+        replacements.put("{{seri}}", Optional.ofNullable(request.getSerial()).orElse(""));
+        replacements.put("{{nc}}", Optional.ofNullable(request.getNoiCapSo()).orElse(""));
+        replacements.put("{{ngc}}", Optional.ofNullable(request.getNgayCapSo()).orElse(""));
+        replacements.put("{{vsmt}}", Optional.ofNullable(request.getNoiDungVaoSo()).orElse(""));
+        replacements.put("{{std}}", Optional.ofNullable(request.getSoThuaDat()).orElse(""));
+        replacements.put("{{sbd}}", Optional.ofNullable(request.getSoBanDo()).orElse(""));
+        replacements.put("{{dctd}}", Optional.ofNullable(request.getDiaChiThuaDat()).orElse(""));
+        replacements.put("{{dt}}", Optional.ofNullable(request.getDienTichDatSo()).orElse(""));
+        replacements.put("{{dtc}}", Optional.ofNullable(request.getDienTichDatChu()).orElse(""));
+        replacements.put("{{htsd}}", Optional.ofNullable(request.getHinhThucSuDung()).orElse(""));
+        replacements.put("{{mdsd}}", Optional.ofNullable(request.getMuchDichSuDung()).orElse(""));
+        replacements.put("{{thsd}}", Optional.ofNullable(request.getThoiHanSuDung()).orElse(""));
+        replacements.put("{{bbdg}}", Optional.ofNullable(request.getSoBienBanDinhGia()).orElse(""));
+        replacements.put("{{ndtt}}", Optional.ofNullable(request.getNoiDungThoaThuan()).orElse(""));
+        replacements.put("{{ngsd}}", Optional.ofNullable(request.getNguonGocSuDung()).orElse(""));
+        replacements.put("{{gc}}", Optional.ofNullable(request.getGhiChu()).orElse(""));
+        replacements.put("{{chv}}", Optional.ofNullable(request.getChoVay()).orElse(""));
+        replacements.put("{{khbd}}", Optional.ofNullable(request.getDungTenBiaDo1()).orElse(""));
+        replacements.put("{{gtkhbd}}", Optional.ofNullable(request.getGioiTinhDungTenBiaDo1()).orElse(""));
+        replacements.put("{{gtkhbdt}}", Optional.ofNullable(request.getGioiTinhDungTenBiaDo1().toLowerCase()).orElse(""));
+        replacements.put("{{nskhbd}}", Optional.ofNullable(request.getNamSinhDungTenBiaDo1()).orElse(""));
+        replacements.put("{{cccdkhbd}}", Optional.ofNullable(request.getCccdDungTenBiaDo1()).orElse(""));
+        replacements.put("{{sdtkhbd}}", Optional.ofNullable(request.getPhoneDungTenBiaDo1()).orElse(""));
+        replacements.put("{{ngckhbd}}", Optional.ofNullable(request.getNgayCapCCCDDungTenBiaDo1()).orElse(""));
+        replacements.put("{{nccccdkhbd}}", Optional.ofNullable(request.getNoiCapCCCDDungTenBiaDo1()).orElse(""));
+        replacements.put("{{dckhbd}}", Optional.ofNullable(request.getDiaChiThuongTruDungTenBiaDo1()).orElse(""));
+        replacements.put("{{ntbd}}", Optional.ofNullable(request.getDungTenBiaDo2()).orElse(""));
+        replacements.put("{{gtntbd}}", Optional.ofNullable(request.getGioiTinhDungTenBiaDo2()).orElse(""));
+        replacements.put("{{cccdntbd}}", Optional.ofNullable(request.getCccdDungTenBiaDo2()).orElse(""));
+        replacements.put("{{ngcntbd}}", Optional.ofNullable(request.getNgayCapCCCDDungTenBiaDo2()).orElse(""));
+        replacements.put("{{nccccdntbd}}", Optional.ofNullable(request.getNoiCapCCCDDungTenBiaDo2()).orElse(""));
+        replacements.put("{{dcntbd}}", Optional.ofNullable(request.getDiaChiThuongTruDungTenBiaDo2()).orElse(""));
+        replacements.put("{{nsntbd}}", Optional.ofNullable(request.getNamSinhDungTenBiaDo2()).orElse(""));
+        replacements.put("{{lv}}", Optional.ofNullable(request.getLoaiVay()).orElse(""));
+        replacements.put("{{land_items}}", Optional.ofNullable(request.getLandItems()).orElse(""));
+        replacements.put("{{thv}}", Optional.ofNullable(request.getThoiHanVay()).orElse(""));
+        replacements.put("{{ncd}}", Optional.ofNullable(request.getNhaCoDinh()).orElse(""));
+        replacements.put("{{tsbds}}", Optional.ofNullable(request.getTongTaiSanBD()).orElse(""));
+        replacements.put("{{tsbdc}}", Optional.ofNullable(request.getTongTaiSanBDChu()).orElse(""));
+        replacements.put("{{phuong}}", extractPhuong(request.getDiaChiThuongTruKhachHang()));
+        replacements.put("{{day}}", String.format("%02d", date.getDayOfMonth()));
+        replacements.put("{{month}}", String.format("%02d", date.getMonthValue()));
+        replacements.put("{{year}}", String.valueOf(date.getYear()));
+        // Thêm placeholder mới dựa vào biến checkNguoiDungTenBiaDo2
+        if (request.getCheckNguoiDungTenBiaDo2()) {
+            replacements.put("{{sng}}", ";Sinh ngày:");
+            replacements.put("{{scccd}}", "CCCD số:");
+            replacements.put("{{cng}}", "; Cấp ngày:");
+            replacements.put("{{nccccd}}", "; Nơi cấp: Cục cảnh sát QLHC về TTXH.");
+            replacements.put("{{dctt}}", "Địa chỉ thường trú:");
+//            replacements.put("{{gtntbd}}", request.getGioiTinhDungTenBiaDo2());
+        } else {
+            replacements.put("{{sng}}", "");
+            replacements.put("{{scccd}}", "");
+            replacements.put("{{cng}}", "");
+            replacements.put("{{nccccd}}", "");
+            replacements.put("{{dctt}}", "");
+        }
+        if (request.getLoaiVay().equalsIgnoreCase("NGẮN HẠN")) {
+            replacements.put("{{loaivay4}}", "Cho vay ngắn hạn");
+        } else if (request.getLoaiVay().equalsIgnoreCase("TRUNG HẠN")) {
+            replacements.put("{{loaivay4}}", "Cho vay trung hạn");
+        }
+        if (request.getCheckNguoiMangTenBiaDo()) {
+            replacements.put("{{ndtbd}}", request.getNguoiMangTen());
+        } else {
+            String nguoiMangTen = request.getGioiTinhDungTenBiaDo1().toLowerCase() + " " + capitalizeWords(request.getDungTenBiaDo1());
+            if (request.getCheckNguoiDungTenBiaDo2()) {
+                nguoiMangTen += " ";
+                nguoiMangTen += request.getGioiTinhDungTenBiaDo2().toLowerCase();
+                nguoiMangTen += " ";
+                nguoiMangTen += capitalizeWords(request.getDungTenBiaDo2());
+            }
+            System.err.println("nguoiMangTen: " + nguoiMangTen);
+            replacements.put("{{ndtbd}}", nguoiMangTen);
+        }
+        if (request.getNguoiDaiDien().equalsIgnoreCase("gd")) {
+            replacements.put("{{dcpgd}}", "Trụ sở tại: Số 178 Ninh Chấp 5; phường Chu Văn An, thành phố Hải Phòng.\n" +
+                    "Giấy phép đăng ký kinh doanh: 0800001806; Điện thoại: 02203.882.700\n");
+            replacements.put("{{ndd}}", "bà: PHÙNG THỊ LOAN Chức vụ: Giám Đốc điều hành\n" +
+                    "CCCD số: 030182016564; Cấp ngày: 22/12/2021\n");
+            replacements.put("{{pgd}}", "");
+        } else if (request.getNguoiDaiDien().equalsIgnoreCase("pgd")) {
+            replacements.put("{{pgd}}", "-PHÒNG GIAO DỊCH AN LẠC");
+            replacements.put("{{dcpgd}}", "Địa chỉ: Bờ Đa, phường Lê Đại Hành, thành phố Hải Phòng.");
+            replacements.put("{{ndd}}", "ông: VŨ THANH HẢI Chức vụ: Phó Giám Đốc - Trưởng PBD An Lạc.\n" +
+                    "CCCD số: 030083003225;\n" +
+                    "(Theo văn bản ủy quyền số: 01/2023/UQ-TN Ngày 10 tháng 02 năm 2023)");
+        }
+        if (request.getCheckHopDongBaoLanh()) {
+            String doanVanBan = "Bên B dùng tài sản này để đảm bảo việc thanh toán được kịp thời, đầy đủ và thực hiện một cách " +
+                    "trọn vẹn khi đến hạn các nghĩa vụ trả nợ đối với hợp đồng cho vay số:" + request.getSoHopDongTD() +"của "
+                    + request.getGtkh().toLowerCase() + " " + capitalizeWords(request.getTenKhachHang())+ " "+ request.getGtnt().toLowerCase() + " " +
+                    capitalizeWords(request.getTenNguoiThan()) + " hoặc các hợp đồng cho vay khác có tham chiếu từ hợp đồng thế chấp này";
+            replacements.put("{{tstc}}", doanVanBan);
+        } else {
+            String doanVanBan = "Để đảm bảo việc thanh toán được kịp thời, đầy đủ và thực hiện một cách trọn vẹn khi đến hạn các nghĩa vụ trả nợ đang " +
+                    "tồn tại hoặc sẽ phát sinh trong tương lai của Bên B cho Bên A theo các " +
+                    "Hợp đồng cho vay và/hoặc các Hợp đồng khác có tham chiếu từ Hợp đồng này";
+            replacements.put("{{tstc}}", doanVanBan);
+        }
 // Tìm paragraph có placeholder
         for (XWPFParagraph para : new ArrayList<>(doc.getParagraphs())) {
             String text = para.getText();
@@ -296,18 +364,29 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         }
     }
 
-private void copyStyle(XWPFRun source, XWPFRun target) {
-    if (source.getCTR() != null && source.getCTR().getRPr() != null) {
-        target.getCTR().setRPr(source.getCTR().getRPr());
+    private void copyStyle(XWPFRun source, XWPFRun target) {
+        if (source.getCTR() != null && source.getCTR().getRPr() != null) {
+            target.getCTR().setRPr(source.getCTR().getRPr());
+        }
     }
-}
+
+    private String capitalizeWords(String str) {
+        str = str.toLowerCase();
+        String[] words = str.split("\\s+");
+        StringBuilder sb = new StringBuilder();
+        for (String word : words) {
+            if (word.length() > 0) {
+                sb.append(Character.toUpperCase(word.charAt(0))).append(word.substring(1)).append(" ");
+            }
+        }
+        return sb.toString().trim();
+    }
 
     // Hàm xử lý paragraph
     private void processParagraph(XWPFParagraph paragraph, Map<String, String> replacements) {
         List<XWPFRun> runs = new ArrayList<>(paragraph.getRuns());
         if (runs.isEmpty()) return;
 
-        // Ghép toàn bộ text
         StringBuilder fullText = new StringBuilder();
         for (XWPFRun run : runs) {
             String text = run.getText(0);
@@ -316,13 +395,34 @@ private void copyStyle(XWPFRun source, XWPFRun target) {
         String paragraphText = fullText.toString();
         if (paragraphText.isEmpty()) return;
 
+        // ✅ Xử lý riêng cho {{land_items}} trước khi thay thế
+        if (paragraphText.contains("{{land_items}}")) {
+            String landItems = replacements.get("{{land_items}}");
+            if (landItems != null && !landItems.isEmpty()) {
+                for (XWPFRun run : runs) {
+                    run.setText("", 0); // xóa run cũ
+                }
+
+                XWPFRun baseRun = runs.get(0);
+                String[] items = landItems.split("\\+");
+                for (String item : items) {
+                    if (!item.trim().isEmpty()) {
+                        XWPFRun runLine = paragraph.createRun();
+                        copyStyle(baseRun, runLine);
+                        runLine.setText("+ " + item.trim());
+                        runLine.addBreak(); // xuống dòng
+                    }
+                }
+            }
+            return; // đã xử lý riêng, không cần xử lý tiếp
+        }
+
         // Thay thế toàn bộ đoạn văn
         String replacedText = paragraphText;
         for (Map.Entry<String, String> entry : replacements.entrySet()) {
             replacedText = replacedText.replace(entry.getKey(), entry.getValue());
         }
 
-        // Nếu sau thay thế rỗng → xóa paragraph
         if (replacedText.trim().isEmpty()) {
             IBody body = paragraph.getBody();
             if (body instanceof XWPFDocument doc) {
@@ -335,45 +435,39 @@ private void copyStyle(XWPFRun source, XWPFRun target) {
             return;
         }
 
-        // Xóa toàn bộ run cũ
         for (XWPFRun run : runs) {
             run.setText("", 0);
         }
 
-        // Run gốc để copy style
         XWPFRun baseRun = runs.get(0);
 
-        // Xử lý riêng cho {{lv}}
         String lvValue = replacements.get("{{lv}}");
         if (lvValue != null && replacedText.contains(lvValue)) {
             int idx = replacedText.indexOf(lvValue);
 
-            // Phần trước {{lv}}
             if (idx > 0) {
                 XWPFRun runNormalBefore = paragraph.createRun();
-                copyStyle(baseRun, runNormalBefore); // giữ nguyên style template
+                copyStyle(baseRun, runNormalBefore);
                 runNormalBefore.setText(replacedText.substring(0, idx));
             }
 
-            // Phần {{lv}} → bold
             XWPFRun runBold = paragraph.createRun();
-            copyStyle(baseRun, runBold); // giữ nguyên style template
-            runBold.setBold(true);       // ép bold riêng cho {{lv}}
+            copyStyle(baseRun, runBold);
+            runBold.setBold(true);
             runBold.setText(lvValue);
 
-            // Phần sau {{lv}}
             if (idx + lvValue.length() < replacedText.length()) {
                 XWPFRun runNormalAfter = paragraph.createRun();
-                copyStyle(baseRun, runNormalAfter); // giữ nguyên style template
+                copyStyle(baseRun, runNormalAfter);
                 runNormalAfter.setText(replacedText.substring(idx + lvValue.length()));
             }
         } else {
-            // Nếu không có {{lv}} thì gán toàn bộ vào run thường
             XWPFRun runNormal = paragraph.createRun();
-            copyStyle(baseRun, runNormal); // giữ nguyên style template
+            copyStyle(baseRun, runNormal);
             runNormal.setText(replacedText);
         }
     }
+
 
     private void fillInsertedTable(XWPFTable table, TableRequest tableRequest) {
         if (table == null || tableRequest == null || !tableRequest.isDrawTable()) return;
@@ -426,4 +520,61 @@ private void copyStyle(XWPFRun source, XWPFRun target) {
             }
         }
     }
+
+    private String extractPhuong(String diaChi) {
+        if (diaChi == null) return "";
+        // Tìm vị trí từ "phường"
+        int idx = diaChi.toLowerCase().indexOf("phường");
+        if (idx == -1) return "";
+
+        // Cắt chuỗi từ sau chữ "phường"
+        String sub = diaChi.substring(idx + "phường".length()).trim();
+
+        // Nếu có dấu phẩy thì lấy trước dấu phẩy
+        int commaIdx = sub.indexOf(",");
+        if (commaIdx != -1) {
+            sub = sub.substring(0, commaIdx).trim();
+        }
+        System.err.println("sub --> " + sub);
+        return sub;
+    }
+
+    @Override
+    @Transactional
+    public void deleteById(Long id) {
+        CreditContractEntity entity = creditContractRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy hợp đồng với id: " + id));
+
+//        // Xóa file vật lý của avatars
+//        if (entity.getAvatars() != null) {
+//            entity.getAvatars().forEach(avatar -> {
+//                try {
+//                    Path path = Paths.get(avatar.getFilePath());
+//                    Files.deleteIfExists(path);
+//                } catch (IOException e) {
+//                    System.err.println("Không thể xóa avatar file: " + avatar.getFilePath() + " - " + e.getMessage());
+//                }
+//            });
+//        }
+//
+//        // Nếu có metadata file liên quan thì xóa luôn
+//        List<FileMetadataEntity> metadataList = fileMetadataRepository.findAll();
+//        metadataList.stream()
+//                .filter(meta -> meta.getFilePath() != null && meta.getFilePath().contains(String.valueOf(entity.getId())))
+//                .forEach(meta -> {
+//                    try {
+//                        Path path = Paths.get(meta.getFilePath());
+//                        System.err.println("path --> "+path);
+//                        Files.deleteIfExists(path);
+//                    } catch (IOException e) {
+//                        System.err.println("Không thể xóa file metadata: " + meta.getFilePath());
+//                    }
+//                    fileMetadataRepository.delete(meta);
+//                });
+
+        // Xóa entity trong DB
+        creditContractRepository.delete(entity);
+    }
+
+
 }

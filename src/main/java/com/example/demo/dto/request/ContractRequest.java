@@ -16,6 +16,7 @@ public class ContractRequest {
     private String soTheThanhVienKhachHang;
     private String cccdKhachHang;
     private String ngayCapCCCDKhachHang;
+    private String noiCapCCCDKhachHang;
     private String diaChiThuongTruKhachHang;
 
     private String gtnt;
@@ -23,6 +24,7 @@ public class ContractRequest {
     private String namSinhNguoiThan;
     private String cccdNguoiThan;
     private String ngayCapCCCDNguoiThan;
+    private String noiCapCCCDNguoiThan;
     private String diaChiThuongTruNguoiThan;
     private String quanHe;
 
@@ -69,4 +71,26 @@ public class ContractRequest {
     private Boolean checkNhaCoDinh;
     private String tongTaiSanBD;
     private String tongTaiSanBDChu;
+    private String loaiDat;
+    private Boolean checkLoaiDat;
+    private Boolean checkMucDich;
+    private String gioiTinhDungTenBiaDo1;
+    private String namSinhDungTenBiaDo1;
+    private String phoneDungTenBiaDo1;
+    private String cccdDungTenBiaDo1;
+    private String noiCapCCCDDungTenBiaDo1;
+    private String ngayCapCCCDDungTenBiaDo1;
+    private String diaChiThuongTruDungTenBiaDo1;
+    private String gioiTinhDungTenBiaDo2;
+    private String namSinhDungTenBiaDo2;
+    private String cccdDungTenBiaDo2;
+    private String noiCapCCCDDungTenBiaDo2;
+    private String ngayCapCCCDDungTenBiaDo2;
+    private String diaChiThuongTruDungTenBiaDo2;
+    private String phongGiaoDich;
+    private String diaChiPhongGiaoDich;
+    private String benA;
+    private Boolean checkNguoiMangTenBiaDo;
+    private String nguoiMangTen;
+    private Boolean checkHopDongBaoLanh;
 }

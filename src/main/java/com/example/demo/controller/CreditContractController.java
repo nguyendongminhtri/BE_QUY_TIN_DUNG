@@ -1,7 +1,9 @@
 package com.example.demo.controller;
 
 import com.example.demo.dto.request.ContractRequest;
+import com.example.demo.dto.response.ResponMessage;
 import com.example.demo.model.AvatarEntity;
+import com.example.demo.model.CarouselEntity;
 import com.example.demo.model.CategoryEntity;
 import com.example.demo.model.CreditContractEntity;
 import com.example.demo.service.creditcontract.ICreditContractService;
@@ -61,6 +63,7 @@ public class CreditContractController {
     public ResponseEntity<?> getListCreditContracts() {
         return new ResponseEntity<>(creditContractService.findAll(), HttpStatus.OK);
     }
+
     private ResponseEntity<Resource> buildZipResponse(List<String> filePaths) throws IOException {
         String zipFileName = "contracts_" + System.currentTimeMillis() + ".zip";
         Path zipPath = Paths.get(contractFilesDir, zipFileName);
@@ -82,13 +85,25 @@ public class CreditContractController {
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .body(resource);
     }
+
     @GetMapping("/{id}")
-    public ResponseEntity<?> detailCategory(@PathVariable Long id){
+    public ResponseEntity<?> detailCategory(@PathVariable Long id) {
         Optional<CreditContractEntity> creditContractEntity = creditContractService.findById(id);
-        if(!creditContractEntity.isPresent()){
+        if (!creditContractEntity.isPresent()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(creditContractEntity, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteCarousel(@PathVariable Long id) {
+        System.err.println("------------xóa id ---- "+id);
+        Optional<CreditContractEntity> carouselEntity = creditContractService.findById(id);
+        if(!carouselEntity.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        creditContractService.deleteById(id);
+        return new ResponseEntity<>(new ResponMessage("delete_success"), HttpStatus.OK);
     }
 
 }

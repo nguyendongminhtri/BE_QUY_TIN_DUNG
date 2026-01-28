@@ -89,6 +89,30 @@ public class ContractMapper {
         entity.setNhaCoDinh(request.getNhaCoDinh());
         entity.setTongTaiSanBD(request.getTongTaiSanBD());
         entity.setTongTaiSanBDChu(request.getTongTaiSanBDChu());
+        entity.setCheckMucDichSuDung(request.getCheckMucDich());
+        entity.setCheckLoaiDat(request.getCheckLoaiDat());
+        entity.setLoaiDat(request.getLoaiDat());
+        entity.setGioiTinhDungTenBiaDo1(request.getGioiTinhDungTenBiaDo1());
+        entity.setNamSinhDungTenBiaDo1(request.getNamSinhDungTenBiaDo1());
+        entity.setPhoneDungTenBiaDo1(request.getPhoneDungTenBiaDo1());
+        entity.setCccdDungTenBiaDo1(request.getCccdDungTenBiaDo1());
+        entity.setNgayCapCCCDDungTenBiaDo1(request.getNgayCapCCCDDungTenBiaDo1());
+        entity.setDiaChiThuongTruDungTenBiaDo1(request.getDiaChiThuongTruDungTenBiaDo1());
+        entity.setGioiTinhDungTenBiaDo2(request.getGioiTinhDungTenBiaDo2());
+        entity.setNamSinhDungTenBiaDo2(request.getNamSinhDungTenBiaDo2());
+        entity.setCccdDungTenBiaDo2(request.getCccdDungTenBiaDo2());
+        entity.setNgayCapCCCDDungTenBiaDo2(request.getNgayCapCCCDDungTenBiaDo2());
+        entity.setDiaChiThuongTruDungTenBiaDo2(request.getDiaChiThuongTruDungTenBiaDo2());
+        entity.setPhongGiaoDich(request.getPhongGiaoDich());
+        entity.setBenA(request.getBenA());
+        entity.setDiaChiPhongGiaoDich(request.getDiaChiPhongGiaoDich());
+        entity.setCheckNguoiMangTenBiaDo(request.getCheckNguoiMangTenBiaDo());
+        entity.setNguoiMangTen(request.getNguoiMangTen());
+        entity.setNoiCapCCCDKhachHang(request.getNoiCapCCCDKhachHang());
+        entity.setNoiCapCCCDNguoiThan(request.getNoiCapCCCDNguoiThan());
+        entity.setNoiCapCCCDDungTenBiaDo1(request.getNoiCapCCCDDungTenBiaDo1());
+        entity.setNoiCapCCCDDungTenBiaDo2(request.getNoiCapCCCDDungTenBiaDo2());
+        entity.setCheckHopDongBaoLanh(request.getCheckHopDongBaoLanh());
         // Ánh xạ dữ liệu bảng sang JSON
         if (request.getTableRequest() != null) {
             try {
@@ -112,7 +136,7 @@ public class ContractMapper {
                                IFileMetadataRepository fileMetadataRepository) {
         if (request.getFileAvatarUrls() == null || request.getFileAvatarUrls().isEmpty()) return;
 
-        // Danh sách file mới
+        // Danh sách file mới từ request
         List<String> newFileNames = request.getFileAvatarUrls()
                 .stream()
                 .map(FileMetadataDto::getFileName)
@@ -138,6 +162,16 @@ public class ContractMapper {
         for (FileMetadataDto dto : request.getFileAvatarUrls()) {
             try {
                 String fileNameAvatar = dto.getFileName();
+
+                // Kiểm tra xem avatar đã tồn tại trong entity chưa
+                boolean exists = entity.getAvatars().stream()
+                        .anyMatch(a -> a.getFileName().equals(fileNameAvatar));
+
+                if (exists) {
+                    System.out.println("Avatar đã tồn tại trong entity, bỏ qua: " + fileNameAvatar);
+                    continue; // bỏ qua không thêm lại
+                }
+
                 Path tempPath = Paths.get(tempDir, fileNameAvatar);
                 Path finalPath = Paths.get(uploadDir, fileNameAvatar);
 

@@ -28,12 +28,15 @@ public class CreditContractEntity {
     private String soTheThanhVienKhachHang;
     private String cccdKhachHang;
     private String ngayCapCCCDKhachHang;
+    private String noiCapCCCDKhachHang;
     private String diaChiThuongTruKhachHang;
     private String gtnt;
     private String tenNguoiThan;
     private String namSinhNguoiThan;
     private String cccdNguoiThan;
     private String ngayCapCCCDNguoiThan;
+    @Column(columnDefinition = "TEXT")
+    private String noiCapCCCDNguoiThan;
     private String diaChiThuongTruNguoiThan;
     private String quanHe;
     private String tienSo;
@@ -54,6 +57,7 @@ public class CreditContractEntity {
     private String dienTichDatSo;
     private String dienTichDatChu;
     private String hinhThucSuDung;
+    private Boolean checkMucDichSuDung;
     private String muchDichSuDung;
     private String thoiHanSuDung;
     private String soBienBanDinhGia;
@@ -67,13 +71,32 @@ public class CreditContractEntity {
     private Boolean checkOption;
     private Boolean checkGhiChu;
     private Boolean checkNguonGocSuDung;
+    private String loaiDat;
+    private Boolean checkLoaiDat;
     @Column(columnDefinition = "TEXT")
     private String tableJson;
     private String soHopDongTD;
     private String ngayKetThucKyHanVay;
+    //Người đứng tên bìa ỏ 1
     private String dungTenBiaDo1;
+    private String gioiTinhDungTenBiaDo1;
+    private String namSinhDungTenBiaDo1;
+    private String phoneDungTenBiaDo1;
+    private String cccdDungTenBiaDo1;
+    private String ngayCapCCCDDungTenBiaDo1;
+    @Column(columnDefinition = "TEXT")
+    private String noiCapCCCDDungTenBiaDo1;
+    private String diaChiThuongTruDungTenBiaDo1;
+
     private Boolean checkNguoiDungTenBiaDo2;
     private String dungTenBiaDo2;
+    private String gioiTinhDungTenBiaDo2;
+    private String namSinhDungTenBiaDo2;
+    private String cccdDungTenBiaDo2;
+    @Column(columnDefinition = "TEXT")
+    private String noiCapCCCDDungTenBiaDo2;
+    private String ngayCapCCCDDungTenBiaDo2;
+    private String diaChiThuongTruDungTenBiaDo2;
     @Column(columnDefinition = "TEXT")
     private String landItems;
     private String thoiHanVay;
@@ -81,6 +104,13 @@ public class CreditContractEntity {
     private String nhaCoDinh;
     private String tongTaiSanBD;
     private String tongTaiSanBDChu;
+    private String phongGiaoDich;
+    private String diaChiPhongGiaoDich;
+    private String benA;
+    private Boolean checkHopDongBaoLanh;
+    private Boolean checkNguoiMangTenBiaDo;
+    @Column(columnDefinition = "TEXT")
+    private String nguoiMangTen;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
