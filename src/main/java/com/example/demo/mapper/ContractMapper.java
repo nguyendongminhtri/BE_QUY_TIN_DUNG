@@ -27,10 +27,11 @@ public class ContractMapper {
     public void mapRequestToEntity(ContractRequest request,
                                    CreditContractEntity entity,
                                    User user,
-                                   LocalDate date) {
+                                   LocalDate date,
+                                   LocalDate dateTC) {
         entity.setUser(user);
         entity.setContractDate(date);
-
+        entity.setNgayTheChap(dateTC);
         entity.setNguoiDaiDien(request.getNguoiDaiDien());
         entity.setGtkh(request.getGtkh());
         entity.setTenKhachHang(request.getTenKhachHang());
@@ -113,6 +114,7 @@ public class ContractMapper {
         entity.setNoiCapCCCDDungTenBiaDo1(request.getNoiCapCCCDDungTenBiaDo1());
         entity.setNoiCapCCCDDungTenBiaDo2(request.getNoiCapCCCDDungTenBiaDo2());
         entity.setCheckHopDongBaoLanh(request.getCheckHopDongBaoLanh());
+        entity.setSoBBXetDuyetChoVay(request.getSoBBXetDuyetChoVay());
         // Ánh xạ dữ liệu bảng sang JSON
         if (request.getTableRequest() != null) {
             try {

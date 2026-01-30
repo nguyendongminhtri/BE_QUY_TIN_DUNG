@@ -2,12 +2,15 @@ package com.example.demo.dto.request;
 
 import lombok.Data;
 import lombok.ToString;
+
+import java.time.LocalDate;
 import java.util.List;
 
 @Data
 @ToString
 public class ContractRequest {
     private String contractDate;
+    private String ngayTheChap;
     private String nguoiDaiDien;
     private String gtkh;
     private String tenKhachHang;
@@ -34,6 +37,7 @@ public class ContractRequest {
     private String hanMuc;
     private String laiSuat;
     private String soHopDongTheChapQSDD;
+    private String soBBXetDuyetChoVay;
 
     //Thong tin Bia Do
     private String serial;

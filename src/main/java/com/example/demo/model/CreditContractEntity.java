@@ -20,6 +20,7 @@ public class CreditContractEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private LocalDate contractDate;
+    private LocalDate ngayTheChap;
     private String nguoiDaiDien;
     private String gtkh;
     private String tenKhachHang;
@@ -111,6 +112,8 @@ public class CreditContractEntity {
     private Boolean checkNguoiMangTenBiaDo;
     @Column(columnDefinition = "TEXT")
     private String nguoiMangTen;
+    @Column(columnDefinition = "TEXT")
+    private String soBBXetDuyetChoVay;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
