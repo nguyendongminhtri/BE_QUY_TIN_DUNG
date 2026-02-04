@@ -2,20 +2,24 @@ package com.example.demo.mapper;
 
 import com.example.demo.dto.request.ContractRequest;
 import com.example.demo.dto.request.FileMetadataDto;
+import com.example.demo.dto.request.TableRequest;
 import com.example.demo.model.AvatarEntity;
 import com.example.demo.model.CreditContractEntity;
+import com.example.demo.model.CreditContractTableEntity;
 import com.example.demo.model.User;
 import com.example.demo.repository.IFileMetadataRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -28,7 +32,7 @@ public class ContractMapper {
                                    CreditContractEntity entity,
                                    User user,
                                    LocalDate date,
-                                   LocalDate dateTC) {
+                                   LocalDate dateTC) throws JsonProcessingException {
         entity.setUser(user);
         entity.setContractDate(date);
         entity.setNgayTheChap(dateTC);
@@ -125,7 +129,181 @@ public class ContractMapper {
                 throw new RuntimeException("Không thể convert TableRequest sang JSON", e);
             }
         }
+//        CreditContractEntity contractEntity = new CreditContractEntity();
+// map các field khác từ request...
+
+        // Xóa các bảng cũ
+        entity.getTables().clear();
+        ObjectMapper mapper = new ObjectMapper();
+// Thêm lại các bảng mới
+        if (request.getTable1() != null) {
+            CreditContractTableEntity t1 = new CreditContractTableEntity();
+            t1.setTableName("table1");
+            t1.setTableJson(mapper.writeValueAsString(request.getTable1()));
+            t1.setCreditContract(entity);
+            entity.getTables().add(t1);
+        }
+
+        if (request.getTable2() != null) {
+            CreditContractTableEntity t2 = new CreditContractTableEntity();
+            t2.setTableName("table2");
+            t2.setTableJson(mapper.writeValueAsString(request.getTable2()));
+            t2.setCreditContract(entity);
+            entity.getTables().add(t2);
+        }
+
+        if (request.getTable3() != null) {
+            CreditContractTableEntity t3 = new CreditContractTableEntity();
+            t3.setTableName("table3");
+            t3.setTableJson(mapper.writeValueAsString(request.getTable3()));
+            t3.setCreditContract(entity);
+            entity.getTables().add(t3);
+        }
     }
+
+    public ContractRequest mapEntityToRequest(CreditContractEntity entity) throws JsonProcessingException {
+        ContractRequest request = new ContractRequest();
+        ObjectMapper mapper = new ObjectMapper();
+        if (entity.getAvatars() != null && !entity.getAvatars().isEmpty()) {
+            List<FileMetadataDto> avatarDtos = new ArrayList<>();
+            for (AvatarEntity avatar : entity.getAvatars()) {
+                FileMetadataDto dto = new FileMetadataDto();
+                dto.setFileName(avatar.getFileName());
+                dto.setContentType(avatar.getContentType());
+                // Sử dụng URL public thay vì đường dẫn vật lý
+                dto.setFileUrl(avatar.getFileUrl());
+                avatarDtos.add(dto);
+            }
+            request.setFileAvatarUrls(avatarDtos);
+        }
+
+
+        // map các field cơ bản
+        request.setId(entity.getId());
+        request.setContractDate(entity.getContractDate() != null ? entity.getContractDate().toString() : null);
+        request.setNgayTheChap(entity.getNgayTheChap() != null ? entity.getNgayTheChap().toString() : null);
+        request.setNguoiDaiDien(entity.getNguoiDaiDien());
+        request.setGtkh(entity.getGtkh());
+        request.setTenKhachHang(entity.getTenKhachHang());
+        request.setNamSinhKhachHang(entity.getNamSinhKhachHang());
+        request.setPhoneKhachHang(entity.getPhoneKhachHang());
+        request.setSoTheThanhVienKhachHang(entity.getSoTheThanhVienKhachHang());
+        request.setCccdKhachHang(entity.getCccdKhachHang());
+        request.setNgayCapCCCDKhachHang(entity.getNgayCapCCCDKhachHang());
+        request.setNoiCapCCCDKhachHang(entity.getNoiCapCCCDKhachHang());
+        request.setDiaChiThuongTruKhachHang(entity.getDiaChiThuongTruKhachHang());
+
+        request.setGtnt(entity.getGtnt());
+        request.setTenNguoiThan(entity.getTenNguoiThan());
+        request.setNamSinhNguoiThan(entity.getNamSinhNguoiThan());
+        request.setCccdNguoiThan(entity.getCccdNguoiThan());
+        request.setNgayCapCCCDNguoiThan(entity.getNgayCapCCCDNguoiThan());
+        request.setNoiCapCCCDNguoiThan(entity.getNoiCapCCCDNguoiThan());
+        request.setDiaChiThuongTruNguoiThan(entity.getDiaChiThuongTruNguoiThan());
+        request.setQuanHe(entity.getQuanHe());
+
+        request.setTienSo(entity.getTienSo());
+        request.setTienChu(entity.getTienChu());
+        request.setMuchDichVay(entity.getMuchDichVay());
+        request.setHanMuc(entity.getHanMuc());
+        request.setLaiSuat(entity.getLaiSuat());
+        request.setSoHopDongTheChapQSDD(entity.getSoHopDongTheChapQSDD());
+
+        // Thông tin bìa đỏ
+        request.setSerial(entity.getSerial());
+        request.setNoiCapSo(entity.getNoiCapSo());
+        request.setNgayCapSo(entity.getNgayCapSo());
+        request.setNoiDungVaoSo(entity.getNoiDungVaoSo());
+        request.setSoThuaDat(entity.getSoThuaDat());
+        request.setSoBanDo(entity.getSoBanDo());
+        request.setDiaChiThuaDat(entity.getDiaChiThuaDat());
+        request.setDienTichDatSo(entity.getDienTichDatSo());
+        request.setDienTichDatChu(entity.getDienTichDatChu());
+        request.setHinhThucSuDung(entity.getHinhThucSuDung());
+        request.setMuchDichSuDung(entity.getMuchDichSuDung());
+        request.setThoiHanSuDung(entity.getThoiHanSuDung());
+        request.setSoBienBanDinhGia(entity.getSoBienBanDinhGia());
+        request.setNoiDungThoaThuan(entity.getNoiDungThoaThuan());
+        request.setNguonGocSuDung(entity.getNguonGocSuDung());
+        request.setGhiChu(entity.getGhiChu());
+        request.setChoVay(entity.getChoVay());
+        request.setLoaiVay(entity.getLoaiVay());
+        request.setCheckOption(entity.getCheckOption());
+        request.setCheckGhiChu(entity.getCheckGhiChu());
+        request.setCheckNguonGocSuDung(entity.getCheckNguonGocSuDung());
+        request.setSoHopDongTD(entity.getSoHopDongTD());
+        request.setNgayKetThucKyHanVay(entity.getNgayKetThucKyHanVay());
+        request.setDungTenBiaDo1(entity.getDungTenBiaDo1());
+        request.setCheckNguoiDungTenBiaDo2(entity.getCheckNguoiDungTenBiaDo2());
+        request.setDungTenBiaDo2(entity.getDungTenBiaDo2());
+        request.setLandItems(entity.getLandItems());
+        request.setThoiHanVay(entity.getThoiHanVay());
+        request.setCheckNhaCoDinh(entity.getCheckNhaCoDinh());
+        request.setNhaCoDinh(entity.getNhaCoDinh());
+        request.setTongTaiSanBD(entity.getTongTaiSanBD());
+        request.setTongTaiSanBDChu(entity.getTongTaiSanBDChu());
+        request.setCheckMucDich(entity.getCheckMucDichSuDung());
+        request.setCheckLoaiDat(entity.getCheckLoaiDat());
+        request.setLoaiDat(entity.getLoaiDat());
+        request.setGioiTinhDungTenBiaDo1(entity.getGioiTinhDungTenBiaDo1());
+        request.setNamSinhDungTenBiaDo1(entity.getNamSinhDungTenBiaDo1());
+        request.setPhoneDungTenBiaDo1(entity.getPhoneDungTenBiaDo1());
+        request.setCccdDungTenBiaDo1(entity.getCccdDungTenBiaDo1());
+        request.setNgayCapCCCDDungTenBiaDo1(entity.getNgayCapCCCDDungTenBiaDo1());
+        request.setNoiCapCCCDDungTenBiaDo1(entity.getNoiCapCCCDDungTenBiaDo1());
+        request.setDiaChiThuongTruDungTenBiaDo1(entity.getDiaChiThuongTruDungTenBiaDo1());
+        request.setGioiTinhDungTenBiaDo2(entity.getGioiTinhDungTenBiaDo2());
+        request.setNamSinhDungTenBiaDo2(entity.getNamSinhDungTenBiaDo2());
+        request.setCccdDungTenBiaDo2(entity.getCccdDungTenBiaDo2());
+        request.setNgayCapCCCDDungTenBiaDo2(entity.getNgayCapCCCDDungTenBiaDo2());
+        request.setNoiCapCCCDDungTenBiaDo2(entity.getNoiCapCCCDDungTenBiaDo2());
+        request.setDiaChiThuongTruDungTenBiaDo2(entity.getDiaChiThuongTruDungTenBiaDo2());
+        request.setPhongGiaoDich(entity.getPhongGiaoDich());
+        request.setBenA(entity.getBenA());
+        request.setDiaChiPhongGiaoDich(entity.getDiaChiPhongGiaoDich());
+        request.setCheckNguoiMangTenBiaDo(entity.getCheckNguoiMangTenBiaDo());
+        request.setNguoiMangTen(entity.getNguoiMangTen());
+        request.setCheckHopDongBaoLanh(entity.getCheckHopDongBaoLanh());
+        request.setSoBBXetDuyetChoVay(entity.getSoBBXetDuyetChoVay());
+        if (entity.getTableJson() != null) {
+            TableRequest tableReq = mapper.readValue(entity.getTableJson(), TableRequest.class);
+            request.setTableRequest(tableReq);
+        }
+        if (entity.getAvatars() != null && !entity.getAvatars().isEmpty()) {
+            List<FileMetadataDto> avatarDtos = new ArrayList<>();
+            for (AvatarEntity avatar : entity.getAvatars()) {
+                FileMetadataDto dto = new FileMetadataDto();
+                dto.setFileName(avatar.getFileName());
+                dto.setContentType(avatar.getContentType());
+                // Nếu cần thêm URL để hiển thị
+                dto.setFileUrl(avatar.getFileUrl());
+                avatarDtos.add(dto);
+            }
+            request.setFileAvatarUrls(avatarDtos);
+        }
+
+
+        // map dữ liệu bảng phụ
+        if (entity.getTables() != null) {
+            for (CreditContractTableEntity t : entity.getTables()) {
+                TableRequest tableReq = mapper.readValue(t.getTableJson(), TableRequest.class);
+                switch (t.getTableName()) {
+                    case "table1":
+                        request.setTable1(tableReq);
+                        break;
+                    case "table2":
+                        request.setTable2(tableReq);
+                        break;
+                    case "table3":
+                        request.setTable3(tableReq);
+                        break;
+                }
+            }
+        }
+
+        return request;
+    }
+
 
     /**
      * Xử lý avatar: di chuyển file từ thư mục tạm sang thư mục uploads,
@@ -143,6 +321,7 @@ public class ContractMapper {
                 .stream()
                 .map(FileMetadataDto::getFileName)
                 .toList();
+        System.err.println("newFileNames --> "+newFileNames);
 
         // Xóa avatar cũ nếu không nằm trong danh sách mới
         Iterator<AvatarEntity> iterator = entity.getAvatars().iterator();
@@ -160,34 +339,20 @@ public class ContractMapper {
             }
         }
 
-        // Thêm avatar mới (di chuyển từ temp sang uploads)
         for (FileMetadataDto dto : request.getFileAvatarUrls()) {
             try {
                 String fileNameAvatar = dto.getFileName();
 
-                // Kiểm tra xem avatar đã tồn tại trong entity chưa
                 boolean exists = entity.getAvatars().stream()
                         .anyMatch(a -> a.getFileName().equals(fileNameAvatar));
-
-                if (exists) {
-                    System.out.println("Avatar đã tồn tại trong entity, bỏ qua: " + fileNameAvatar);
-                    continue; // bỏ qua không thêm lại
-                }
+                if (exists) continue;
 
                 Path tempPath = Paths.get(tempDir, fileNameAvatar);
                 Path finalPath = Paths.get(uploadDir, fileNameAvatar);
 
-                // Nếu file đã tồn tại ở uploadDir thì bỏ qua move
-                if (Files.exists(finalPath)) {
-                    System.out.println("File đã tồn tại trong uploads, bỏ qua move: " + fileNameAvatar);
-                } else {
-                    // Chỉ move nếu file còn trong temp
-                    if (Files.exists(tempPath)) {
-                        Files.createDirectories(finalPath.getParent());
-                        Files.move(tempPath, finalPath, StandardCopyOption.REPLACE_EXISTING);
-                    } else {
-                        System.out.println("Không tìm thấy file trong temp: " + fileNameAvatar);
-                    }
+                if (!Files.exists(finalPath) && Files.exists(tempPath)) {
+                    Files.createDirectories(finalPath.getParent());
+                    Files.move(tempPath, finalPath, StandardCopyOption.REPLACE_EXISTING);
                 }
 
                 String finalUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
@@ -196,8 +361,9 @@ public class ContractMapper {
                         .toUriString();
 
                 AvatarEntity avatar = new AvatarEntity();
-                avatar.setFilePath(finalUrl);
                 avatar.setFileName(fileNameAvatar);
+                avatar.setFilePath(finalPath.toString()); // đường dẫn vật lý
+                avatar.setFileUrl(finalUrl);              // URL public
                 avatar.setContentType(dto.getContentType());
                 avatar.setCreditContract(entity);
 
@@ -206,5 +372,8 @@ public class ContractMapper {
                 throw new RuntimeException("Không thể xử lý file avatar: " + dto.getFileName(), e);
             }
         }
+
+
+
     }
 }

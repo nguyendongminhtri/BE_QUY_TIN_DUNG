@@ -4,7 +4,8 @@ import com.example.demo.dto.request.ContractRequest;
 import com.example.demo.dto.request.TableRequest;
 import com.example.demo.mapper.ContractMapper;
 import com.example.demo.model.CreditContractEntity;
-
+import java.text.NumberFormat;
+import java.util.Locale;
 import com.example.demo.model.User;
 import com.example.demo.repository.ICreditContractRepository;
 import com.example.demo.repository.IFileMetadataRepository;
@@ -89,6 +90,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         fileUrls.add(generateContractFile(request, date, dateTC, user, "PhuLucHopDong.docx"));
         fileUrls.add(generateContractFile(request, date, dateTC, user, "BienBanKiemTraSauKhiChoVay.docx"));
         fileUrls.add(generateContractFile(request, date, dateTC, user, "BienBanXetDuyetChoVay.docx"));
+        fileUrls.add(generateContractFile(request, date, dateTC, user, "BienBanXacDinhGiaTriTaiSanBaoDam.docx"));
 
         return fileUrls;
     }
@@ -113,6 +115,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         fileUrls.add(generateContractFileExport(request, date, dateTC, user, "PhuLucHopDong.docx"));
         fileUrls.add(generateContractFileExport(request, date, dateTC, user, "BienBanKiemTraSauKhiChoVay.docx"));
         fileUrls.add(generateContractFileExport(request, date, dateTC, user, "BienBanXetDuyetChoVay.docx"));
+        fileUrls.add(generateContractFileExport(request, date, dateTC, user, "BienBanXacDinhGiaTriTaiSanBaoDam.docx"));
 
         creditContractRepository.save(entity);
         return fileUrls;
@@ -140,6 +143,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         fileUrls.add(generateContractFileExport(request, date, dateTC, user, "PhuLucHopDong.docx"));
         fileUrls.add(generateContractFileExport(request, date, dateTC, user, "BienBanKiemTraSauKhiChoVay.docx"));
         fileUrls.add(generateContractFileExport(request, date, dateTC, user, "BienBanXetDuyetChoVay.docx"));
+        fileUrls.add(generateContractFileExport(request, date, dateTC, user, "BienBanXacDinhGiaTriTaiSanBaoDam.docx"));
 
         creditContractRepository.save(entity);
         return fileUrls;
@@ -202,6 +206,10 @@ public class CreditContractServiceIMPL implements ICreditContractService {
 
     private void replacePlaceholders(XWPFDocument doc, ContractRequest request, LocalDate date, LocalDate dateTC) {
         System.err.println("request --> " + request);
+        long gtqsdd = Long.parseLong(Optional.ofNullable(request.getGiaTriQuyenSuDungDat()).orElse(String.valueOf(0L)));
+// Định dạng theo locale Việt Nam
+        NumberFormat nf = NumberFormat.getInstance(new Locale("vi", "VN"));
+        String formattedGtqsdd = nf.format(gtqsdd);
         Map<String, String> replacements = new HashMap<>(); // Các placeholder mặc định
 //        replacements.put("{{gd}}", Optional.ofNullable(request.getNguoiDaiDien()).orElse(""));
         replacements.put("{{shdtd}}", Optional.ofNullable(request.getSoHopDongTD()).orElse(""));
@@ -248,6 +256,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         replacements.put("{{ngsd}}", Optional.ofNullable(request.getNguonGocSuDung()).orElse(""));
         replacements.put("{{gc}}", Optional.ofNullable(request.getGhiChu()).orElse(""));
         replacements.put("{{chv}}", Optional.ofNullable(request.getChoVay()).orElse(""));
+        replacements.put("{{gtqsdd}}", Optional.ofNullable(formattedGtqsdd).orElse(""));
         replacements.put("{{khbd}}", Optional.ofNullable(request.getDungTenBiaDo1()).orElse(""));
         replacements.put("{{gtkhbd}}", Optional.ofNullable(request.getGioiTinhDungTenBiaDo1()).orElse(""));
         replacements.put("{{gtkhbdt}}", Optional.ofNullable(request.getGioiTinhDungTenBiaDo1().toLowerCase()).orElse(""));
@@ -284,7 +293,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         java.util.regex.Matcher matcher = pattern.matcher(request.getLaiSuat());
         if (matcher.find()) {
             String result = matcher.group();
-            replacements.put("{{lss}}",result);
+            replacements.put("{{lss}}", result);
             System.out.println("Kết quả: " + result);
         } else {
             System.out.println("Không tìm thấy số.");
@@ -364,35 +373,24 @@ public class CreditContractServiceIMPL implements ICreditContractService {
 // Tìm paragraph có placeholder
         for (XWPFParagraph para : new ArrayList<>(doc.getParagraphs())) {
             String text = para.getText();
-            if (text != null && text.contains("{{TABLE_PLACEHOLDER}}")) {
-                // Xóa nội dung placeholder
-                for (int i = para.getRuns().size() - 1; i >= 0; i--) {
-                    para.removeRun(i);
+            if (text != null) {
+                if (text.contains("{{TABLE_PLACEHOLDER}}")) {
+                    // bảng tuỳ chọn, chỉ tạo nếu drawTable = true
+                    insertTableAtPlaceholder(doc, para, request.getTableRequest(), true);
                 }
-
-                // Nếu người dùng có chọn "Có bảng dữ liệu" thì mới tạo bảng
-                if (request.getTableRequest() != null && request.getTableRequest().isDrawTable()) {
-                    XmlCursor cursor = para.getCTP().newCursor();
-                    XWPFTable table = doc.insertNewTbl(cursor);
-
-                    if (table != null) {
-                        fillInsertedTable(table, request.getTableRequest());
-                    } else {
-                        System.err.println("Không tạo được bảng tại {{TABLE_PLACEHOLDER}}");
-                    }
+                if (text.contains("{{TABLE1_PLACEHOLDER}}")) {
+                    // bảng bắt buộc, luôn tạo
+                    insertTableAtPlaceholder(doc, para, request.getTable1(), false);
                 }
-
-                // Luôn xóa paragraph placeholder để không còn dư
-                IBody body = para.getBody();
-                if (body instanceof XWPFDocument d) {
-                    int pos = d.getPosOfParagraph(para);
-                    if (pos >= 0) d.removeBodyElement(pos);
-                } else if (body instanceof XWPFTableCell cell) {
-                    int idx = cell.getParagraphs().indexOf(para);
-                    if (idx >= 0) cell.removeParagraph(idx);
+                if (text.contains("{{TABLE2_PLACEHOLDER}}")) {
+                    insertTableAtPlaceholder(doc, para, request.getTable2(), false);
+                }
+                if (text.contains("{{TABLE3_PLACEHOLDER}}")) {
+                    insertTableAtPlaceholder(doc, para, request.getTable3(), false);
                 }
             }
         }
+
         // Duyệt trên bản copy để tránh ConcurrentModificationException
         List<XWPFParagraph> docParas = new ArrayList<>(doc.getParagraphs());
         for (XWPFParagraph paragraph : docParas) {
@@ -412,25 +410,58 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         }
     }
 
-    private void copyStyle(XWPFRun source, XWPFRun target) {
-        if (source.getCTR() != null) {
-            target.getCTR().setRPr(source.getCTR().getRPr());
-            // giữ nguyên định dạng, kể cả superscript/subscript
+    //    private void copyStyle(XWPFRun source, XWPFRun target) {
+//        if (source.getCTR() != null) {
+//            target.getCTR().setRPr(source.getCTR().getRPr());
+//            // giữ nguyên định dạng, kể cả superscript/subscript
+//        }
+//    }
+    private void insertTableAtPlaceholder(XWPFDocument doc, XWPFParagraph para, TableRequest tableRequest,
+                                          boolean checkDrawTable) {
+        // Xóa nội dung placeholder
+        for (int i = para.getRuns().size() - 1; i >= 0; i--) {
+            para.removeRun(i);
+        }
+
+        if (tableRequest != null) {
+            if (!checkDrawTable || tableRequest.isDrawTable()) {
+                XmlCursor cursor = para.getCTP().newCursor();
+                XWPFTable table = doc.insertNewTbl(cursor);
+                if (table != null) {
+                    fillInsertedTable(table, tableRequest, checkDrawTable);
+                }
+            }
+        }
+
+        // Xóa paragraph placeholder để không còn dư
+        IBody body = para.getBody();
+        if (body instanceof XWPFDocument d) {
+            int pos = d.getPosOfParagraph(para);
+            if (pos >= 0) d.removeBodyElement(pos);
+        } else if (body instanceof XWPFTableCell cell) {
+            int idx = cell.getParagraphs().indexOf(para);
+            if (idx >= 0) cell.removeParagraph(idx);
         }
     }
 
 
     private String capitalizeWords(String str) {
+        if (str == null || str.isEmpty()) {
+            return "";
+        }
         str = str.toLowerCase();
         String[] words = str.split("\\s+");
         StringBuilder sb = new StringBuilder();
         for (String word : words) {
-            if (word.length() > 0) {
-                sb.append(Character.toUpperCase(word.charAt(0))).append(word.substring(1)).append(" ");
+            if (!word.isEmpty()) {
+                sb.append(Character.toUpperCase(word.charAt(0)))
+                        .append(word.substring(1))
+                        .append(" ");
             }
         }
         return sb.toString().trim();
     }
+
 
     private void processParagraph(XWPFParagraph paragraph, Map<String, String> replacements) {
         List<XWPFRun> runs = paragraph.getRuns();
@@ -464,57 +495,47 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         baseRun.setText(replacedText, 0);
     }
 
-    private void fillInsertedTable(XWPFTable table, TableRequest tableRequest) {
-        if (table == null || tableRequest == null || !tableRequest.isDrawTable()) return;
+    private void fillInsertedTable(XWPFTable table, TableRequest tableRequest, boolean checkDrawTable) {
+        if (table == null || tableRequest == null) return;
+        if (checkDrawTable && !tableRequest.isDrawTable()) return;
 
-        int colCount = 3;
         int dataRowCount = tableRequest.getRows().size();
-        int totalRows = dataRowCount + 1; // +1 header
+        int colCount = dataRowCount > 0 ? tableRequest.getRows().get(0).size() : 0;
 
-        // Căn giữa và set width
         table.setTableAlignment(TableRowAlign.CENTER);
-        table.setWidth("8000"); // full A4 width
+        table.setWidth("8000");
 
-        // Header row
-        XWPFTableRow headerRow = table.getRow(0);
-        while (headerRow.getTableCells().size() < colCount) {
-            headerRow.addNewTableCell();
-        }
-
-        // Tạo thêm hàng dữ liệu
-        while (table.getNumberOfRows() < totalRows) {
+        // Tạo đủ số hàng
+        while (table.getNumberOfRows() < dataRowCount) {
             XWPFTableRow newRow = table.createRow();
             while (newRow.getTableCells().size() < colCount) {
                 newRow.addNewTableCell();
             }
         }
 
-        // Header
-        for (int c = 0; c < colCount; c++) {
-            XWPFParagraph para = headerRow.getCell(c).getParagraphs().get(0);
-            para.setAlignment(ParagraphAlignment.CENTER);
-            for (int i = para.getRuns().size() - 1; i >= 0; i--) para.removeRun(i);
-            XWPFRun run = para.createRun();
-            run.setBold(true);
-            run.setFontFamily("Times New Roman");
-            run.setFontSize(13);
-            run.setText(tableRequest.getHeaders().get(c));
-        }
-
-        // Dữ liệu
         for (int r = 0; r < dataRowCount; r++) {
-            XWPFTableRow row = table.getRow(r + 1);
+            XWPFTableRow row = table.getRow(r);
+            while (row.getTableCells().size() < colCount) {
+                row.addNewTableCell();
+            }
+
+            List<String> rowData = tableRequest.getRows().get(r);
             for (int c = 0; c < colCount; c++) {
-                XWPFParagraph para = row.getCell(c).getParagraphs().get(0);
+                String cellValue = c < rowData.size() ? rowData.get(c) : "";
+                XWPFTableCell cell = row.getCell(c);
+                if (cell == null) cell = row.addNewTableCell();
+
+                XWPFParagraph para = cell.getParagraphs().get(0);
                 para.setAlignment(ParagraphAlignment.CENTER);
                 for (int i = para.getRuns().size() - 1; i >= 0; i--) para.removeRun(i);
                 XWPFRun run = para.createRun();
                 run.setFontFamily("Times New Roman");
                 run.setFontSize(13);
-                run.setText(tableRequest.getRows().get(r).get(c));
+                run.setText(cellValue);
             }
         }
     }
+
 
     private String extractPhuong(String diaChi) {
         if (diaChi == null) return "";

@@ -76,6 +76,12 @@ public class CreditContractEntity {
     private Boolean checkLoaiDat;
     @Column(columnDefinition = "TEXT")
     private String tableJson;
+//    @Column(columnDefinition = "JSON")
+//    private String table1Json;
+//    @Column(columnDefinition = "JSON")
+//    private String table2Json;
+//    @Column(columnDefinition = "JSON")
+//    private String table3Json;
     private String soHopDongTD;
     private String ngayKetThucKyHanVay;
     //Người đứng tên bìa ỏ 1
@@ -131,5 +137,6 @@ public class CreditContractEntity {
     @OneToMany(mappedBy = "creditContract", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<AvatarEntity> avatars = new ArrayList();
-
+    @OneToMany(mappedBy = "creditContract", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CreditContractTableEntity> tables = new ArrayList<>();
 }

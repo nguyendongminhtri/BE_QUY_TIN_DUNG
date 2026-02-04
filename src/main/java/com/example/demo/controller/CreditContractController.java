@@ -2,11 +2,13 @@ package com.example.demo.controller;
 
 import com.example.demo.dto.request.ContractRequest;
 import com.example.demo.dto.response.ResponMessage;
+import com.example.demo.mapper.ContractMapper;
 import com.example.demo.model.AvatarEntity;
 import com.example.demo.model.CarouselEntity;
 import com.example.demo.model.CategoryEntity;
 import com.example.demo.model.CreditContractEntity;
 import com.example.demo.service.creditcontract.ICreditContractService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -30,6 +32,8 @@ import java.util.zip.ZipOutputStream;
 public class CreditContractController {
     @Autowired
     private ICreditContractService creditContractService;
+    @Autowired
+    private ContractMapper contractMapper;
 
     @PostMapping()
     public ResponseEntity<List<String>> generate(@RequestBody ContractRequest request) throws IOException {
@@ -60,9 +64,20 @@ public class CreditContractController {
     }
 
     @GetMapping
-    public ResponseEntity<?> getListCreditContracts() {
-        return new ResponseEntity<>(creditContractService.findAll(), HttpStatus.OK);
+    public ResponseEntity<List<ContractRequest>> getListCreditContracts() {
+        List<CreditContractEntity> entities = creditContractService.findAll();
+        List<ContractRequest> dtos = entities.stream()
+                .map(entity -> {
+                    try {
+                        return contractMapper.mapEntityToRequest(entity);
+                    } catch (Exception e) {
+                        throw new RuntimeException("Không thể parse dữ liệu bảng", e);
+                    }
+                })
+                .toList();
+        return ResponseEntity.ok(dtos);
     }
+
 
     private ResponseEntity<Resource> buildZipResponse(List<String> filePaths) throws IOException {
         String zipFileName = "contracts_" + System.currentTimeMillis() + ".zip";
@@ -87,13 +102,14 @@ public class CreditContractController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> detailCategory(@PathVariable Long id) {
-        Optional<CreditContractEntity> creditContractEntity = creditContractService.findById(id);
-        if (!creditContractEntity.isPresent()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        return new ResponseEntity<>(creditContractEntity, HttpStatus.OK);
+    public ResponseEntity<ContractRequest> detailContract(@PathVariable Long id) throws JsonProcessingException {
+        CreditContractEntity entity = creditContractService.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy hợp đồng"));
+        ContractRequest dto = contractMapper.mapEntityToRequest(entity);
+        System.err.println("dto =======> "+dto);
+        return ResponseEntity.ok(dto);
     }
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteCarousel(@PathVariable Long id) {

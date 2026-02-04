@@ -9,6 +9,7 @@ import java.util.List;
 @Data
 @ToString
 public class ContractRequest {
+    private Long id;
     private String contractDate;
     private String ngayTheChap;
     private String nguoiDaiDien;
@@ -65,6 +66,9 @@ public class ContractRequest {
     private Boolean checkNguonGocSuDung;
     private List<FileMetadataDto> fileAvatarUrls;
     private TableRequest tableRequest;
+    private TableRequest table1;
+    private TableRequest table2;
+    private TableRequest table3;
     private String ngayKetThucKyHanVay;
     private String dungTenBiaDo1;
     private Boolean checkNguoiDungTenBiaDo2;
@@ -97,4 +101,5 @@ public class ContractRequest {
     private Boolean checkNguoiMangTenBiaDo;
     private String nguoiMangTen;
     private Boolean checkHopDongBaoLanh;
+    private String giaTriQuyenSuDungDat;
 }
