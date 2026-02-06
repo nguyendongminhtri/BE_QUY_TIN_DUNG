@@ -4,8 +4,10 @@ import com.example.demo.dto.request.ContractRequest;
 import com.example.demo.dto.request.TableRequest;
 import com.example.demo.mapper.ContractMapper;
 import com.example.demo.model.CreditContractEntity;
+
 import java.text.NumberFormat;
 import java.util.Locale;
+
 import com.example.demo.model.User;
 import com.example.demo.repository.ICreditContractRepository;
 import com.example.demo.repository.IFileMetadataRepository;
@@ -80,17 +82,18 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         User user = userDetailService.getCurrentUser();
         LocalDate date = LocalDate.parse(request.getContractDate());
         LocalDate dateTC = LocalDate.parse(request.getNgayTheChap());
+        LocalDate dateBD = LocalDate.parse(request.getNgayBaoDam());
 
         List<String> fileUrls = new ArrayList<>();
-        fileUrls.add(generateContractFile(request, date, dateTC, user, "HopDongTinDung.docx"));
-        fileUrls.add(generateContractFile(request, date, dateTC, user, "HopDongTheChap.docx"));
-        fileUrls.add(generateContractFile(request, date, dateTC, user, "PhieuBaoDamQSDD.docx"));
-        fileUrls.add(generateContractFile(request, date, dateTC, user, "GiayDeNghiVayVon.docx"));
-        fileUrls.add(generateContractFile(request, date, dateTC, user, "DanhMucHoSoChoVay.docx"));
-        fileUrls.add(generateContractFile(request, date, dateTC, user, "PhuLucHopDong.docx"));
-        fileUrls.add(generateContractFile(request, date, dateTC, user, "BienBanKiemTraSauKhiChoVay.docx"));
-        fileUrls.add(generateContractFile(request, date, dateTC, user, "BienBanXetDuyetChoVay.docx"));
-        fileUrls.add(generateContractFile(request, date, dateTC, user, "BienBanXacDinhGiaTriTaiSanBaoDam.docx"));
+        fileUrls.add(generateContractFile(request, date, dateTC, dateBD, user, "HopDongTinDung.docx"));
+        fileUrls.add(generateContractFile(request, date, dateTC, dateBD, user, "HopDongTheChap.docx"));
+        fileUrls.add(generateContractFile(request, date, dateTC, dateBD, user, "PhieuBaoDamQSDD.docx"));
+        fileUrls.add(generateContractFile(request, date, dateTC, dateBD, user, "GiayDeNghiVayVon.docx"));
+        fileUrls.add(generateContractFile(request, date, dateTC, dateBD, user, "DanhMucHoSoChoVay.docx"));
+        fileUrls.add(generateContractFile(request, date, dateTC, dateBD, user, "PhuLucHopDong.docx"));
+        fileUrls.add(generateContractFile(request, date, dateTC, dateBD, user, "BienBanKiemTraSauKhiChoVay.docx"));
+        fileUrls.add(generateContractFile(request, date, dateTC, dateBD, user, "BienBanXetDuyetChoVay.docx"));
+        fileUrls.add(generateContractFile(request, date, dateTC, dateBD, user, "BienBanXacDinhGiaTriTaiSanBaoDam.docx"));
 
         return fileUrls;
     }
@@ -101,21 +104,22 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         User user = userDetailService.getCurrentUser();
         LocalDate date = LocalDate.parse(request.getContractDate());
         LocalDate dateTC = LocalDate.parse(request.getNgayTheChap());
+        LocalDate dateBD = LocalDate.parse(request.getNgayBaoDam());
 
         CreditContractEntity entity = new CreditContractEntity();
-        contractMapper.mapRequestToEntity(request, entity, user, date, dateTC);
+        contractMapper.mapRequestToEntity(request, entity, user, date, dateTC, dateBD);
         contractMapper.processAvatars(request, entity, tempDir, uploadDir, fileMetadataRepository);
 
         List<String> fileUrls = new ArrayList<>();
-        fileUrls.add(generateContractFileExport(request, date, dateTC, user, "HopDongTinDung.docx"));
-        fileUrls.add(generateContractFileExport(request, date, dateTC, user, "HopDongTheChap.docx"));
-        fileUrls.add(generateContractFileExport(request, date, dateTC, user, "PhieuBaoDamQSDD.docx"));
-        fileUrls.add(generateContractFileExport(request, date, dateTC, user, "GiayDeNghiVayVon.docx"));
-        fileUrls.add(generateContractFileExport(request, date, dateTC, user, "DanhMucHoSoChoVay.docx"));
-        fileUrls.add(generateContractFileExport(request, date, dateTC, user, "PhuLucHopDong.docx"));
-        fileUrls.add(generateContractFileExport(request, date, dateTC, user, "BienBanKiemTraSauKhiChoVay.docx"));
-        fileUrls.add(generateContractFileExport(request, date, dateTC, user, "BienBanXetDuyetChoVay.docx"));
-        fileUrls.add(generateContractFileExport(request, date, dateTC, user, "BienBanXacDinhGiaTriTaiSanBaoDam.docx"));
+        fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "HopDongTinDung.docx"));
+        fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "HopDongTheChap.docx"));
+        fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "PhieuBaoDamQSDD.docx"));
+        fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "GiayDeNghiVayVon.docx"));
+        fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "DanhMucHoSoChoVay.docx"));
+        fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "PhuLucHopDong.docx"));
+        fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "BienBanKiemTraSauKhiChoVay.docx"));
+        fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "BienBanXetDuyetChoVay.docx"));
+        fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "BienBanXacDinhGiaTriTaiSanBaoDam.docx"));
 
         creditContractRepository.save(entity);
         return fileUrls;
@@ -127,34 +131,35 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         User user = userDetailService.getCurrentUser();
         LocalDate date = LocalDate.parse(request.getContractDate());
         LocalDate dateTC = LocalDate.parse(request.getNgayTheChap());
+        LocalDate dateBD = LocalDate.parse(request.getNgayBaoDam());
 
         CreditContractEntity entity = creditContractRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy hợp đồng"));
 
-        contractMapper.mapRequestToEntity(request, entity, user, date, dateTC);
+        contractMapper.mapRequestToEntity(request, entity, user, date, dateTC, dateBD);
         contractMapper.processAvatars(request, entity, tempDir, uploadDir, fileMetadataRepository);
 
         List<String> fileUrls = new ArrayList<>();
-        fileUrls.add(generateContractFileExport(request, date, dateTC, user, "HopDongTinDung.docx"));
-        fileUrls.add(generateContractFileExport(request, date, dateTC, user, "HopDongTheChap.docx"));
-        fileUrls.add(generateContractFileExport(request, date, dateTC, user, "PhieuBaoDamQSDD.docx"));
-        fileUrls.add(generateContractFileExport(request, date, dateTC, user, "GiayDeNghiVayVon.docx"));
-        fileUrls.add(generateContractFileExport(request, date, dateTC, user, "DanhMucHoSoChoVay.docx"));
-        fileUrls.add(generateContractFileExport(request, date, dateTC, user, "PhuLucHopDong.docx"));
-        fileUrls.add(generateContractFileExport(request, date, dateTC, user, "BienBanKiemTraSauKhiChoVay.docx"));
-        fileUrls.add(generateContractFileExport(request, date, dateTC, user, "BienBanXetDuyetChoVay.docx"));
-        fileUrls.add(generateContractFileExport(request, date, dateTC, user, "BienBanXacDinhGiaTriTaiSanBaoDam.docx"));
+        fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "HopDongTinDung.docx"));
+        fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "HopDongTheChap.docx"));
+        fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "PhieuBaoDamQSDD.docx"));
+        fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "GiayDeNghiVayVon.docx"));
+        fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "DanhMucHoSoChoVay.docx"));
+        fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "PhuLucHopDong.docx"));
+        fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "BienBanKiemTraSauKhiChoVay.docx"));
+        fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "BienBanXetDuyetChoVay.docx"));
+        fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "BienBanXacDinhGiaTriTaiSanBaoDam.docx"));
 
         creditContractRepository.save(entity);
         return fileUrls;
     }
 
     // 👉 Hàm generate file (preview)
-    private String generateContractFile(ContractRequest request, LocalDate date, LocalDate dateTC, User user, String templateName) throws IOException {
+    private String generateContractFile(ContractRequest request, LocalDate date, LocalDate dateTC, LocalDate dateBD, User user, String templateName) throws IOException {
         try (InputStream is = new ClassPathResource("templates/" + templateName).getInputStream();
              XWPFDocument doc = new XWPFDocument(is)) {
 
-            replacePlaceholders(doc, request, date, dateTC);
+            replacePlaceholders(doc, request, date, dateTC, dateBD);
 
             String fileName = templateName.replace(".docx", "")
                     + "_" + user.getId()
@@ -179,12 +184,13 @@ public class CreditContractServiceIMPL implements ICreditContractService {
     public String generateContractFileExport(@NotNull ContractRequest request,
                                              @NotNull LocalDate date,
                                              @NotNull LocalDate dateTC,
+                                             @NotNull LocalDate dateBD,
                                              @NotNull User user,
                                              @NotNull String templateName) throws IOException {
         try (InputStream is = new ClassPathResource("templates/" + templateName).getInputStream();
              XWPFDocument doc = new XWPFDocument(is)) {
 
-            replacePlaceholders(doc, request, date, dateTC);
+            replacePlaceholders(doc, request, date, dateTC, dateBD);
 
             String fileName = templateName.replace(".docx", "")
                     + "_export_" + user.getId()
@@ -204,7 +210,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
     }
 
 
-    private void replacePlaceholders(XWPFDocument doc, ContractRequest request, LocalDate date, LocalDate dateTC) {
+    private void replacePlaceholders(XWPFDocument doc, ContractRequest request, LocalDate date, LocalDate dateTC, LocalDate dateBD) {
         System.err.println("request --> " + request);
         long gtqsdd = Long.parseLong(Optional.ofNullable(request.getGiaTriQuyenSuDungDat()).orElse(String.valueOf(0L)));
 // Định dạng theo locale Việt Nam
@@ -258,6 +264,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         replacements.put("{{chv}}", Optional.ofNullable(request.getChoVay()).orElse(""));
         replacements.put("{{gtqsdd}}", Optional.ofNullable(formattedGtqsdd).orElse(""));
         replacements.put("{{khbd}}", Optional.ofNullable(request.getDungTenBiaDo1()).orElse(""));
+        replacements.put("{{ndnb}}", Optional.ofNullable(request.getNoiDungNgoaiBia()).orElse(""));
         replacements.put("{{gtkhbd}}", Optional.ofNullable(request.getGioiTinhDungTenBiaDo1()).orElse(""));
         replacements.put("{{gtkhbdt}}", Optional.ofNullable(request.getGioiTinhDungTenBiaDo1().toLowerCase()).orElse(""));
         replacements.put("{{nskhbd}}", Optional.ofNullable(request.getNamSinhDungTenBiaDo1()).orElse(""));
@@ -274,7 +281,32 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         replacements.put("{{dcntbd}}", Optional.ofNullable(request.getDiaChiThuongTruDungTenBiaDo2()).orElse(""));
         replacements.put("{{nsntbd}}", Optional.ofNullable(request.getNamSinhDungTenBiaDo2()).orElse(""));
         replacements.put("{{lv}}", Optional.ofNullable(request.getLoaiVay()).orElse(""));
-        replacements.put("{{lvt}}", Optional.ofNullable(capitalizeWords(request.getLoaiVay())).orElse(""));
+        if(request.getLoaiVay().equalsIgnoreCase("NGẮN HẠN (Thỏa thuận)")){
+            replacements.put("{{lvt}}", Optional.ofNullable("Ngắn hạn").orElse(""));
+            replacements.put("{{slv}}", "hạn mức");
+            System.err.println("get::"+replacements.get("{{slv}}"));
+            replacements.put("{{ms1t}}", "Phương thức cho vay: Cho vay theo hạn mức");
+            replacements.put("{{ms1d}}", "");
+            replacements.put("{{ms2t}}", "Hạn mức cho vay:");
+            replacements.put("{{ms2d}}", "Bên A cam kết cho bên B vay các khoản cấp tín dụng bằng đồng Việt Nam với hạn mức cho vay là: "+request.getTienSo()+" đồng, (Bằng chữ: "+request.getTienChu()+ " )");
+            replacements.put("{{ms3}}", "Mục đích sử dụng tiền vay: "+request.getMuchDichVay());
+            replacements.put("{{ms4}}", "Thời hạn duy trì hạn mức: "+request.getHanMuc()+ ", kể từ ngày ký thỏa thuận Hợp đồng tín dụng này. Trong khoảng thời gian này Bên B được đề nghị Bên A cấp tín dụng phù hợp với mục đích sử dụng vốn và có thể đề nghị giải ngân một lần hoặc nhiều lần trong hạn mức nêu tại Hợp đồng tín dụng này. Hết thời hạn duy trì hạn mức hợp đồng này, bên A không có nghĩa vụ giải ngân bất kỳ khoản vay nợ nào");
+            replacements.put("{{ms5}}", "5. Một năm ít nhất một lần bên A có trách nhiệm xem xét, xác định lại hạn mức cho vay tối đa và thời gian duy trì hạn mức Hợp đồng này.");
+            replacements.put("{{ms6t}}", "6. Thời hạn cho vay: Từng khoản cấp tín dụng được xác định cụ thể trên từng giấy nhận nợ, mỗi giấy nhận nợ có thời gian cho vay khác nhau và được Bên A xác định vào chu kỳ sản xuất kinh doanh, khả năng trả nợ của Bên B và không vượt quá 10 tháng hoặc không vượt quá một thời hạn khác do Bên A xác định trong từng thời kỳ.");
+            replacements.put("{{ms6d}}", "Thời hạn cho vay của từng khoản cấp tín dụng cụ thể được tính từ ngày tiếp theo của ngày giải ngân cho đến thời điểm trả hết toàn bộ tiền gốc, lãi tiền vay và các chi phí phát sinh liên quan. Trong trường hợp Bên B sử dụng tiền vay chưa đủ một ngày, thì tính từ thời điểm nhận tiền vay và thời gian vay vốn được tính là 01 (một) ngày và trường hợp ngày cuối cùng của thời hạn vay là ngày lễ hoặc thứ 7, chủ nhật hàng tuần, thì ngày đến hạn chuyển sang ngày làm việc tiếp theo.");
+        } else {
+            replacements.put("{{lvt}}", Optional.ofNullable(capitalizeWords(request.getLoaiVay())).orElse(""));
+            replacements.put("{{slv}}", "từng lần");
+            replacements.put("{{ms1t}}", "Số tiền cho vay:");
+            replacements.put("{{ms1d}}", "Theo các điều khoản và điều kiện của Hợp đồng tín dụng này, bên A cho bên B vay khoản tiền bằng đồng Việt Nam. Số tiền vay là: "+request.getTienSo()+" đồng, (Bằng chữ: "+request.getTienChu()+ " ).");
+            replacements.put("{{ms2t}}", "Thời hạn cho vay: ");
+            replacements.put("{{ms2d}}", "Thời hạn cho vay là: "+request.getHanMuc()+ ", được tính từ ngày tiếp theo của ngày giải ngân đến ngày "+request.getNgayKetThucKyHanVay()+" (trường hợp ngày cuối cùng của thời hạn vay là ngày lễ hoặc là ngày thứ 7, chủ nhật hàng tuần, thì ngày đến hạn chuyển sang ngày làm việc tiếp theo; nếu trường hợp bên B sử dụng chưa đủ một ngày, thì tính từ thời điểm nhận tiền vay và thời gian vay vốn được tính là 01 (một) ngày)");
+            replacements.put("{{ms3}}", "Phương thức cho vay: Cho vay Từng lần.");
+            replacements.put("{{ms4}}", "Mục đích sử dụng vốn vay: "+request.getMuchDichVay());
+            replacements.put("{{ms5}}", "");
+            replacements.put("{{ms6t}}", "");
+            replacements.put("{{ms6d}}", "");
+        }
         replacements.put("{{land_items}}", Optional.ofNullable(request.getLandItems()).orElse(""));
         replacements.put("{{thv}}", Optional.ofNullable(request.getThoiHanVay()).orElse(""));
         replacements.put("{{ncd}}", Optional.ofNullable(request.getNhaCoDinh()).orElse(""));
@@ -287,6 +319,9 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         replacements.put("{{dayTC}}", String.format("%02d", dateTC.getDayOfMonth()));
         replacements.put("{{monthTC}}", String.format("%02d", dateTC.getMonthValue()));
         replacements.put("{{yearTC}}", String.valueOf(dateTC.getYear()));
+        replacements.put("{{dayBD}}", String.format("%02d", dateBD.getDayOfMonth()));
+        replacements.put("{{monthBD}}", String.format("%02d", dateBD.getMonthValue()));
+        replacements.put("{{yearBD}}", String.valueOf(dateBD.getYear()));
         // Thêm placeholder mới dựa vào biến checkNguoiDungTenBiaDo2
         String regex = "\\d+(,\\d+)?";
         java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(regex);
@@ -314,23 +349,18 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         replacements.put("{{endDate}}", endDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
         //CUỐI TẠO END DATE
         if (request.getCheckNguoiDungTenBiaDo2()) {
-            replacements.put("{{sng}}", ";Sinh ngày:");
-            replacements.put("{{scccd}}", "CCCD số:");
-            replacements.put("{{cng}}", "; Cấp ngày:");
-            replacements.put("{{nccccd}}", "; Nơi cấp: Cục cảnh sát QLHC về TTXH.");
-            replacements.put("{{dctt}}", "Địa chỉ thường trú:");
-//            replacements.put("{{gtntbd}}", request.getGioiTinhDungTenBiaDo2());
+            replacements.put("{{ntbdd1}}", request.getGioiTinhDungTenBiaDo2()+": "+request.getDungTenBiaDo2()+"; Sinh ngày: "+request.getNamSinhDungTenBiaDo2()+".");
+            replacements.put("{{ntbdd2}}", "CCCD số: "+request.getCccdDungTenBiaDo2()+"; Ngày cấp: "+request.getNgayCapCCCDDungTenBiaDo2()+"; Nơi cấp: "+request.getNoiCapCCCDDungTenBiaDo2()+".");
+            replacements.put("{{ntbdd3}}", "Địa chỉ thường trú: "+request.getDiaChiThuongTruDungTenBiaDo2()+".");
         } else {
-            replacements.put("{{sng}}", "");
-            replacements.put("{{scccd}}", "");
-            replacements.put("{{cng}}", "");
-            replacements.put("{{nccccd}}", "");
-            replacements.put("{{dctt}}", "");
+            replacements.put("{{ntbdd1}}", "");
+            replacements.put("{{ntbdd2}}", "");
+            replacements.put("{{ntbdd3}}", "");
         }
         if (request.getLoaiVay().equalsIgnoreCase("NGẮN HẠN")) {
-            replacements.put("{{loaivay4}}", "Cho vay ngắn hạn");
+            replacements.put("{{loaivay}}", "Cho vay ngắn hạn");
         } else if (request.getLoaiVay().equalsIgnoreCase("TRUNG HẠN")) {
-            replacements.put("{{loaivay4}}", "Cho vay trung hạn");
+            replacements.put("{{loaivay}}", "Cho vay trung hạn");
         }
         if (request.getCheckNguoiMangTenBiaDo()) {
             replacements.put("{{ndtbd}}", request.getNguoiMangTen());
@@ -363,12 +393,15 @@ public class CreditContractServiceIMPL implements ICreditContractService {
                     "trọn vẹn khi đến hạn các nghĩa vụ trả nợ đối với hợp đồng cho vay số:" + request.getSoHopDongTD() + "của "
                     + request.getGtkh().toLowerCase() + " " + capitalizeWords(request.getTenKhachHang()) + " " + request.getGtnt().toLowerCase() + " " +
                     capitalizeWords(request.getTenNguoiThan()) + " hoặc các hợp đồng cho vay khác có tham chiếu từ hợp đồng thế chấp này";
+            String doanVanBan2 = "theo hợp đồng cho vay số: " +request.getSoHopDongTD()+ " và hợp đồng cho vay khác (nếu có) mà tài sản thế chấp này làm bảo đảm";
             replacements.put("{{tstc}}", doanVanBan);
+            replacements.put("{{dvb}}", doanVanBan2);
         } else {
             String doanVanBan = "Để đảm bảo việc thanh toán được kịp thời, đầy đủ và thực hiện một cách trọn vẹn khi đến hạn các nghĩa vụ trả nợ đang " +
                     "tồn tại hoặc sẽ phát sinh trong tương lai của Bên B cho Bên A theo các " +
                     "Hợp đồng cho vay và/hoặc các Hợp đồng khác có tham chiếu từ Hợp đồng này";
             replacements.put("{{tstc}}", doanVanBan);
+            replacements.put("{{dvb}}", "của Bên B");
         }
 // Tìm paragraph có placeholder
         for (XWPFParagraph para : new ArrayList<>(doc.getParagraphs())) {
@@ -482,6 +515,19 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             replacedText = replacedText.replace(entry.getKey(), entry.getValue());
         }
 
+        // Nếu sau khi thay thế mà chỉ còn trống hoặc toàn khoảng trắng → xóa paragraph
+        if (replacedText.trim().isEmpty()) {
+            IBody body = paragraph.getBody();
+            if (body instanceof XWPFDocument d) {
+                int pos = d.getPosOfParagraph(paragraph);
+                if (pos >= 0) d.removeBodyElement(pos);
+            } else if (body instanceof XWPFTableCell cell) {
+                int idx = cell.getParagraphs().indexOf(paragraph);
+                if (idx >= 0) cell.removeParagraph(idx);
+            }
+            return;
+        }
+
         // Nếu không có thay đổi thì bỏ qua
         if (replacedText.equals(paragraphText)) return;
 
@@ -494,6 +540,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         XWPFRun baseRun = runs.get(0);
         baseRun.setText(replacedText, 0);
     }
+
 
     private void fillInsertedTable(XWPFTable table, TableRequest tableRequest, boolean checkDrawTable) {
         if (table == null || tableRequest == null) return;

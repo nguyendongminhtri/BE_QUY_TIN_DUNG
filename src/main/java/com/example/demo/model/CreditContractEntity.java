@@ -21,6 +21,7 @@ public class CreditContractEntity {
     private Long id;
     private LocalDate contractDate;
     private LocalDate ngayTheChap;
+    private LocalDate ngayBaoDam;
     private String nguoiDaiDien;
     private String gtkh;
     private String tenKhachHang;
@@ -39,6 +40,8 @@ public class CreditContractEntity {
     @Column(columnDefinition = "TEXT")
     private String noiCapCCCDNguoiThan;
     private String diaChiThuongTruNguoiThan;
+    @Column(name = "noi_dung_ngoai_bia")
+    private String noiDungNgoaiBia;
     private String quanHe;
     private String tienSo;
     private String tienChu;
@@ -76,12 +79,6 @@ public class CreditContractEntity {
     private Boolean checkLoaiDat;
     @Column(columnDefinition = "TEXT")
     private String tableJson;
-//    @Column(columnDefinition = "JSON")
-//    private String table1Json;
-//    @Column(columnDefinition = "JSON")
-//    private String table2Json;
-//    @Column(columnDefinition = "JSON")
-//    private String table3Json;
     private String soHopDongTD;
     private String ngayKetThucKyHanVay;
     //Người đứng tên bìa ỏ 1
@@ -113,7 +110,6 @@ public class CreditContractEntity {
     private String tongTaiSanBDChu;
     private String phongGiaoDich;
     private String diaChiPhongGiaoDich;
-    private String benA;
     private Boolean checkHopDongBaoLanh;
     private Boolean checkNguoiMangTenBiaDo;
     @Column(columnDefinition = "TEXT")

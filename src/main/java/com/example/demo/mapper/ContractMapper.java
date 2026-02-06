@@ -32,10 +32,12 @@ public class ContractMapper {
                                    CreditContractEntity entity,
                                    User user,
                                    LocalDate date,
-                                   LocalDate dateTC) throws JsonProcessingException {
+                                   LocalDate dateTC,
+                                   LocalDate dateBD) throws JsonProcessingException {
         entity.setUser(user);
         entity.setContractDate(date);
         entity.setNgayTheChap(dateTC);
+        entity.setNgayBaoDam(dateBD);
         entity.setNguoiDaiDien(request.getNguoiDaiDien());
         entity.setGtkh(request.getGtkh());
         entity.setTenKhachHang(request.getTenKhachHang());
@@ -53,7 +55,7 @@ public class ContractMapper {
         entity.setNgayCapCCCDNguoiThan(request.getNgayCapCCCDNguoiThan());
         entity.setDiaChiThuongTruNguoiThan(request.getDiaChiThuongTruNguoiThan());
         entity.setQuanHe(request.getQuanHe());
-
+        entity.setNoiDungNgoaiBia(request.getNoiDungNgoaiBia());
         entity.setTienSo(request.getTienSo());
         entity.setTienChu(request.getTienChu());
         entity.setMuchDichVay(request.getMuchDichVay());
@@ -109,7 +111,6 @@ public class ContractMapper {
         entity.setNgayCapCCCDDungTenBiaDo2(request.getNgayCapCCCDDungTenBiaDo2());
         entity.setDiaChiThuongTruDungTenBiaDo2(request.getDiaChiThuongTruDungTenBiaDo2());
         entity.setPhongGiaoDich(request.getPhongGiaoDich());
-        entity.setBenA(request.getBenA());
         entity.setDiaChiPhongGiaoDich(request.getDiaChiPhongGiaoDich());
         entity.setCheckNguoiMangTenBiaDo(request.getCheckNguoiMangTenBiaDo());
         entity.setNguoiMangTen(request.getNguoiMangTen());
@@ -201,7 +202,7 @@ public class ContractMapper {
         request.setNoiCapCCCDNguoiThan(entity.getNoiCapCCCDNguoiThan());
         request.setDiaChiThuongTruNguoiThan(entity.getDiaChiThuongTruNguoiThan());
         request.setQuanHe(entity.getQuanHe());
-
+        request.setNoiDungNgoaiBia(entity.getNoiDungNgoaiBia());
         request.setTienSo(entity.getTienSo());
         request.setTienChu(entity.getTienChu());
         request.setMuchDichVay(entity.getMuchDichVay());
@@ -259,7 +260,6 @@ public class ContractMapper {
         request.setNoiCapCCCDDungTenBiaDo2(entity.getNoiCapCCCDDungTenBiaDo2());
         request.setDiaChiThuongTruDungTenBiaDo2(entity.getDiaChiThuongTruDungTenBiaDo2());
         request.setPhongGiaoDich(entity.getPhongGiaoDich());
-        request.setBenA(entity.getBenA());
         request.setDiaChiPhongGiaoDich(entity.getDiaChiPhongGiaoDich());
         request.setCheckNguoiMangTenBiaDo(entity.getCheckNguoiMangTenBiaDo());
         request.setNguoiMangTen(entity.getNguoiMangTen());

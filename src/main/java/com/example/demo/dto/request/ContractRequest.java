@@ -12,6 +12,7 @@ public class ContractRequest {
     private Long id;
     private String contractDate;
     private String ngayTheChap;
+    private String ngayBaoDam;
     private String nguoiDaiDien;
     private String gtkh;
     private String tenKhachHang;
@@ -22,7 +23,7 @@ public class ContractRequest {
     private String ngayCapCCCDKhachHang;
     private String noiCapCCCDKhachHang;
     private String diaChiThuongTruKhachHang;
-
+    private String noiDungNgoaiBia;
     private String gtnt;
     private String tenNguoiThan;
     private String namSinhNguoiThan;
@@ -97,7 +98,6 @@ public class ContractRequest {
     private String diaChiThuongTruDungTenBiaDo2;
     private String phongGiaoDich;
     private String diaChiPhongGiaoDich;
-    private String benA;
     private Boolean checkNguoiMangTenBiaDo;
     private String nguoiMangTen;
     private Boolean checkHopDongBaoLanh;
