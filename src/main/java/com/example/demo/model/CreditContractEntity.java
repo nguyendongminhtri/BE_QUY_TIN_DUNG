@@ -135,4 +135,6 @@ public class CreditContractEntity {
     private List<AvatarEntity> avatars = new ArrayList();
     @OneToMany(mappedBy = "creditContract", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CreditContractTableEntity> tables = new ArrayList<>();
+    @OneToOne(mappedBy = "creditContract", cascade = CascadeType.ALL, orphanRemoval = true)
+    private CreditContractTSBDEntity contractTSBD;
 }

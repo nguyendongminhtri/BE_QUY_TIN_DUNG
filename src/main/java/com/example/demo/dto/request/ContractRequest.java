@@ -102,4 +102,5 @@ public class ContractRequest {
     private String nguoiMangTen;
     private Boolean checkHopDongBaoLanh;
     private String giaTriQuyenSuDungDat;
+    private CreditContractTSBDRequest tsbdRequest;
 }

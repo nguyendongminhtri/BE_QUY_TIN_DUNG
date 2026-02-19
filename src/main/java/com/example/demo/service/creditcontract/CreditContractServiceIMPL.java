@@ -1,6 +1,7 @@
 package com.example.demo.service.creditcontract;
 
 import com.example.demo.dto.request.ContractRequest;
+import com.example.demo.dto.request.CreditContractTSBDRequest;
 import com.example.demo.dto.request.TableRequest;
 import com.example.demo.mapper.ContractMapper;
 import com.example.demo.model.CreditContractEntity;
@@ -8,6 +9,7 @@ import com.example.demo.model.CreditContractEntity;
 import java.text.NumberFormat;
 import java.util.Locale;
 
+import com.example.demo.model.CreditContractTSBDEntity;
 import com.example.demo.model.User;
 import com.example.demo.repository.ICreditContractRepository;
 import com.example.demo.repository.IFileMetadataRepository;
@@ -307,6 +309,14 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             replacements.put("{{ms6t}}", "");
             replacements.put("{{ms6d}}", "");
         }
+        CreditContractTSBDRequest tsbdDto = request.getTsbdRequest();
+        if (tsbdDto != null && Boolean.TRUE.equals(tsbdDto.getCheckTaiSanGanLienVoiDat())) {
+            replacements.put("{{dienTichTS}}", Optional.ofNullable(tsbdDto.getDienTichTS()).orElse(""));
+            replacements.put("{{ketCauXayDung}}", Optional.ofNullable(tsbdDto.getKetCauXayDung()).orElse(""));
+            replacements.put("{{fromTime}}", Optional.ofNullable(tsbdDto.getFromTime()).orElse(""));
+        }
+
+
         replacements.put("{{land_items}}", Optional.ofNullable(request.getLandItems()).orElse(""));
         replacements.put("{{thv}}", Optional.ofNullable(request.getThoiHanVay()).orElse(""));
         replacements.put("{{ncd}}", Optional.ofNullable(request.getNhaCoDinh()).orElse(""));

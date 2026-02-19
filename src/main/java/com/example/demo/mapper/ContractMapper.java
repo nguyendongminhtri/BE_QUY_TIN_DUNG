@@ -1,12 +1,10 @@
 package com.example.demo.mapper;
 
 import com.example.demo.dto.request.ContractRequest;
+import com.example.demo.dto.request.CreditContractTSBDRequest;
 import com.example.demo.dto.request.FileMetadataDto;
 import com.example.demo.dto.request.TableRequest;
-import com.example.demo.model.AvatarEntity;
-import com.example.demo.model.CreditContractEntity;
-import com.example.demo.model.CreditContractTableEntity;
-import com.example.demo.model.User;
+import com.example.demo.model.*;
 import com.example.demo.repository.IFileMetadataRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -120,6 +118,23 @@ public class ContractMapper {
         entity.setNoiCapCCCDDungTenBiaDo2(request.getNoiCapCCCDDungTenBiaDo2());
         entity.setCheckHopDongBaoLanh(request.getCheckHopDongBaoLanh());
         entity.setSoBBXetDuyetChoVay(request.getSoBBXetDuyetChoVay());
+        if (request.getTsbdRequest() != null) {
+            CreditContractTSBDRequest dto = request.getTsbdRequest();
+            CreditContractTSBDEntity tsbd = entity.getContractTSBD();
+
+            if (tsbd == null) {
+                tsbd = new CreditContractTSBDEntity();
+                tsbd.setCreditContract(entity); // liên kết ngược
+            }
+
+            tsbd.setCheckTaiSanGanLienVoiDat(dto.getCheckTaiSanGanLienVoiDat());
+            tsbd.setDienTichTS(dto.getDienTichTS());
+            tsbd.setKetCauXayDung(dto.getKetCauXayDung());
+            tsbd.setFromTime(dto.getFromTime());
+
+            entity.setContractTSBD(tsbd); // liên kết xuôi
+        }
+
         // Ánh xạ dữ liệu bảng sang JSON
         if (request.getTableRequest() != null) {
             try {
@@ -177,6 +192,19 @@ public class ContractMapper {
             }
             request.setFileAvatarUrls(avatarDtos);
         }
+        if (entity.getContractTSBD() != null) {
+            CreditContractTSBDEntity tsbd = entity.getContractTSBD();
+
+            CreditContractTSBDRequest dto = new CreditContractTSBDRequest();
+            dto.setCheckTaiSanGanLienVoiDat(tsbd.getCheckTaiSanGanLienVoiDat());
+            dto.setDienTichTS(tsbd.getDienTichTS());
+            dto.setKetCauXayDung(tsbd.getKetCauXayDung());
+            dto.setFromTime(tsbd.getFromTime());
+
+            request.setTsbdRequest(dto);
+        }
+
+
 
 
         // map các field cơ bản
@@ -267,6 +295,7 @@ public class ContractMapper {
         request.setSoBBXetDuyetChoVay(entity.getSoBBXetDuyetChoVay());
         if (entity.getTableJson() != null) {
             TableRequest tableReq = mapper.readValue(entity.getTableJson(), TableRequest.class);
+            System.out.println("TableRequest sau khi đọc: " + tableReq.getRows());
             request.setTableRequest(tableReq);
         }
         if (entity.getAvatars() != null && !entity.getAvatars().isEmpty()) {
