@@ -1,9 +1,6 @@
 package com.example.demo.mapper;
 
-import com.example.demo.dto.request.ContractRequest;
-import com.example.demo.dto.request.CreditContractTSBDRequest;
-import com.example.demo.dto.request.FileMetadataDto;
-import com.example.demo.dto.request.TableRequest;
+import com.example.demo.dto.request.*;
 import com.example.demo.model.*;
 import com.example.demo.repository.IFileMetadataRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -131,8 +128,22 @@ public class ContractMapper {
             tsbd.setDienTichTS(dto.getDienTichTS());
             tsbd.setKetCauXayDung(dto.getKetCauXayDung());
             tsbd.setFromTime(dto.getFromTime());
-
             entity.setContractTSBD(tsbd); // liên kết xuôi
+        }
+        if (request.getPavvRequest() != null) {
+            CreditContractPAVVRequest dto = request.getPavvRequest();
+            CreditContractPAVVEntity pavv = entity.getContractPAVV();
+
+            if (pavv == null) {
+                pavv = new CreditContractPAVVEntity();
+                pavv.setCreditContract(entity); // liên kết ngược
+            }
+
+            pavv.setName(dto.getName());
+            pavv.setAddress(dto.getAddress());
+            pavv.setReason(dto.getReason());
+            pavv.setCheckAddress(dto.getCheckAddress());
+            entity.setContractPAVV(pavv); // liên kết xuôi
         }
 
         // Ánh xạ dữ liệu bảng sang JSON
@@ -174,6 +185,20 @@ public class ContractMapper {
             t3.setTableJson(mapper.writeValueAsString(request.getTable3()));
             t3.setCreditContract(entity);
             entity.getTables().add(t3);
+        }
+        if (request.getHanMucTable() != null) {
+            CreditContractTableEntity hm = new CreditContractTableEntity();
+            hm.setTableName("hanMucTable");
+            hm.setTableJson(mapper.writeValueAsString(request.getHanMucTable()));
+            hm.setCreditContract(entity);
+            entity.getTables().add(hm);
+        }
+        if (request.getChiPhiTable() != null) {
+            CreditContractTableEntity hm = new CreditContractTableEntity();
+            hm.setTableName("chiPhiTable");
+            hm.setTableJson(mapper.writeValueAsString(request.getChiPhiTable()));
+            hm.setCreditContract(entity);
+            entity.getTables().add(hm);
         }
     }
 
@@ -325,6 +350,12 @@ public class ContractMapper {
                         break;
                     case "table3":
                         request.setTable3(tableReq);
+                        break;
+                    case "hanMucTable":
+                        request.setTableRequest(tableReq);
+                        break;
+                    case "chiPhiTable":
+                        request.setTableRequest(tableReq);
                         break;
                 }
             }

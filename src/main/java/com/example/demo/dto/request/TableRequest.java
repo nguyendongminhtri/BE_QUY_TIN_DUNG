@@ -9,4 +9,6 @@ public class TableRequest {
     private boolean drawTable;
     private List<String> headers;
     private List<List<String>> rows;
+    private List<MergeInfoRequest> merges;   // thêm field này
+    private String tableType;
 }

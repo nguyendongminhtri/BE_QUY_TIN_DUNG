@@ -14,7 +14,7 @@ import java.util.Optional;
 
 @CrossOrigin(origins = "*")
 @RestController
-@RequestMapping("/carousel")
+@RequestMapping("/api/carousel")
 public class CarouselController {
     @Autowired
     private ICarouselService carouselService;

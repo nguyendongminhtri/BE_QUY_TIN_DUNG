@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/story-success")
+@RequestMapping("/api/story-success")
 @CrossOrigin(origins = "*")
 public class StorySuccessController {
     @Autowired

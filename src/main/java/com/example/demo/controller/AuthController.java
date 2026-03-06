@@ -29,7 +29,7 @@ import javax.validation.Valid;
 import java.util.HashSet;
 import java.util.Set;
 
-@RequestMapping("/auth")
+@RequestMapping("/api/auth")
 @RestController
 @CrossOrigin(origins = "*")
 public class AuthController {

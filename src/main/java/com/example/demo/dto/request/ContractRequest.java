@@ -70,6 +70,8 @@ public class ContractRequest {
     private TableRequest table1;
     private TableRequest table2;
     private TableRequest table3;
+    private TableRequest hanMucTable;
+    private TableRequest chiPhiTable;
     private String ngayKetThucKyHanVay;
     private String dungTenBiaDo1;
     private Boolean checkNguoiDungTenBiaDo2;
@@ -103,4 +105,5 @@ public class ContractRequest {
     private Boolean checkHopDongBaoLanh;
     private String giaTriQuyenSuDungDat;
     private CreditContractTSBDRequest tsbdRequest;
+    private CreditContractPAVVRequest pavvRequest;
 }

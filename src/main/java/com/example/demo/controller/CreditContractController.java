@@ -28,7 +28,7 @@ import java.util.zip.ZipOutputStream;
 
 @CrossOrigin(origins = "*")
 @RestController
-@RequestMapping("/credit-contract")
+@RequestMapping("/api/credit-contract")
 public class CreditContractController {
     @Autowired
     private ICreditContractService creditContractService;

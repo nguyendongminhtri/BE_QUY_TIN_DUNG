@@ -1,11 +1,10 @@
 package com.example.demo.service.creditcontract;
 
-import com.example.demo.dto.request.ContractRequest;
-import com.example.demo.dto.request.CreditContractTSBDRequest;
-import com.example.demo.dto.request.TableRequest;
+import com.example.demo.dto.request.*;
 import com.example.demo.mapper.ContractMapper;
 import com.example.demo.model.CreditContractEntity;
 
+import java.math.BigInteger;
 import java.text.NumberFormat;
 import java.util.Locale;
 
@@ -16,6 +15,7 @@ import com.example.demo.repository.IFileMetadataRepository;
 import com.example.demo.security.userprincal.UserDetailService;
 import org.apache.poi.xwpf.usermodel.*;
 import org.apache.xmlbeans.XmlCursor;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
@@ -96,6 +96,8 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         fileUrls.add(generateContractFile(request, date, dateTC, dateBD, user, "BienBanKiemTraSauKhiChoVay.docx"));
         fileUrls.add(generateContractFile(request, date, dateTC, dateBD, user, "BienBanXetDuyetChoVay.docx"));
         fileUrls.add(generateContractFile(request, date, dateTC, dateBD, user, "BienBanXacDinhGiaTriTaiSanBaoDam.docx"));
+        fileUrls.add(generateContractFile(request, date, dateTC, dateBD, user, "PhuongAnVayVon.docx"));
+        fileUrls.add(generateContractFile(request, date, dateTC, dateBD, user, "BaoCaoDeNghiGiaiNganKiemGiayNhanNo.docx"));
 
         return fileUrls;
     }
@@ -122,6 +124,8 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "BienBanKiemTraSauKhiChoVay.docx"));
         fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "BienBanXetDuyetChoVay.docx"));
         fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "BienBanXacDinhGiaTriTaiSanBaoDam.docx"));
+        fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "PhuongAnVayVon.docx"));
+        fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "BaoCaoDeNghiGiaiNganKiemGiayNhanNo.docx"));
 
         creditContractRepository.save(entity);
         return fileUrls;
@@ -151,6 +155,8 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "BienBanKiemTraSauKhiChoVay.docx"));
         fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "BienBanXetDuyetChoVay.docx"));
         fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "BienBanXacDinhGiaTriTaiSanBaoDam.docx"));
+        fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "PhuongAnVayVon.docx"));
+        fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "BaoCaoDeNghiGiaiNganKiemGiayNhanNo.docx"));
 
         creditContractRepository.save(entity);
         return fileUrls;
@@ -296,6 +302,9 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             replacements.put("{{ms5}}", "5. Một năm ít nhất một lần bên A có trách nhiệm xem xét, xác định lại hạn mức cho vay tối đa và thời gian duy trì hạn mức Hợp đồng này.");
             replacements.put("{{ms6t}}", "6. Thời hạn cho vay: Từng khoản cấp tín dụng được xác định cụ thể trên từng giấy nhận nợ, mỗi giấy nhận nợ có thời gian cho vay khác nhau và được Bên A xác định vào chu kỳ sản xuất kinh doanh, khả năng trả nợ của Bên B và không vượt quá 10 tháng hoặc không vượt quá một thời hạn khác do Bên A xác định trong từng thời kỳ.");
             replacements.put("{{ms6d}}", "Thời hạn cho vay của từng khoản cấp tín dụng cụ thể được tính từ ngày tiếp theo của ngày giải ngân cho đến thời điểm trả hết toàn bộ tiền gốc, lãi tiền vay và các chi phí phát sinh liên quan. Trong trường hợp Bên B sử dụng tiền vay chưa đủ một ngày, thì tính từ thời điểm nhận tiền vay và thời gian vay vốn được tính là 01 (một) ngày và trường hợp ngày cuối cùng của thời hạn vay là ngày lễ hoặc thứ 7, chủ nhật hàng tuần, thì ngày đến hạn chuyển sang ngày làm việc tiếp theo.");
+            replacements.put("{{tghm}}","Thời gian xác định bình quân cho một chu kỳ sản xuất, kinh doanh.");
+            replacements.put("{{vqhm}}", "Vòng quay vốn lưu động = Tổng số ngày 01 năm/Tổng số ngày bình quân = 365/304 = 1,2 vòng.");
+            replacements.put("{{tgvv}}","Thời gian duy trì hàn mức: "+request.getHanMuc());
         } else {
             replacements.put("{{lvt}}", Optional.ofNullable(capitalizeWords(request.getLoaiVay())).orElse(""));
             replacements.put("{{slv}}", "từng lần");
@@ -308,6 +317,9 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             replacements.put("{{ms5}}", "");
             replacements.put("{{ms6t}}", "");
             replacements.put("{{ms6d}}", "");
+            replacements.put("{{tghm}}","");
+            replacements.put("{{vqhm}}","");
+            replacements.put("{{tgvv}}","- Thời gian vay vốn: "+request.getThoiHanVay() + " năm");
         }
         CreditContractTSBDRequest tsbdDto = request.getTsbdRequest();
         if (tsbdDto != null && Boolean.TRUE.equals(tsbdDto.getCheckTaiSanGanLienVoiDat())) {
@@ -315,8 +327,17 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             replacements.put("{{ketCauXayDung}}", Optional.ofNullable(tsbdDto.getKetCauXayDung()).orElse(""));
             replacements.put("{{fromTime}}", Optional.ofNullable(tsbdDto.getFromTime()).orElse(""));
         }
-
-
+        CreditContractPAVVRequest pavvDto = request.getPavvRequest();
+        if(pavvDto!=null && Boolean.TRUE.equals(pavvDto.getCheckAddress())){
+            String address = "- Địa điểm thực hiện phương án: "+pavvDto.getAddress();
+            replacements.put("{{ddpavv}}", address);
+        } else {
+            replacements.put("{{ddpavv}}", "");
+        }
+        if(pavvDto!=null){
+            replacements.put("{{tenpavv}}", Optional.ofNullable(pavvDto.getName()).orElse(""));
+            replacements.put("{{ldpavv}}", Optional.ofNullable(pavvDto.getReason()).orElse(""));
+        }
         replacements.put("{{land_items}}", Optional.ofNullable(request.getLandItems()).orElse(""));
         replacements.put("{{thv}}", Optional.ofNullable(request.getThoiHanVay()).orElse(""));
         replacements.put("{{ncd}}", Optional.ofNullable(request.getNhaCoDinh()).orElse(""));
@@ -419,6 +440,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             if (text != null) {
                 if (text.contains("{{TABLE_PLACEHOLDER}}")) {
                     // bảng tuỳ chọn, chỉ tạo nếu drawTable = true
+                    System.err.println("getTableRequest -------> "+request.getTableRequest());
                     insertTableAtPlaceholder(doc, para, request.getTableRequest(), true);
                 }
                 if (text.contains("{{TABLE1_PLACEHOLDER}}")) {
@@ -430,6 +452,12 @@ public class CreditContractServiceIMPL implements ICreditContractService {
                 }
                 if (text.contains("{{TABLE3_PLACEHOLDER}}")) {
                     insertTableAtPlaceholder(doc, para, request.getTable3(), false);
+                }
+                if (text.contains("{{TABLE_HM_PLACEHOLDER}}")) {
+                    insertTableAtPlaceholder(doc, para, request.getHanMucTable(), false);
+                }
+                if (text.contains("{{TABLE_CP_PLACEHOLDER}}")) {
+                    insertTableAtPlaceholder(doc, para, request.getChiPhiTable(), false);
                 }
             }
         }
@@ -465,12 +493,16 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         for (int i = para.getRuns().size() - 1; i >= 0; i--) {
             para.removeRun(i);
         }
-
+        System.err.println("tableRequest --> "+tableRequest);
         if (tableRequest != null) {
             if (!checkDrawTable || tableRequest.isDrawTable()) {
                 XmlCursor cursor = para.getCTP().newCursor();
                 XWPFTable table = doc.insertNewTbl(cursor);
                 if (table != null) {
+                    // Xóa row mặc định đầu tiên để tránh ô thừa
+                    if (table.getNumberOfRows() > 0) {
+                        table.removeRow(0);
+                    }
                     fillInsertedTable(table, tableRequest, checkDrawTable);
                 }
             }
@@ -486,6 +518,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             if (idx >= 0) cell.removeParagraph(idx);
         }
     }
+
 
 
     private String capitalizeWords(String str) {
@@ -551,7 +584,6 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         baseRun.setText(replacedText, 0);
     }
 
-
     private void fillInsertedTable(XWPFTable table, TableRequest tableRequest, boolean checkDrawTable) {
         if (table == null || tableRequest == null) return;
         if (checkDrawTable && !tableRequest.isDrawTable()) return;
@@ -562,26 +594,37 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         table.setTableAlignment(TableRowAlign.CENTER);
         table.setWidth("8000");
 
-        // Tạo đủ số hàng
-        while (table.getNumberOfRows() < dataRowCount) {
-            XWPFTableRow newRow = table.createRow();
-            while (newRow.getTableCells().size() < colCount) {
-                newRow.addNewTableCell();
+        // ===== Header row =====
+        if (tableRequest.getHeaders() != null && !tableRequest.getHeaders().isEmpty()) {
+            XWPFTableRow headerRow = table.createRow();
+            while (headerRow.getTableCells().size() < tableRequest.getHeaders().size()) {
+                headerRow.addNewTableCell();
+            }
+            for (int c = 0; c < tableRequest.getHeaders().size(); c++) {
+                XWPFTableCell cell = headerRow.getCell(c);
+                if (cell == null) cell = headerRow.addNewTableCell();
+                XWPFParagraph para = cell.getParagraphs().get(0);
+                para.setAlignment(ParagraphAlignment.CENTER);
+                para.removeRun(0);
+                XWPFRun run = para.createRun();
+                run.setBold(true);
+                run.setFontFamily("Times New Roman");
+                run.setFontSize(13);
+                run.setText(tableRequest.getHeaders().get(c));
             }
         }
 
+        // ===== Data rows =====
         for (int r = 0; r < dataRowCount; r++) {
-            XWPFTableRow row = table.getRow(r);
+            XWPFTableRow row = table.createRow();
             while (row.getTableCells().size() < colCount) {
                 row.addNewTableCell();
             }
-
             List<String> rowData = tableRequest.getRows().get(r);
             for (int c = 0; c < colCount; c++) {
                 String cellValue = c < rowData.size() ? rowData.get(c) : "";
                 XWPFTableCell cell = row.getCell(c);
                 if (cell == null) cell = row.addNewTableCell();
-
                 XWPFParagraph para = cell.getParagraphs().get(0);
                 para.setAlignment(ParagraphAlignment.CENTER);
                 for (int i = para.getRuns().size() - 1; i >= 0; i--) para.removeRun(i);
@@ -591,7 +634,120 @@ public class CreditContractServiceIMPL implements ICreditContractService {
                 run.setText(cellValue);
             }
         }
+
+        // ===== Merge xử lý từ frontend =====
+        if (tableRequest.getMerges() != null) {
+            for (MergeInfoRequest merge : tableRequest.getMerges()) {
+                int rowPos = merge.getRowIndex() + (tableRequest.getHeaders().isEmpty() ? 0 : 1);
+                XWPFTableRow row = table.getRow(rowPos);
+                if (row != null) {
+                    int span = merge.getMergeTargets().size();
+                    if (span > 0) {
+                        XWPFTableCell cell0 = row.getCell(0);
+                        CTTcPr tcPr0 = cell0.getCTTc().isSetTcPr() ? cell0.getCTTc().getTcPr() : cell0.getCTTc().addNewTcPr();
+                        tcPr0.addNewGridSpan().setVal(BigInteger.valueOf(span));
+
+                        // Xóa cell thừa
+                        for (int j = 1; j < span; j++) {
+                            row.removeCell(1);
+                        }
+
+                        // Set nội dung merge
+                        XWPFParagraph para0 = cell0.getParagraphs().get(0);
+                        for (int i = para0.getRuns().size() - 1; i >= 0; i--) para0.removeRun(i);
+                        XWPFRun run0 = para0.createRun();
+                        run0.setFontFamily("Times New Roman");
+                        run0.setFontSize(13);
+                        run0.setBold(true);
+                        run0.setText(merge.getMergedValue());
+
+                        // Set border cho cell merge
+                        CTTcBorders borders = tcPr0.isSetTcBorders() ? tcPr0.getTcBorders() : tcPr0.addNewTcBorders();
+                        borders.addNewTop().setVal(STBorder.SINGLE);
+                        borders.addNewBottom().setVal(STBorder.SINGLE);
+                        borders.addNewLeft().setVal(STBorder.SINGLE);
+                        borders.addNewRight().setVal(STBorder.SINGLE);
+
+                        // In đậm toàn bộ row merge
+                        for (XWPFTableCell cell : row.getTableCells()) {
+                            XWPFParagraph para = cell.getParagraphs().get(0);
+                            for (XWPFRun run : para.getRuns()) {
+                                run.setBold(true);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // ===== Nếu là hanMucTable thì xử lý row cuối cùng đặc biệt =====
+        if ("hanMuc".equals(tableRequest.getTableType()) && dataRowCount > 0) {
+            String totalValue = "";
+            List<String> lastRowData = tableRequest.getRows().get(dataRowCount - 1);
+            if (lastRowData.size() > 3) {
+                totalValue = lastRowData.get(3);
+            }
+
+            XWPFTableRow lastRow = table.getRow(table.getNumberOfRows() - 1);
+
+            while (lastRow.getTableCells().size() > 0) {
+                lastRow.removeCell(0);
+            }
+
+            lastRow.addNewTableCell();
+            lastRow.addNewTableCell();
+            lastRow.addNewTableCell();
+
+            XWPFTableCell cell0 = lastRow.getCell(0);
+            CTTcPr tcPr0 = cell0.getCTTc().isSetTcPr() ? cell0.getCTTc().getTcPr() : cell0.getCTTc().addNewTcPr();
+            tcPr0.addNewGridSpan().setVal(BigInteger.valueOf(3));
+
+            XWPFParagraph para0 = cell0.getParagraphs().get(0);
+            for (int i = para0.getRuns().size() - 1; i >= 0; i--) para0.removeRun(i);
+            XWPFRun run0 = para0.createRun();
+            run0.setFontFamily("Times New Roman");
+            run0.setFontSize(13);
+            run0.setBold(true);
+            run0.setText("Tổng số ngày bình quân");
+
+            XWPFTableCell cell2 = lastRow.getCell(2);
+            XWPFParagraph para2 = cell2.getParagraphs().get(0);
+            para2.setAlignment(ParagraphAlignment.CENTER);
+            XWPFRun run2 = para2.createRun();
+            run2.setFontFamily("Times New Roman");
+            run2.setFontSize(13);
+            run2.setBold(true);
+            run2.setText(totalValue != null ? totalValue : "");
+        }
+
+        // ===== Rebuild lại grid theo số cell thực tế =====
+        CTTbl ctTbl = table.getCTTbl();
+        CTTblGrid tblGrid = ctTbl.getTblGrid();
+        if (tblGrid == null) {
+            tblGrid = ctTbl.addNewTblGrid();
+        }
+        // Xóa grid cũ
+        while (tblGrid.sizeOfGridColArray() > 0) {
+            tblGrid.removeGridCol(0);
+        }
+        // Lấy số cell thực tế của row đầu tiên sau merge
+        int actualColCount = table.getRow(0).getTableCells().size();
+        for (int i = 0; i < actualColCount; i++) {
+            tblGrid.addNewGridCol().setW(BigInteger.valueOf(2000)); // width tùy chỉnh
+        }
+
+        // ===== Đảm bảo toàn bảng có border =====
+        CTTblPr tblPr = ctTbl.getTblPr() == null ? ctTbl.addNewTblPr() : ctTbl.getTblPr();
+        CTTblBorders borders = tblPr.isSetTblBorders() ? tblPr.getTblBorders() : tblPr.addNewTblBorders();
+
+        borders.addNewTop().setVal(STBorder.SINGLE);
+        borders.addNewBottom().setVal(STBorder.SINGLE);
+        borders.addNewLeft().setVal(STBorder.SINGLE);
+        borders.addNewRight().setVal(STBorder.SINGLE);
+        borders.addNewInsideH().setVal(STBorder.SINGLE);
+        borders.addNewInsideV().setVal(STBorder.SINGLE);
     }
+
 
 
     private String extractPhuong(String diaChi) {
