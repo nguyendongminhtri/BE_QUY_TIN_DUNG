@@ -20,6 +20,11 @@ public class CreditContractPAVVEntity {
     private CreditContractEntity creditContract;
     private String name;
     private String address;
+    @Column(columnDefinition = "TEXT")
     private String reason;
     private Boolean checkAddress;
+    private String tongVon;
+    private String tongVonLuuDong;
+    private String vonTuCo;
+    private String vonKhac;
 }

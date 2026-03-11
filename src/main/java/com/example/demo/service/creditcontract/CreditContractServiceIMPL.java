@@ -92,7 +92,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         fileUrls.add(generateContractFile(request, date, dateTC, dateBD, user, "PhieuBaoDamQSDD.docx"));
         fileUrls.add(generateContractFile(request, date, dateTC, dateBD, user, "GiayDeNghiVayVon.docx"));
         fileUrls.add(generateContractFile(request, date, dateTC, dateBD, user, "DanhMucHoSoChoVay.docx"));
-        fileUrls.add(generateContractFile(request, date, dateTC, dateBD, user, "PhuLucHopDong.docx"));
+//        fileUrls.add(generateContractFile(request, date, dateTC, dateBD, user, "PhuLucHopDong.docx"));
         fileUrls.add(generateContractFile(request, date, dateTC, dateBD, user, "BienBanKiemTraSauKhiChoVay.docx"));
         fileUrls.add(generateContractFile(request, date, dateTC, dateBD, user, "BienBanXetDuyetChoVay.docx"));
         fileUrls.add(generateContractFile(request, date, dateTC, dateBD, user, "BienBanXacDinhGiaTriTaiSanBaoDam.docx"));
@@ -120,7 +120,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "PhieuBaoDamQSDD.docx"));
         fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "GiayDeNghiVayVon.docx"));
         fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "DanhMucHoSoChoVay.docx"));
-        fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "PhuLucHopDong.docx"));
+//        fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "PhuLucHopDong.docx"));
         fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "BienBanKiemTraSauKhiChoVay.docx"));
         fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "BienBanXetDuyetChoVay.docx"));
         fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "BienBanXacDinhGiaTriTaiSanBaoDam.docx"));
@@ -151,7 +151,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "PhieuBaoDamQSDD.docx"));
         fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "GiayDeNghiVayVon.docx"));
         fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "DanhMucHoSoChoVay.docx"));
-        fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "PhuLucHopDong.docx"));
+//        fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "PhuLucHopDong.docx"));
         fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "BienBanKiemTraSauKhiChoVay.docx"));
         fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "BienBanXetDuyetChoVay.docx"));
         fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "BienBanXacDinhGiaTriTaiSanBaoDam.docx"));
@@ -220,12 +220,16 @@ public class CreditContractServiceIMPL implements ICreditContractService {
 
     private void replacePlaceholders(XWPFDocument doc, ContractRequest request, LocalDate date, LocalDate dateTC, LocalDate dateBD) {
         System.err.println("request --> " + request);
+        System.err.println("date ::::"+date);
+        System.err.println("date ::::"+dateToWords(date));
         long gtqsdd = Long.parseLong(Optional.ofNullable(request.getGiaTriQuyenSuDungDat()).orElse(String.valueOf(0L)));
 // Định dạng theo locale Việt Nam
         NumberFormat nf = NumberFormat.getInstance(new Locale("vi", "VN"));
         String formattedGtqsdd = nf.format(gtqsdd);
         Map<String, String> replacements = new HashMap<>(); // Các placeholder mặc định
 //        replacements.put("{{gd}}", Optional.ofNullable(request.getNguoiDaiDien()).orElse(""));
+
+        replacements.put("{{dateTextWords}}", dateToWords(date));
         replacements.put("{{shdtd}}", Optional.ofNullable(request.getSoHopDongTD()).orElse(""));
         replacements.put("{{gtkh}}", Optional.ofNullable(request.getGtkh()).orElse(""));
         replacements.put("{{gtkht}}", Optional.ofNullable(request.getGtkh().toLowerCase()).orElse(""));
@@ -305,6 +309,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             replacements.put("{{tghm}}","Thời gian xác định bình quân cho một chu kỳ sản xuất, kinh doanh.");
             replacements.put("{{vqhm}}", "Vòng quay vốn lưu động = Tổng số ngày 01 năm/Tổng số ngày bình quân = 365/304 = 1,2 vòng.");
             replacements.put("{{tgvv}}","Thời gian duy trì hàn mức: "+request.getHanMuc());
+            replacements.put("{{vongQuay}}","- Số vòng quay vốn bình quân:  1,2  Vòng/năm.");
         } else {
             replacements.put("{{lvt}}", Optional.ofNullable(capitalizeWords(request.getLoaiVay())).orElse(""));
             replacements.put("{{slv}}", "từng lần");
@@ -320,6 +325,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             replacements.put("{{tghm}}","");
             replacements.put("{{vqhm}}","");
             replacements.put("{{tgvv}}","- Thời gian vay vốn: "+request.getThoiHanVay() + " năm");
+            replacements.put("{{vongQuay}}","");
         }
         CreditContractTSBDRequest tsbdDto = request.getTsbdRequest();
         if (tsbdDto != null && Boolean.TRUE.equals(tsbdDto.getCheckTaiSanGanLienVoiDat())) {
@@ -337,13 +343,47 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         if(pavvDto!=null){
             replacements.put("{{tenpavv}}", Optional.ofNullable(pavvDto.getName()).orElse(""));
             replacements.put("{{ldpavv}}", Optional.ofNullable(pavvDto.getReason()).orElse(""));
+            replacements.put("{{tongVon}}", Optional.ofNullable(pavvDto.getTongVon()).orElse(""));
+            replacements.put("{{tongVonLuuDong}}", Optional.ofNullable(pavvDto.getTongVonLuuDong()).orElse(""));
+            replacements.put("{{vonTuCo}}", Optional.ofNullable(pavvDto.getVonTuCo()).orElse(""));
+            replacements.put("{{vonKhac}}", Optional.ofNullable(pavvDto.getVonKhac()).orElse(""));
+            //TÍNH TOÁN PHẦN TRĂM TỔNG TIỀN VAY VỐN
+            double tongVonLuuDong = Optional.ofNullable(pavvDto.getTongVonLuuDong())
+                    .filter(v -> !v.toString().isBlank()) // bỏ qua chuỗi rỗng
+                    .map(v -> Double.parseDouble(v.toString().replace(".", "")))
+                    .orElse(0.0);
+
+            double vonTuCo = Optional.ofNullable(pavvDto.getVonTuCo())
+                    .filter(v -> !v.toString().isBlank())
+                    .map(v -> Double.parseDouble(v.toString().replace(".", "")))
+                    .orElse(0.0);
+
+            double vonKhac = Optional.ofNullable(pavvDto.getVonKhac())
+                    .filter(v -> !v.toString().isBlank())
+                    .map(v -> Double.parseDouble(v.toString().replace(".", "")))
+                    .orElse(0.0);
+
+            double tienSo = Optional.ofNullable(request.getTienSo())
+                    .filter(v -> !v.toString().isBlank())
+                    .map(v -> Double.parseDouble(v.toString().replace(".", "")))
+                    .orElse(0.0);
+
+            System.err.println("tienSo = " + tienSo);
+            boolean isThoaThuan = request.getLoaiVay().equalsIgnoreCase("NGẮN HẠN (Thỏa thuận)");
+            Map<String, String> percents = calculatePercents(tongVonLuuDong, vonTuCo, vonKhac, tienSo, isThoaThuan);
+            replacements.put("{{vonTuCoPercent}}", percents.get("vonTuCoPercent"));
+            replacements.put("{{vonKhacPercent}}", percents.get("vonKhacPercent"));
+            replacements.put("{{tienSoPercent}}", percents.get("tienSoPercent"));
+            if (percents.containsKey("vonLuuDongMotVongQuay")) {
+                replacements.put("{{vonLuuDongMotVongQuay}}", "- Vốn lưu động cần thiết cho một vòng quay: "+percents.get("vonLuuDongMotVongQuay")+" đồng");
+            }
         }
         replacements.put("{{land_items}}", Optional.ofNullable(request.getLandItems()).orElse(""));
         replacements.put("{{thv}}", Optional.ofNullable(request.getThoiHanVay()).orElse(""));
         replacements.put("{{ncd}}", Optional.ofNullable(request.getNhaCoDinh()).orElse(""));
         replacements.put("{{tsbds}}", Optional.ofNullable(request.getTongTaiSanBD()).orElse(""));
         replacements.put("{{tsbdc}}", Optional.ofNullable(request.getTongTaiSanBDChu()).orElse(""));
-        replacements.put("{{phuong}}", extractPhuong(request.getDiaChiThuongTruKhachHang()));
+//        replacements.put("{{phuong}}", extractPhuong(request.getDiaChiThuongTruKhachHang()));
         replacements.put("{{day}}", String.format("%02d", date.getDayOfMonth()));
         replacements.put("{{month}}", String.format("%02d", date.getMonthValue()));
         replacements.put("{{year}}", String.valueOf(date.getYear()));
@@ -410,14 +450,28 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             replacements.put("{{dcpgd}}", "Trụ sở tại: Số 178 Ninh Chấp 5; phường Chu Văn An, thành phố Hải Phòng.\n" +
                     "Giấy phép đăng ký kinh doanh: 0800001806; Điện thoại: 02203.882.700\n");
             replacements.put("{{ndd}}", "bà: PHÙNG THỊ LOAN Chức vụ: Giám Đốc điều hành\n" +
-                    "CCCD số: 030182016564; Cấp ngày: 22/12/2021\n");
+                    "CCCD số: 030182016564; Cấp ngày: 22/12/2021. Nơi cấp: Cục cảnh sát quản lý hành chính về trật tự xã hội.");
             replacements.put("{{pgd}}", "");
+            replacements.put("{{phuong}}", "Chu Văn An");
+            replacements.put("{{chuTichPhuong}}", "..........................");
+            replacements.put("{{nguoiTiepNhanHoSo}}", "Phạm Thị Thơm");
+            replacements.put("{{diaChiLienHe}}","Số 178 Ninh Chấp 5, phường Chu Văn An,");
+            replacements.put("{{canBoTD}}","VŨ XUÂN LONG");
+            replacements.put("{{sdtCanBoTD}}","0987858237");
+            replacements.put("{{gmail}}","thaihocqtd@gmail.com");
         } else if (request.getNguoiDaiDien().equalsIgnoreCase("pgd")) {
             replacements.put("{{pgd}}", "-PHÒNG GIAO DỊCH AN LẠC");
             replacements.put("{{dcpgd}}", "Địa chỉ: Bờ Đa, phường Lê Đại Hành, thành phố Hải Phòng.");
-            replacements.put("{{ndd}}", "ông: VŨ THANH HẢI Chức vụ: Phó Giám Đốc - Trưởng PBD An Lạc.\n" +
+            replacements.put("{{ndd}}", "ông: VŨ THANH HẢI Chức vụ: Phó Giám Đốc - Trưởng PGD An Lạc.\n" +
                     "CCCD số: 030083003225;\n" +
-                    "(Theo văn bản ủy quyền số: 01/2023/UQ-TN Ngày 10 tháng 02 năm 2023)");
+                    "(Theo văn bản ủy quyền số: 01/2026/UQ-TN Ngày 05 tháng 02 năm 2026)");
+            replacements.put("{{phuong}}", "Lê Đại Hành");
+            replacements.put("{{chuTichPhuong}}", "Phương Quốc Luyện");
+            replacements.put("{{nguoiTiepNhanHoSo}}", "Nguyễn Văn Chiến");
+            replacements.put("{{diaChiLienHe}}","Bờ Đa, phường Lê Đại Hành,");
+            replacements.put("{{canBoTD}}","DƯƠNG QUANG TUẤN");
+            replacements.put("{{sdtCanBoTD}}","0906676333");
+            replacements.put("{{gmail}}","pgdanlac888@gmail.com");
         }
         if (request.getCheckHopDongBaoLanh()) {
             String doanVanBan = "Bên B dùng tài sản này để đảm bảo việc thanh toán được kịp thời, đầy đủ và thực hiện một cách " +
@@ -480,13 +534,101 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             }
         }
     }
+    private static final String[] units = {
+            "không", "một", "hai", "ba", "bốn", "năm", "sáu", "bảy", "tám", "chín"
+    };
 
-    //    private void copyStyle(XWPFRun source, XWPFRun target) {
-//        if (source.getCTR() != null) {
-//            target.getCTR().setRPr(source.getCTR().getRPr());
-//            // giữ nguyên định dạng, kể cả superscript/subscript
-//        }
-//    }
+    // Đọc số từ 1 đến 99 (dùng cho ngày, tháng)
+    public static String numberToWords(int number) {
+        if (number == 0) return units[0];
+        if (number < 10) return units[number];
+        if (number < 20) {
+            if (number == 10) return "mười";
+            if (number == 15) return "mười lăm";
+            return "mười " + units[number % 10];
+        }
+        int tens = number / 10;
+        int ones = number % 10;
+        StringBuilder sb = new StringBuilder();
+        sb.append(units[tens]).append(" mươi");
+        if (ones == 1) sb.append(" mốt");
+        else if (ones == 5) sb.append(" lăm");
+        else if (ones > 0) sb.append(" ").append(units[ones]);
+        return sb.toString();
+    }
+
+    // Đọc năm đầy đủ (ví dụ: 2026 → "hai nghìn không trăm hai mươi sáu")
+    public static String readYearFull(int year) {
+        int nghin = year / 1000;
+        int tram = (year % 1000) / 100;
+        int chuc = (year % 100) / 10;
+        int donvi = year % 10;
+
+        StringBuilder sb = new StringBuilder();
+
+        // Nghìn
+        sb.append(units[nghin]).append(" nghìn ");
+
+        // Trăm
+        sb.append(units[tram]).append(" trăm ");
+
+        // Chục
+        if (chuc == 0 && donvi != 0) {
+            sb.append("lẻ ");
+        } else if (chuc == 1) {
+            sb.append("mười ");
+        } else if (chuc > 1) {
+            sb.append(units[chuc]).append(" mươi ");
+        }
+
+        // Đơn vị
+        if (donvi > 0) {
+            if (donvi == 1 && chuc > 1) {
+                sb.append("mốt");
+            } else if (donvi == 5 && chuc > 0) {
+                sb.append("lăm");
+            } else {
+                sb.append(units[donvi]);
+            }
+        }
+
+        return sb.toString().trim();
+    }
+
+    // Đọc ngày tháng năm thành chữ
+    public static String dateToWords(LocalDate date) {
+        String dayText = numberToWords(date.getDayOfMonth());
+        String monthText = numberToWords(date.getMonthValue());
+        String yearText = readYearFull(date.getYear());
+        return "Ngày " + dayText + ", tháng " + monthText + ", năm " + yearText;
+    }
+
+
+    private Map<String, String> calculatePercents(double tongVonLuuDong, double vonTuCo, double vonKhac, double tienSo, boolean isThoaThuan) {
+        // Nếu là thỏa thuận thì base = tongVonLuuDong, ngược lại base = tongVonLuuDong / 1.2
+        double baseTotal = isThoaThuan ? tongVonLuuDong/1.2 : tongVonLuuDong;
+
+        Map<String, String> result = new HashMap<>();
+
+        // Format phần trăm với dấu phẩy (Locale GERMAN dùng dấu phẩy cho thập phân)
+        NumberFormat percentFormat = NumberFormat.getNumberInstance(Locale.GERMAN);
+        percentFormat.setMaximumFractionDigits(1);
+
+        result.put("vonTuCoPercent", baseTotal > 0 ? percentFormat.format((vonTuCo / baseTotal) * 100) + "%" : "0%");
+        result.put("vonKhacPercent", baseTotal > 0 ? percentFormat.format((vonKhac / baseTotal) * 100) + "%" : "0%");
+        result.put("tienSoPercent", baseTotal > 0 ? percentFormat.format((tienSo / baseTotal) * 100) + "%" : "0%");
+
+        // Nếu không phải thỏa thuận thì thêm placeholder vonLuuDongMotVongQuay
+        if (isThoaThuan) {
+            // Format tiền theo chuẩn Việt Nam (dấu chấm ngăn cách hàng nghìn)
+            NumberFormat moneyFormat = NumberFormat.getNumberInstance(new Locale("vi", "VN"));
+            result.put("vonLuuDongMotVongQuay", moneyFormat.format(tongVonLuuDong / 1.2));
+        }
+
+        return result;
+    }
+
+
     private void insertTableAtPlaceholder(XWPFDocument doc, XWPFParagraph para, TableRequest tableRequest,
                                           boolean checkDrawTable) {
         // Xóa nội dung placeholder
@@ -577,13 +719,13 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         // Xóa nội dung cũ trong các run nhưng giữ style
         for (XWPFRun run : runs) {
             run.setText("", 0);
+
         }
 
         // Ghi lại text đã thay thế vào run đầu tiên
         XWPFRun baseRun = runs.get(0);
         baseRun.setText(replacedText, 0);
     }
-
     private void fillInsertedTable(XWPFTable table, TableRequest tableRequest, boolean checkDrawTable) {
         if (table == null || tableRequest == null) return;
         if (checkDrawTable && !tableRequest.isDrawTable()) return;

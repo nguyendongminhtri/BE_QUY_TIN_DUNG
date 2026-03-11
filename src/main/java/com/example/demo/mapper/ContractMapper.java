@@ -143,6 +143,9 @@ public class ContractMapper {
             pavv.setAddress(dto.getAddress());
             pavv.setReason(dto.getReason());
             pavv.setCheckAddress(dto.getCheckAddress());
+            pavv.setTongVon(dto.getTongVon());
+            pavv.setVonTuCo(dto.getVonTuCo());
+            pavv.setVonKhac(dto.getVonKhac());
             entity.setContractPAVV(pavv); // liên kết xuôi
         }
 
@@ -227,6 +230,21 @@ public class ContractMapper {
             dto.setFromTime(tsbd.getFromTime());
 
             request.setTsbdRequest(dto);
+        }
+        if (entity.getContractPAVV() != null) {
+            CreditContractPAVVEntity pavv = entity.getContractPAVV();
+
+            CreditContractPAVVRequest pavvDto = new CreditContractPAVVRequest();
+            pavvDto.setName(pavv.getName());
+            pavvDto.setAddress(pavv.getAddress());
+            pavvDto.setReason(pavv.getReason());
+            pavvDto.setCheckAddress(pavv.getCheckAddress());
+            pavvDto.setTongVon(pavv.getTongVon());
+            pavvDto.setTongVonLuuDong(pavv.getTongVonLuuDong()); // nếu có field này
+            pavvDto.setVonTuCo(pavv.getVonTuCo());
+            pavvDto.setVonKhac(pavv.getVonKhac());
+
+            request.setPavvRequest(pavvDto);
         }
 
 
@@ -352,10 +370,10 @@ public class ContractMapper {
                         request.setTable3(tableReq);
                         break;
                     case "hanMucTable":
-                        request.setTableRequest(tableReq);
+                        request.setHanMucTable(tableReq);
                         break;
                     case "chiPhiTable":
-                        request.setTableRequest(tableReq);
+                        request.setChiPhiTable(tableReq);
                         break;
                 }
             }
