@@ -420,13 +420,35 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         replacements.put("{{endDate}}", endDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
         //CUỐI TẠO END DATE
         if (request.getCheckNguoiDungTenBiaDo2()) {
+            System.err.println("===============DUNG TEN BI DO 2 ========================");
             replacements.put("{{ntbdd1}}", request.getGioiTinhDungTenBiaDo2()+": "+request.getDungTenBiaDo2()+"; Sinh ngày: "+request.getNamSinhDungTenBiaDo2()+".");
             replacements.put("{{ntbdd2}}", "CCCD số: "+request.getCccdDungTenBiaDo2()+"; Ngày cấp: "+request.getNgayCapCCCDDungTenBiaDo2()+"; Nơi cấp: "+request.getNoiCapCCCDDungTenBiaDo2()+".");
             replacements.put("{{ntbdd3}}", "Địa chỉ thường trú: "+request.getDiaChiThuongTruDungTenBiaDo2()+".");
+            replacements.put("{{ntbdd4}}","3.6. Họ và tên đầy đủ đối với cá nhân/tên đầy đủ đối với tổ chức: (viết chữ IN HOA)");
+            replacements.put("{{ntbdd5}}","Năm sinh: "+request.getNamSinhDungTenBiaDo2());
+            replacements.put("{{ntbdd6}}","3.7. Địa chỉ thường trú:  "+request.getDiaChiThuongTruDungTenBiaDo2());
+            replacements.put("{{ntbdd7}}","3.8. Giấy tờ xác định tư cách pháp lý: ");
+            replacements.put("{{ntbdd8}}","☑ Chứng minh nhân dân/Căn cước công dân/Chứng minh quân đội");
+            replacements.put("{{ntbdd9}}","□ Hộ chiếu        □ Thẻ thường trú");
+            replacements.put("{{ntbdd10}}","□ Mã số thuế");
+            replacements.put("{{ntbdd11}}","CCCD số: "+ request.getCccdDungTenBiaDo2()+"; Ngày cấp: "+ request.getNgayCapCCCDDungTenBiaDo2()+"; Nơi cấp: "+request.getNoiCapCCCDDungTenBiaDo2()+";");
+            replacements.put("{{ntbdd12}}","3.9. Thuộc đối tượng không phải nộp phí đăng ký □");
+            replacements.put("{{ntbdd13}}","3.10. Số điện thoại (nếu có):…..Fax (nếu có):……Thư điện tử (nếu có):………………..");
+            System.err.println("===============END DUNG TEN BI DO 2 ========================");
         } else {
             replacements.put("{{ntbdd1}}", "");
             replacements.put("{{ntbdd2}}", "");
             replacements.put("{{ntbdd3}}", "");
+            replacements.put("{{ntbdd4}}", "");
+            replacements.put("{{ntbdd5}}", "");
+            replacements.put("{{ntbdd6}}", "");
+            replacements.put("{{ntbdd7}}", "");
+            replacements.put("{{ntbdd8}}", "");
+            replacements.put("{{ntbdd9}}", "");
+            replacements.put("{{ntbdd10}}", "");
+            replacements.put("{{ntbdd11}}", "");
+            replacements.put("{{ntbdd12}}", "");
+            replacements.put("{{ntbdd13}}", "");
         }
         if (request.getLoaiVay().equalsIgnoreCase("NGẮN HẠN")) {
             replacements.put("{{loaivay}}", "Cho vay ngắn hạn");
@@ -681,27 +703,71 @@ public class CreditContractServiceIMPL implements ICreditContractService {
     }
 
 
+//    private void processParagraph(XWPFParagraph paragraph, Map<String, String> replacements) {
+//        List<XWPFRun> runs = paragraph.getRuns();
+//        if (runs == null || runs.isEmpty()) return;
+//
+//        // Ghép toàn bộ text của paragraph
+//        StringBuilder fullText = new StringBuilder();
+//        for (XWPFRun run : runs) {
+//            String text = run.getText(0);
+//            if (text != null) fullText.append(text);
+//        }
+//        String paragraphText = fullText.toString();
+//        if (paragraphText.isEmpty()) return;
+//
+//        // Thay thế tất cả placeholder trong đoạn văn
+//        String replacedText = paragraphText;
+//        for (Map.Entry<String, String> entry : replacements.entrySet()) {
+//            replacedText = replacedText.replace(entry.getKey(), entry.getValue());
+//        }
+//
+//        // Nếu sau khi thay thế mà chỉ còn trống hoặc toàn khoảng trắng → xóa paragraph
+//        if (replacedText.trim().isEmpty()) {
+//            IBody body = paragraph.getBody();
+//            if (body instanceof XWPFDocument d) {
+//                int pos = d.getPosOfParagraph(paragraph);
+//                if (pos >= 0) d.removeBodyElement(pos);
+//            } else if (body instanceof XWPFTableCell cell) {
+//                int idx = cell.getParagraphs().indexOf(paragraph);
+//                if (idx >= 0) cell.removeParagraph(idx);
+//            }
+//            return;
+//        }
+//
+//        // Nếu không có thay đổi thì bỏ qua
+//        if (replacedText.equals(paragraphText)) return;
+//
+//        // Xóa nội dung cũ trong các run nhưng giữ style
+//        for (XWPFRun run : runs) {
+//            run.setText("", 0);
+//
+//        }
+//
+//        // Ghi lại text đã thay thế vào run đầu tiên
+//        XWPFRun baseRun = runs.get(0);
+//        baseRun.setText(replacedText, 0);
+//    }
+
     private void processParagraph(XWPFParagraph paragraph, Map<String, String> replacements) {
         List<XWPFRun> runs = paragraph.getRuns();
         if (runs == null || runs.isEmpty()) return;
 
-        // Ghép toàn bộ text của paragraph
-        StringBuilder fullText = new StringBuilder();
         for (XWPFRun run : runs) {
             String text = run.getText(0);
-            if (text != null) fullText.append(text);
+            if (text != null) {
+                String replaced = text;
+                for (Map.Entry<String, String> entry : replacements.entrySet()) {
+                    replaced = replaced.replace(entry.getKey(), entry.getValue());
+                }
+                if (!replaced.equals(text)) {
+                    run.setText(replaced, 0); // giữ nguyên style của run
+                }
+            }
         }
-        String paragraphText = fullText.toString();
-        if (paragraphText.isEmpty()) return;
 
-        // Thay thế tất cả placeholder trong đoạn văn
-        String replacedText = paragraphText;
-        for (Map.Entry<String, String> entry : replacements.entrySet()) {
-            replacedText = replacedText.replace(entry.getKey(), entry.getValue());
-        }
-
-        // Nếu sau khi thay thế mà chỉ còn trống hoặc toàn khoảng trắng → xóa paragraph
-        if (replacedText.trim().isEmpty()) {
+        // Nếu toàn bộ paragraph rỗng sau khi thay thế → xóa paragraph
+        if (paragraph.getText().trim().isEmpty()) {
             IBody body = paragraph.getBody();
             if (body instanceof XWPFDocument d) {
                 int pos = d.getPosOfParagraph(paragraph);
@@ -710,22 +776,13 @@ public class CreditContractServiceIMPL implements ICreditContractService {
                 int idx = cell.getParagraphs().indexOf(paragraph);
                 if (idx >= 0) cell.removeParagraph(idx);
             }
-            return;
         }
-
-        // Nếu không có thay đổi thì bỏ qua
-        if (replacedText.equals(paragraphText)) return;
-
-        // Xóa nội dung cũ trong các run nhưng giữ style
-        for (XWPFRun run : runs) {
-            run.setText("", 0);
-
-        }
-
-        // Ghi lại text đã thay thế vào run đầu tiên
-        XWPFRun baseRun = runs.get(0);
-        baseRun.setText(replacedText, 0);
+//        for (XWPFRun run : paragraph.getRuns()) {
+//            System.err.println("Run text: " + run.getText(0));
+//        }
     }
+
+
     private void fillInsertedTable(XWPFTable table, TableRequest tableRequest, boolean checkDrawTable) {
         if (table == null || tableRequest == null) return;
         if (checkDrawTable && !tableRequest.isDrawTable()) return;
