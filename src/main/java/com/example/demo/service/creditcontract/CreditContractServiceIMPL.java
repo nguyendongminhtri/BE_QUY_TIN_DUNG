@@ -481,8 +481,9 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             replacements.put("{{canBoTD}}","VŨ XUÂN LONG");
             replacements.put("{{sdtCanBoTD}}","0987858237");
             replacements.put("{{gmail}}","thaihocqtd@gmail.com");
+            replacements.put("{{nddpl}}","Giám Đốc");
         } else if (request.getNguoiDaiDien().equalsIgnoreCase("pgd")) {
-            replacements.put("{{pgd}}", "-PHÒNG GIAO DỊCH AN LẠC");
+            replacements.put("{{pgd}}", " -PHÒNG GIAO DỊCH AN LẠC");
             replacements.put("{{dcpgd}}", "Địa chỉ: Bờ Đa, phường Lê Đại Hành, thành phố Hải Phòng.");
             replacements.put("{{ndd}}", "ông: VŨ THANH HẢI Chức vụ: Phó Giám Đốc - Trưởng PGD An Lạc.\n" +
                     "CCCD số: 030083003225;\n" +
@@ -494,6 +495,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             replacements.put("{{canBoTD}}","DƯƠNG QUANG TUẤN");
             replacements.put("{{sdtCanBoTD}}","0906676333");
             replacements.put("{{gmail}}","pgdanlac888@gmail.com");
+            replacements.put("{{nddpl}}","Trưởng Phòng");
         }
         if (request.getCheckHopDongBaoLanh()) {
             String doanVanBan = "Bên B dùng tài sản này để đảm bảo việc thanh toán được kịp thời, đầy đủ và thực hiện một cách " +
