@@ -242,6 +242,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         replacements.put("{{nccccdkh}}", Optional.ofNullable(request.getNoiCapCCCDKhachHang()).orElse(""));
         replacements.put("{{ttkh}}", Optional.ofNullable(request.getDiaChiThuongTruKhachHang()).orElse(""));
         replacements.put("{{gtnt}}", Optional.ofNullable(request.getGtnt()).orElse(""));
+        replacements.put("{{gtntt}}", Optional.ofNullable(request.getGtnt().toLowerCase()).orElse(""));
         replacements.put("{{ntkh}}", Optional.ofNullable(request.getTenNguoiThan()).orElse(""));
         replacements.put("{{nsnt}}", Optional.ofNullable(request.getNamSinhNguoiThan()).orElse(""));
         replacements.put("{{cccdnt}}", Optional.ofNullable(request.getCccdNguoiThan()).orElse(""));
@@ -479,11 +480,12 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             replacements.put("{{nguoiTiepNhanHoSo}}", "Phạm Thị Thơm");
             replacements.put("{{diaChiLienHe}}","Số 178 Ninh Chấp 5, phường Chu Văn An,");
             replacements.put("{{canBoTD}}","VŨ XUÂN LONG");
+            replacements.put("{{canBoTDVT}}",capitalizeWords("VŨ XUÂN LONG"));
             replacements.put("{{sdtCanBoTD}}","0987858237");
             replacements.put("{{gmail}}","thaihocqtd@gmail.com");
             replacements.put("{{nddpl}}","Giám Đốc");
         } else if (request.getNguoiDaiDien().equalsIgnoreCase("pgd")) {
-            replacements.put("{{pgd}}", " -PHÒNG GIAO DỊCH AN LẠC");
+            replacements.put("{{pgd}}", " - PHÒNG GIAO DỊCH AN LẠC");
             replacements.put("{{dcpgd}}", "Địa chỉ: Bờ Đa, phường Lê Đại Hành, thành phố Hải Phòng.");
             replacements.put("{{ndd}}", "ông: VŨ THANH HẢI Chức vụ: Phó Giám Đốc - Trưởng PGD An Lạc.\n" +
                     "CCCD số: 030083003225;\n" +
@@ -493,6 +495,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             replacements.put("{{nguoiTiepNhanHoSo}}", "Nguyễn Văn Chiến");
             replacements.put("{{diaChiLienHe}}","Bờ Đa, phường Lê Đại Hành,");
             replacements.put("{{canBoTD}}","DƯƠNG QUANG TUẤN");
+            replacements.put("{{canBoTDVT}}",capitalizeWords("DƯƠNG QUANG TUẤN"));
             replacements.put("{{sdtCanBoTD}}","0906676333");
             replacements.put("{{gmail}}","pgdanlac888@gmail.com");
             replacements.put("{{nddpl}}","Trưởng Phòng");
