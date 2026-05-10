@@ -8,7 +8,6 @@ import java.math.BigInteger;
 import java.text.NumberFormat;
 import java.util.Locale;
 
-import com.example.demo.model.CreditContractTSBDEntity;
 import com.example.demo.model.User;
 import com.example.demo.repository.ICreditContractRepository;
 import com.example.demo.repository.IFileMetadataRepository;
@@ -98,6 +97,8 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         fileUrls.add(generateContractFile(request, date, dateTC, dateBD, user, "BienBanXacDinhGiaTriTaiSanBaoDam.docx"));
         fileUrls.add(generateContractFile(request, date, dateTC, dateBD, user, "PhuongAnVayVon.docx"));
         fileUrls.add(generateContractFile(request, date, dateTC, dateBD, user, "BaoCaoDeNghiGiaiNganKiemGiayNhanNo.docx"));
+        fileUrls.add(generateContractFile(request, date, dateTC, dateBD, user, "BaoCaoThongTinVeNguoiCoLienQuan.docx"));
+        fileUrls.add(generateContractFile(request, date, dateTC, dateBD, user, "ThongBao.docx"));
 
         return fileUrls;
     }
@@ -126,6 +127,8 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "BienBanXacDinhGiaTriTaiSanBaoDam.docx"));
         fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "PhuongAnVayVon.docx"));
         fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "BaoCaoDeNghiGiaiNganKiemGiayNhanNo.docx"));
+        fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "BaoCaoThongTinVeNguoiCoLienQuan.docx"));
+        fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "ThongBao.docx"));
 
         creditContractRepository.save(entity);
         return fileUrls;
@@ -157,6 +160,8 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "BienBanXacDinhGiaTriTaiSanBaoDam.docx"));
         fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "PhuongAnVayVon.docx"));
         fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "BaoCaoDeNghiGiaiNganKiemGiayNhanNo.docx"));
+        fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "BaoCaoThongTinVeNguoiCoLienQuan.docx"));
+        fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "ThongBao.docx"));
 
         creditContractRepository.save(entity);
         return fileUrls;
@@ -241,6 +246,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         replacements.put("{{nckh}}", Optional.ofNullable(request.getNgayCapCCCDKhachHang()).orElse(""));
         replacements.put("{{nccccdkh}}", Optional.ofNullable(request.getNoiCapCCCDKhachHang()).orElse(""));
         replacements.put("{{ttkh}}", Optional.ofNullable(request.getDiaChiThuongTruKhachHang()).orElse(""));
+        replacements.put("{{tdp}}", Optional.ofNullable(request.getDiaChiThuongTruKhachHang().split(",")[0].trim()).orElse(""));
         replacements.put("{{gtnt}}", Optional.ofNullable(request.getGtnt()).orElse(""));
         replacements.put("{{gtntt}}", Optional.ofNullable(request.getGtnt().toLowerCase()).orElse(""));
         replacements.put("{{ntkh}}", Optional.ofNullable(request.getTenNguoiThan()).orElse(""));
@@ -332,7 +338,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         if (tsbdDto != null && Boolean.TRUE.equals(tsbdDto.getCheckTaiSanGanLienVoiDat())) {
             replacements.put("{{dienTichTS}}", Optional.ofNullable(tsbdDto.getDienTichTS()).orElse(""));
             replacements.put("{{ketCauXayDung}}", Optional.ofNullable(tsbdDto.getKetCauXayDung()).orElse(""));
-            replacements.put("{{fromTime}}", Optional.ofNullable(tsbdDto.getFromTime()).orElse(""));
+            replacements.put("{{loaiNha}}", Optional.ofNullable(tsbdDto.getLoaiNha()).orElse(""));
         }
         CreditContractPAVVRequest pavvDto = request.getPavvRequest();
         if(pavvDto!=null && Boolean.TRUE.equals(pavvDto.getCheckAddress())){
@@ -422,7 +428,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         //CUỐI TẠO END DATE
         if (request.getCheckNguoiDungTenBiaDo2()) {
             System.err.println("===============DUNG TEN BI DO 2 ========================");
-            replacements.put("{{ntbdd1}}", request.getGioiTinhDungTenBiaDo2()+": "+request.getDungTenBiaDo2()+"; Sinh ngày: "+request.getNamSinhDungTenBiaDo2()+".");
+            replacements.put("{{ntbdd1}}", request.getGioiTinhDungTenBiaDo2()+": "+request.getDungTenBiaDo2()+"; Sinh năm: "+request.getNamSinhDungTenBiaDo2()+".");
             replacements.put("{{ntbdd2}}", "CCCD số: "+request.getCccdDungTenBiaDo2()+"; Ngày cấp: "+request.getNgayCapCCCDDungTenBiaDo2()+"; Nơi cấp: "+request.getNoiCapCCCDDungTenBiaDo2()+".");
             replacements.put("{{ntbdd3}}", "Địa chỉ thường trú: "+request.getDiaChiThuongTruDungTenBiaDo2()+".");
             replacements.put("{{ntbdd4}}","3.6. Họ và tên đầy đủ đối với cá nhân/tên đầy đủ đối với tổ chức: (viết chữ IN HOA)");
@@ -430,11 +436,10 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             replacements.put("{{ntbdd6}}","3.7. Địa chỉ thường trú:  "+request.getDiaChiThuongTruDungTenBiaDo2());
             replacements.put("{{ntbdd7}}","3.8. Giấy tờ xác định tư cách pháp lý: ");
             replacements.put("{{ntbdd8}}","☑ Chứng minh nhân dân/Căn cước công dân/Chứng minh quân đội");
-            replacements.put("{{ntbdd9}}","□ Hộ chiếu        □ Thẻ thường trú");
-            replacements.put("{{ntbdd10}}","□ Mã số thuế");
-            replacements.put("{{ntbdd11}}","CCCD số: "+ request.getCccdDungTenBiaDo2()+"; Ngày cấp: "+ request.getNgayCapCCCDDungTenBiaDo2()+"; Nơi cấp: "+request.getNoiCapCCCDDungTenBiaDo2()+";");
-            replacements.put("{{ntbdd12}}","3.9. Thuộc đối tượng không phải nộp phí đăng ký □");
-            replacements.put("{{ntbdd13}}","3.10. Số điện thoại (nếu có):…..Fax (nếu có):……Thư điện tử (nếu có):………………..");
+            replacements.put("{{ntbdd9}}","□ Hộ chiếu        □ Thẻ thường trú        □ Mã số thuế");
+            replacements.put("{{ntbdd10}}","CCCD số: "+ request.getCccdDungTenBiaDo2()+"; Ngày cấp: "+ request.getNgayCapCCCDDungTenBiaDo2()+"; Nơi cấp: "+request.getNoiCapCCCDDungTenBiaDo2()+";");
+            replacements.put("{{ntbdd11}}","3.9. Thuộc đối tượng không phải nộp phí đăng ký □");
+            replacements.put("{{ntbdd12}}","3.10. Số điện thoại (nếu có):…..Fax (nếu có):……Thư điện tử (nếu có):………………..");
             System.err.println("===============END DUNG TEN BI DO 2 ========================");
         } else {
             replacements.put("{{ntbdd1}}", "");
@@ -449,7 +454,6 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             replacements.put("{{ntbdd10}}", "");
             replacements.put("{{ntbdd11}}", "");
             replacements.put("{{ntbdd12}}", "");
-            replacements.put("{{ntbdd13}}", "");
         }
         if (request.getLoaiVay().equalsIgnoreCase("NGẮN HẠN")) {
             replacements.put("{{loaivay}}", "Cho vay ngắn hạn");
@@ -489,7 +493,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             replacements.put("{{dcpgd}}", "Địa chỉ: Bờ Đa, phường Lê Đại Hành, thành phố Hải Phòng.");
             replacements.put("{{ndd}}", "ông: VŨ THANH HẢI Chức vụ: Phó Giám Đốc - Trưởng PGD An Lạc.\n" +
                     "CCCD số: 030083003225;\n" +
-                    "(Theo văn bản ủy quyền số: 01/2026/UQ-TN Ngày 05 tháng 02 năm 2026)");
+                    "(Theo văn bản ủy quyền số: 01/2026/UQ-TN Ngày 05 tháng 01 năm 2026)");
             replacements.put("{{phuong}}", "Lê Đại Hành");
             replacements.put("{{chuTichPhuong}}", "Phương Quốc Luyện");
             replacements.put("{{nguoiTiepNhanHoSo}}", "Nguyễn Văn Chiến");
@@ -656,28 +660,35 @@ public class CreditContractServiceIMPL implements ICreditContractService {
     }
 
 
-    private void insertTableAtPlaceholder(XWPFDocument doc, XWPFParagraph para, TableRequest tableRequest,
-                                          boolean checkDrawTable) {
-        // Xóa nội dung placeholder
+    private void insertTableAtPlaceholder(XWPFDocument doc, XWPFParagraph para,
+                                          TableRequest tableRequest, boolean checkDrawTable) {
+        // Lấy con trỏ trước khi xóa nội dung
+        XmlCursor cursor = para.getCTP().newCursor();
+
+        // Xóa nội dung placeholder (runs), nhưng giữ paragraph tạm thời
         for (int i = para.getRuns().size() - 1; i >= 0; i--) {
             para.removeRun(i);
         }
-        System.err.println("tableRequest --> "+tableRequest);
+
         if (tableRequest != null) {
             if (!checkDrawTable || tableRequest.isDrawTable()) {
-                XmlCursor cursor = para.getCTP().newCursor();
+                // Chèn bảng tại vị trí con trỏ
                 XWPFTable table = doc.insertNewTbl(cursor);
                 if (table != null) {
-                    // Xóa row mặc định đầu tiên để tránh ô thừa
-                    if (table.getNumberOfRows() > 0) {
+                    // Thay vì xóa row mặc định ngay, hãy điền dữ liệu vào đó
+                    if (table.getNumberOfRows() == 1 && table.getRow(0).getTableCells().size() == 1) {
+                        // Nếu không muốn dùng row mặc định, thêm row mới trước rồi mới xóa
+                        table.createRow();
                         table.removeRow(0);
                     }
+
+                    // Điền dữ liệu vào bảng
                     fillInsertedTable(table, tableRequest, checkDrawTable);
                 }
             }
         }
 
-        // Xóa paragraph placeholder để không còn dư
+        // Sau khi chèn bảng, xóa paragraph placeholder để tránh dư thừa
         IBody body = para.getBody();
         if (body instanceof XWPFDocument d) {
             int pos = d.getPosOfParagraph(para);
@@ -687,6 +698,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             if (idx >= 0) cell.removeParagraph(idx);
         }
     }
+
 
 
 

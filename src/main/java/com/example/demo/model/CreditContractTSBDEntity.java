@@ -22,5 +22,5 @@ public class CreditContractTSBDEntity {
     private Boolean checkTaiSanGanLienVoiDat;
     private String dienTichTS;
     private String ketCauXayDung;
-    private String fromTime;
+    private String loaiNha;
 }
