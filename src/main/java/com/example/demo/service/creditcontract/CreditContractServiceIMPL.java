@@ -225,8 +225,12 @@ public class CreditContractServiceIMPL implements ICreditContractService {
 
     private void replacePlaceholders(XWPFDocument doc, ContractRequest request, LocalDate date, LocalDate dateTC, LocalDate dateBD) {
         System.err.println("request --> " + request);
-        System.err.println("date ::::"+date);
-        System.err.println("date ::::"+dateToWords(date));
+        System.err.println("date ::::" + date);
+        System.err.println("date ::::" + dateToWords(date));
+        LocalDate dateKT = date.plusYears(Long.parseLong(request.getThoiHanVay()));
+        System.err.println("dateKT ::::" + dateKT);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        String ngayKetThuc = dateKT.format(formatter);
         long gtqsdd = Long.parseLong(Optional.ofNullable(request.getGiaTriQuyenSuDungDat()).orElse(String.valueOf(0L)));
 // Định dạng theo locale Việt Nam
         NumberFormat nf = NumberFormat.getInstance(new Locale("vi", "VN"));
@@ -262,7 +266,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         replacements.put("{{hm}}", Optional.ofNullable(request.getHanMuc()).orElse(""));
         replacements.put("{{sbbxdcv}}", Optional.ofNullable(request.getSoBBXetDuyetChoVay()).orElse(""));
         replacements.put("{{ls}}", Optional.ofNullable(request.getLaiSuat()).orElse(""));
-        replacements.put("{{nkt}}", Optional.ofNullable(request.getNgayKetThucKyHanVay()).orElse(""));
+        replacements.put("{{nkt}}", Optional.ofNullable(ngayKetThuc).orElse(""));
         replacements.put("{{shdtc}}", Optional.ofNullable(request.getSoHopDongTheChapQSDD()).orElse(""));
         replacements.put("{{seri}}", Optional.ofNullable(request.getSerial()).orElse(""));
         replacements.put("{{nc}}", Optional.ofNullable(request.getNoiCapSo()).orElse(""));
@@ -278,7 +282,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         replacements.put("{{thsd}}", Optional.ofNullable(request.getThoiHanSuDung()).orElse(""));
         replacements.put("{{bbdg}}", Optional.ofNullable(request.getSoBienBanDinhGia()).orElse(""));
         replacements.put("{{ndtt}}", Optional.ofNullable(request.getNoiDungThoaThuan()).orElse(""));
-        replacements.put("{{ngsd}}", Optional.ofNullable(request.getNguonGocSuDung()).orElse(""));
+        replacements.put("{{ngsd}}", Optional.ofNullable("Nguồn gốc sử dụng: " + request.getNguonGocSuDung()).orElse(""));
         replacements.put("{{gc}}", Optional.ofNullable(request.getGhiChu()).orElse(""));
         replacements.put("{{chv}}", Optional.ofNullable(request.getChoVay()).orElse(""));
         replacements.put("{{gtqsdd}}", Optional.ofNullable(formattedGtqsdd).orElse(""));
@@ -300,39 +304,39 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         replacements.put("{{dcntbd}}", Optional.ofNullable(request.getDiaChiThuongTruDungTenBiaDo2()).orElse(""));
         replacements.put("{{nsntbd}}", Optional.ofNullable(request.getNamSinhDungTenBiaDo2()).orElse(""));
         replacements.put("{{lv}}", Optional.ofNullable(request.getLoaiVay()).orElse(""));
-        if(request.getLoaiVay().equalsIgnoreCase("NGẮN HẠN (Thỏa thuận)")){
+        if (request.getLoaiVay().equalsIgnoreCase("NGẮN HẠN (Thỏa thuận)")) {
             replacements.put("{{lvt}}", Optional.ofNullable("Ngắn hạn").orElse(""));
             replacements.put("{{slv}}", "hạn mức");
-            System.err.println("get::"+replacements.get("{{slv}}"));
+            System.err.println("get::" + replacements.get("{{slv}}"));
             replacements.put("{{ms1t}}", "Phương thức cho vay: Cho vay theo hạn mức");
             replacements.put("{{ms1d}}", "");
             replacements.put("{{ms2t}}", "Hạn mức cho vay:");
-            replacements.put("{{ms2d}}", "Bên A cam kết cho bên B vay các khoản cấp tín dụng bằng đồng Việt Nam với hạn mức cho vay là: "+request.getTienSo()+" đồng, (Bằng chữ: "+request.getTienChu()+ " )");
-            replacements.put("{{ms3}}", "Mục đích sử dụng tiền vay: "+request.getMuchDichVay());
-            replacements.put("{{ms4}}", "Thời hạn duy trì hạn mức: "+request.getHanMuc()+ ", kể từ ngày ký thỏa thuận Hợp đồng tín dụng này. Trong khoảng thời gian này Bên B được đề nghị Bên A cấp tín dụng phù hợp với mục đích sử dụng vốn và có thể đề nghị giải ngân một lần hoặc nhiều lần trong hạn mức nêu tại Hợp đồng tín dụng này. Hết thời hạn duy trì hạn mức hợp đồng này, bên A không có nghĩa vụ giải ngân bất kỳ khoản vay nợ nào");
+            replacements.put("{{ms2d}}", "Bên A cam kết cho bên B vay các khoản cấp tín dụng bằng đồng Việt Nam với hạn mức cho vay là: " + request.getTienSo() + " đồng, (Bằng chữ: " + request.getTienChu() + " )");
+            replacements.put("{{ms3}}", "Mục đích sử dụng tiền vay: " + request.getMuchDichVay());
+            replacements.put("{{ms4}}", "Thời hạn duy trì hạn mức: " + request.getHanMuc() + ", kể từ ngày ký thỏa thuận Hợp đồng tín dụng này. Trong khoảng thời gian này Bên B được đề nghị Bên A cấp tín dụng phù hợp với mục đích sử dụng vốn và có thể đề nghị giải ngân một lần hoặc nhiều lần trong hạn mức nêu tại Hợp đồng tín dụng này. Hết thời hạn duy trì hạn mức hợp đồng này, bên A không có nghĩa vụ giải ngân bất kỳ khoản vay nợ nào");
             replacements.put("{{ms5}}", "5. Một năm ít nhất một lần bên A có trách nhiệm xem xét, xác định lại hạn mức cho vay tối đa và thời gian duy trì hạn mức Hợp đồng này.");
             replacements.put("{{ms6t}}", "6. Thời hạn cho vay: Từng khoản cấp tín dụng được xác định cụ thể trên từng giấy nhận nợ, mỗi giấy nhận nợ có thời gian cho vay khác nhau và được Bên A xác định vào chu kỳ sản xuất kinh doanh, khả năng trả nợ của Bên B và không vượt quá 10 tháng hoặc không vượt quá một thời hạn khác do Bên A xác định trong từng thời kỳ.");
             replacements.put("{{ms6d}}", "Thời hạn cho vay của từng khoản cấp tín dụng cụ thể được tính từ ngày tiếp theo của ngày giải ngân cho đến thời điểm trả hết toàn bộ tiền gốc, lãi tiền vay và các chi phí phát sinh liên quan. Trong trường hợp Bên B sử dụng tiền vay chưa đủ một ngày, thì tính từ thời điểm nhận tiền vay và thời gian vay vốn được tính là 01 (một) ngày và trường hợp ngày cuối cùng của thời hạn vay là ngày lễ hoặc thứ 7, chủ nhật hàng tuần, thì ngày đến hạn chuyển sang ngày làm việc tiếp theo.");
-            replacements.put("{{tghm}}","Thời gian xác định bình quân cho một chu kỳ sản xuất, kinh doanh.");
+            replacements.put("{{tghm}}", "Thời gian xác định bình quân cho một chu kỳ sản xuất, kinh doanh.");
             replacements.put("{{vqhm}}", "Vòng quay vốn lưu động = Tổng số ngày 01 năm/Tổng số ngày bình quân = 365/304 = 1,2 vòng.");
-            replacements.put("{{tgvv}}","Thời gian duy trì hàn mức: "+request.getHanMuc());
-            replacements.put("{{vongQuay}}","- Số vòng quay vốn bình quân:  1,2  Vòng/năm.");
+            replacements.put("{{tgvv}}", "Thời gian duy trì hàn mức: " + request.getHanMuc());
+            replacements.put("{{vongQuay}}", "- Số vòng quay vốn bình quân:  1,2  Vòng/năm.");
         } else {
             replacements.put("{{lvt}}", Optional.ofNullable(capitalizeWords(request.getLoaiVay())).orElse(""));
             replacements.put("{{slv}}", "từng lần");
             replacements.put("{{ms1t}}", "Số tiền cho vay:");
-            replacements.put("{{ms1d}}", "Theo các điều khoản và điều kiện của Hợp đồng tín dụng này, bên A cho bên B vay khoản tiền bằng đồng Việt Nam. Số tiền vay là: "+request.getTienSo()+" đồng, (Bằng chữ: "+request.getTienChu()+ " ).");
+            replacements.put("{{ms1d}}", "Theo các điều khoản và điều kiện của Hợp đồng tín dụng này, bên A cho bên B vay khoản tiền bằng đồng Việt Nam. Số tiền vay là: " + request.getTienSo() + " đồng, (Bằng chữ: " + request.getTienChu() + " ).");
             replacements.put("{{ms2t}}", "Thời hạn cho vay: ");
-            replacements.put("{{ms2d}}", "Thời hạn cho vay là: "+request.getHanMuc()+ ", được tính từ ngày tiếp theo của ngày giải ngân đến ngày "+request.getNgayKetThucKyHanVay()+" (trường hợp ngày cuối cùng của thời hạn vay là ngày lễ hoặc là ngày thứ 7, chủ nhật hàng tuần, thì ngày đến hạn chuyển sang ngày làm việc tiếp theo; nếu trường hợp bên B sử dụng chưa đủ một ngày, thì tính từ thời điểm nhận tiền vay và thời gian vay vốn được tính là 01 (một) ngày)");
+            replacements.put("{{ms2d}}", "Thời hạn cho vay là: " + request.getHanMuc() + ", được tính từ ngày tiếp theo của ngày giải ngân đến ngày " + ngayKetThuc + " (trường hợp ngày cuối cùng của thời hạn vay là ngày lễ hoặc là ngày thứ 7, chủ nhật hàng tuần, thì ngày đến hạn chuyển sang ngày làm việc tiếp theo; nếu trường hợp bên B sử dụng chưa đủ một ngày, thì tính từ thời điểm nhận tiền vay và thời gian vay vốn được tính là 01 (một) ngày)");
             replacements.put("{{ms3}}", "Phương thức cho vay: Cho vay Từng lần.");
-            replacements.put("{{ms4}}", "Mục đích sử dụng vốn vay: "+request.getMuchDichVay());
+            replacements.put("{{ms4}}", "Mục đích sử dụng vốn vay: " + request.getMuchDichVay());
             replacements.put("{{ms5}}", "");
             replacements.put("{{ms6t}}", "");
             replacements.put("{{ms6d}}", "");
-            replacements.put("{{tghm}}","");
-            replacements.put("{{vqhm}}","");
-            replacements.put("{{tgvv}}","- Thời gian vay vốn: "+request.getThoiHanVay() + " năm");
-            replacements.put("{{vongQuay}}","");
+            replacements.put("{{tghm}}", "");
+            replacements.put("{{vqhm}}", "");
+            replacements.put("{{tgvv}}", "- Thời gian vay vốn: " + request.getThoiHanVay() + " năm");
+            replacements.put("{{vongQuay}}", "");
         }
         CreditContractTSBDRequest tsbdDto = request.getTsbdRequest();
         if (tsbdDto != null && Boolean.TRUE.equals(tsbdDto.getCheckTaiSanGanLienVoiDat())) {
@@ -341,13 +345,13 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             replacements.put("{{loaiNha}}", Optional.ofNullable(tsbdDto.getLoaiNha()).orElse(""));
         }
         CreditContractPAVVRequest pavvDto = request.getPavvRequest();
-        if(pavvDto!=null && Boolean.TRUE.equals(pavvDto.getCheckAddress())){
-            String address = "- Địa điểm thực hiện phương án: "+pavvDto.getAddress();
+        if (pavvDto != null && Boolean.TRUE.equals(pavvDto.getCheckAddress())) {
+            String address = "- Địa điểm thực hiện phương án: " + pavvDto.getAddress();
             replacements.put("{{ddpavv}}", address);
         } else {
             replacements.put("{{ddpavv}}", "");
         }
-        if(pavvDto!=null){
+        if (pavvDto != null) {
             replacements.put("{{tenpavv}}", Optional.ofNullable(pavvDto.getName()).orElse(""));
             replacements.put("{{ldpavv}}", Optional.ofNullable(pavvDto.getReason()).orElse(""));
             replacements.put("{{tongVon}}", Optional.ofNullable(pavvDto.getTongVon()).orElse(""));
@@ -382,7 +386,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             replacements.put("{{vonKhacPercent}}", percents.get("vonKhacPercent"));
             replacements.put("{{tienSoPercent}}", percents.get("tienSoPercent"));
             if (percents.containsKey("vonLuuDongMotVongQuay")) {
-                replacements.put("{{vonLuuDongMotVongQuay}}", "- Vốn lưu động cần thiết cho một vòng quay: "+percents.get("vonLuuDongMotVongQuay")+" đồng");
+                replacements.put("{{vonLuuDongMotVongQuay}}", "- Vốn lưu động cần thiết cho một vòng quay: " + percents.get("vonLuuDongMotVongQuay") + " đồng");
             }
         }
         replacements.put("{{land_items}}", Optional.ofNullable(request.getLandItems()).orElse(""));
@@ -428,18 +432,18 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         //CUỐI TẠO END DATE
         if (request.getCheckNguoiDungTenBiaDo2()) {
             System.err.println("===============DUNG TEN BI DO 2 ========================");
-            replacements.put("{{ntbdd1}}", request.getGioiTinhDungTenBiaDo2()+": "+request.getDungTenBiaDo2()+"; Sinh năm: "+request.getNamSinhDungTenBiaDo2()+".");
-            replacements.put("{{ntbdd2}}", "CCCD số: "+request.getCccdDungTenBiaDo2()+"; Ngày cấp: "+request.getNgayCapCCCDDungTenBiaDo2()+"; Nơi cấp: "+request.getNoiCapCCCDDungTenBiaDo2()+".");
-            replacements.put("{{ntbdd3}}", "Địa chỉ thường trú: "+request.getDiaChiThuongTruDungTenBiaDo2()+".");
-            replacements.put("{{ntbdd4}}","3.6. Họ và tên đầy đủ đối với cá nhân/tên đầy đủ đối với tổ chức: (viết chữ IN HOA)");
-            replacements.put("{{ntbdd5}}","Năm sinh: "+request.getNamSinhDungTenBiaDo2());
-            replacements.put("{{ntbdd6}}","3.7. Địa chỉ thường trú:  "+request.getDiaChiThuongTruDungTenBiaDo2());
-            replacements.put("{{ntbdd7}}","3.8. Giấy tờ xác định tư cách pháp lý: ");
-            replacements.put("{{ntbdd8}}","☑ Chứng minh nhân dân/Căn cước công dân/Chứng minh quân đội");
-            replacements.put("{{ntbdd9}}","□ Hộ chiếu        □ Thẻ thường trú        □ Mã số thuế");
-            replacements.put("{{ntbdd10}}","CCCD số: "+ request.getCccdDungTenBiaDo2()+"; Ngày cấp: "+ request.getNgayCapCCCDDungTenBiaDo2()+"; Nơi cấp: "+request.getNoiCapCCCDDungTenBiaDo2()+";");
-            replacements.put("{{ntbdd11}}","3.9. Thuộc đối tượng không phải nộp phí đăng ký □");
-            replacements.put("{{ntbdd12}}","3.10. Số điện thoại (nếu có):…..Fax (nếu có):……Thư điện tử (nếu có):………………..");
+            replacements.put("{{ntbdd1}}", request.getGioiTinhDungTenBiaDo2() + ": " + request.getDungTenBiaDo2() + "; Sinh năm: " + request.getNamSinhDungTenBiaDo2() + ".");
+            replacements.put("{{ntbdd2}}", "CCCD số: " + request.getCccdDungTenBiaDo2() + "; Ngày cấp: " + request.getNgayCapCCCDDungTenBiaDo2() + "; Nơi cấp: " + request.getNoiCapCCCDDungTenBiaDo2() + ".");
+            replacements.put("{{ntbdd3}}", "Địa chỉ thường trú: " + request.getDiaChiThuongTruDungTenBiaDo2() + ".");
+            replacements.put("{{ntbdd4}}", "3.6. Họ và tên đầy đủ đối với cá nhân/tên đầy đủ đối với tổ chức: (viết chữ IN HOA)");
+            replacements.put("{{ntbdd5}}", "Năm sinh: " + request.getNamSinhDungTenBiaDo2());
+            replacements.put("{{ntbdd6}}", "3.7. Địa chỉ thường trú:  " + request.getDiaChiThuongTruDungTenBiaDo2());
+            replacements.put("{{ntbdd7}}", "3.8. Giấy tờ xác định tư cách pháp lý: ");
+            replacements.put("{{ntbdd8}}", "☑ Chứng minh nhân dân/Căn cước công dân/Chứng minh quân đội");
+            replacements.put("{{ntbdd9}}", "□ Hộ chiếu        □ Thẻ thường trú        □ Mã số thuế");
+            replacements.put("{{ntbdd10}}", "CCCD số: " + request.getCccdDungTenBiaDo2() + "; Ngày cấp: " + request.getNgayCapCCCDDungTenBiaDo2() + "; Nơi cấp: " + request.getNoiCapCCCDDungTenBiaDo2() + ";");
+            replacements.put("{{ntbdd11}}", "3.9. Thuộc đối tượng không phải nộp phí đăng ký □");
+            replacements.put("{{ntbdd12}}", "3.10. Số điện thoại (nếu có):…..Fax (nếu có):……Thư điện tử (nếu có):………………..");
             System.err.println("===============END DUNG TEN BI DO 2 ========================");
         } else {
             replacements.put("{{ntbdd1}}", "");
@@ -474,42 +478,47 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             replacements.put("{{ndtbd}}", nguoiMangTen);
         }
         if (request.getNguoiDaiDien().equalsIgnoreCase("gd")) {
-            replacements.put("{{dcpgd}}", "Trụ sở tại: Số 178 Ninh Chấp 5; phường Chu Văn An, thành phố Hải Phòng.\n" +
+            replacements.put("{{dcpgd}}", "Trụ sở tại: Số 178, TDP Ninh Chấp 5, phường Chu Văn An, thành phố Hải Phòng.\n" +
                     "Giấy phép đăng ký kinh doanh: 0800001806; Điện thoại: 02203.882.700\n");
             replacements.put("{{ndd}}", "bà: PHÙNG THỊ LOAN Chức vụ: Giám Đốc điều hành\n" +
                     "CCCD số: 030182016564; Cấp ngày: 22/12/2021. Nơi cấp: Cục cảnh sát quản lý hành chính về trật tự xã hội.");
+            replacements.put("{{ndd1}}", "Bà: " + capitalizeWords("PHÙNG THỊ LOAN") + " - Chức vụ: Giám Đốc điều hành.");
             replacements.put("{{pgd}}", "");
+            replacements.put("{{pgdvt}}", "");
             replacements.put("{{phuong}}", "Chu Văn An");
             replacements.put("{{chuTichPhuong}}", "..........................");
             replacements.put("{{nguoiTiepNhanHoSo}}", "Phạm Thị Thơm");
-            replacements.put("{{diaChiLienHe}}","Số 178 Ninh Chấp 5, phường Chu Văn An,");
-            replacements.put("{{canBoTD}}","VŨ XUÂN LONG");
-            replacements.put("{{canBoTDVT}}",capitalizeWords("VŨ XUÂN LONG"));
-            replacements.put("{{sdtCanBoTD}}","0987858237");
-            replacements.put("{{gmail}}","thaihocqtd@gmail.com");
-            replacements.put("{{nddpl}}","Giám Đốc");
+            replacements.put("{{diaChiLienHe}}", "Số 178 Ninh Chấp 5, phường Chu Văn An,");
+            replacements.put("{{canBoTD}}", "VŨ XUÂN LONG");
+            replacements.put("{{canBoTDVT}}", capitalizeWords("VŨ XUÂN LONG"));
+            replacements.put("{{sdtCanBoTD}}", "0987858237");
+            replacements.put("{{gmail}}", "thaihocqtd@gmail.com");
+            replacements.put("{{nddpl}}", "Giám Đốc");
         } else if (request.getNguoiDaiDien().equalsIgnoreCase("pgd")) {
             replacements.put("{{pgd}}", " - PHÒNG GIAO DỊCH AN LẠC");
-            replacements.put("{{dcpgd}}", "Địa chỉ: Bờ Đa, phường Lê Đại Hành, thành phố Hải Phòng.");
+            replacements.put("{{pgdvt}}", capitalizeWords(" - PHÒNG GIAO DỊCH AN LẠC"));
+            replacements.put("{{dcpgd}}", "Địa chỉ: Bờ Đa, phường Lê Đại Hành, thành phố Hải Phòng. " +
+                    "Giấy phép đăng ký kinh doanh: 0800001806; Điện thoại: 0220.3596.266");
             replacements.put("{{ndd}}", "ông: VŨ THANH HẢI Chức vụ: Phó Giám Đốc - Trưởng PGD An Lạc.\n" +
                     "CCCD số: 030083003225;\n" +
                     "(Theo văn bản ủy quyền số: 01/2026/UQ-TN Ngày 05 tháng 01 năm 2026)");
+            replacements.put("{{ndd1}}", "Ông: " + capitalizeWords("VŨ THANH HẢI") + " - Chức vụ: Phó Giám Đốc - Trưởng PGD An Lạc.");
             replacements.put("{{phuong}}", "Lê Đại Hành");
             replacements.put("{{chuTichPhuong}}", "Phương Quốc Luyện");
             replacements.put("{{nguoiTiepNhanHoSo}}", "Nguyễn Văn Chiến");
-            replacements.put("{{diaChiLienHe}}","Bờ Đa, phường Lê Đại Hành,");
-            replacements.put("{{canBoTD}}","DƯƠNG QUANG TUẤN");
-            replacements.put("{{canBoTDVT}}",capitalizeWords("DƯƠNG QUANG TUẤN"));
-            replacements.put("{{sdtCanBoTD}}","0906676333");
-            replacements.put("{{gmail}}","pgdanlac888@gmail.com");
-            replacements.put("{{nddpl}}","Trưởng Phòng");
+            replacements.put("{{diaChiLienHe}}", "Bờ Đa, phường Lê Đại Hành,");
+            replacements.put("{{canBoTD}}", "DƯƠNG QUANG TUẤN");
+            replacements.put("{{canBoTDVT}}", capitalizeWords("DƯƠNG QUANG TUẤN"));
+            replacements.put("{{sdtCanBoTD}}", "0906676333");
+            replacements.put("{{gmail}}", "pgdanlac888@gmail.com");
+            replacements.put("{{nddpl}}", "Trưởng Phòng");
         }
         if (request.getCheckHopDongBaoLanh()) {
             String doanVanBan = "Bên B dùng tài sản này để đảm bảo việc thanh toán được kịp thời, đầy đủ và thực hiện một cách " +
                     "trọn vẹn khi đến hạn các nghĩa vụ trả nợ đối với hợp đồng cho vay số:" + request.getSoHopDongTD() + "của "
                     + request.getGtkh().toLowerCase() + " " + capitalizeWords(request.getTenKhachHang()) + " " + request.getGtnt().toLowerCase() + " " +
                     capitalizeWords(request.getTenNguoiThan()) + " hoặc các hợp đồng cho vay khác có tham chiếu từ hợp đồng thế chấp này";
-            String doanVanBan2 = "theo hợp đồng cho vay số: " +request.getSoHopDongTD()+ " và hợp đồng cho vay khác (nếu có) mà tài sản thế chấp này làm bảo đảm";
+            String doanVanBan2 = "theo hợp đồng cho vay số: " + request.getSoHopDongTD() + " và hợp đồng cho vay khác (nếu có) mà tài sản thế chấp này làm bảo đảm";
             replacements.put("{{tstc}}", doanVanBan);
             replacements.put("{{dvb}}", doanVanBan2);
         } else {
@@ -520,43 +529,83 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             replacements.put("{{dvb}}", "của Bên B");
         }
 // Tìm paragraph có placeholder
-        for (XWPFParagraph para : new ArrayList<>(doc.getParagraphs())) {
+//        for (XWPFParagraph para : new ArrayList<>(doc.getParagraphs())) {
+//            String text = para.getText();
+//            if (text != null) {
+//                if (text.contains("{{TABLE_PLACEHOLDER}}")) {
+//                    // bảng tuỳ chọn, chỉ tạo nếu drawTable = true
+//                    System.err.println("getTableRequest -------> "+request.getTableRequest());
+//                    insertTableAtPlaceholder(doc, para, request.getTableRequest(), true);
+//                }
+//                if (text.contains("{{TABLE1_PLACEHOLDER}}")) {
+//                    // bảng bắt buộc, luôn tạo
+//                    insertTableAtPlaceholder(doc, para, request.getTable1(), false);
+//                }
+//                if (text.contains("{{TABLE2_PLACEHOLDER}}")) {
+//                    insertTableAtPlaceholder(doc, para, request.getTable2(), false);
+//                }
+//                if (text.contains("{{TABLE3_PLACEHOLDER}}")) {
+//                    insertTableAtPlaceholder(doc, para, request.getTable3(), false);
+//                }
+//                if (text.contains("{{TABLE_HM_PLACEHOLDER}}")) {
+//                    insertTableAtPlaceholder(doc, para, request.getHanMucTable(), false);
+//                }
+//                if (text.contains("{{TABLE_CP_PLACEHOLDER}}")) {
+//                    insertTableAtPlaceholder(doc, para, request.getChiPhiTable(), false);
+//                }
+//            }
+//        }
+        // Tạo bản copy để duyệt, tránh ConcurrentModificationException
+        // Bước 1: tìm tất cả paragraph chứa placeholder
+        List<XWPFParagraph> targets = new ArrayList<>();
+        for (XWPFParagraph para : doc.getParagraphs()) {
             String text = para.getText();
-            if (text != null) {
-                if (text.contains("{{TABLE_PLACEHOLDER}}")) {
-                    // bảng tuỳ chọn, chỉ tạo nếu drawTable = true
-                    System.err.println("getTableRequest -------> "+request.getTableRequest());
-                    insertTableAtPlaceholder(doc, para, request.getTableRequest(), true);
-                }
-                if (text.contains("{{TABLE1_PLACEHOLDER}}")) {
-                    // bảng bắt buộc, luôn tạo
-                    insertTableAtPlaceholder(doc, para, request.getTable1(), false);
-                }
-                if (text.contains("{{TABLE2_PLACEHOLDER}}")) {
-                    insertTableAtPlaceholder(doc, para, request.getTable2(), false);
-                }
-                if (text.contains("{{TABLE3_PLACEHOLDER}}")) {
-                    insertTableAtPlaceholder(doc, para, request.getTable3(), false);
-                }
-                if (text.contains("{{TABLE_HM_PLACEHOLDER}}")) {
-                    insertTableAtPlaceholder(doc, para, request.getHanMucTable(), false);
-                }
-                if (text.contains("{{TABLE_CP_PLACEHOLDER}}")) {
-                    insertTableAtPlaceholder(doc, para, request.getChiPhiTable(), false);
-                }
+            if (text == null) continue;
+
+            if (text.contains("{{TABLE_PLACEHOLDER}}")
+                    || text.contains("{{TABLE1_PLACEHOLDER}}")
+                    || text.contains("{{TABLE2_PLACEHOLDER}}")
+                    || text.contains("{{TABLE3_PLACEHOLDER}}")
+                    || text.contains("{{TABLE_HM_PLACEHOLDER}}")
+                    || text.contains("{{TABLE_CP_PLACEHOLDER}}")) {
+                targets.add(para);
             }
         }
 
-        // Duyệt trên bản copy để tránh ConcurrentModificationException
+// Bước 2: thay thế placeholder bằng bảng
+        for (XWPFParagraph para : targets) {
+            String text = para.getText();
+
+            if (text.contains("{{TABLE_PLACEHOLDER}}")) {
+                insertTableAtPlaceholder(doc, para, request.getTableRequest(), true);
+            }
+            if (text.contains("{{TABLE1_PLACEHOLDER}}")) {
+                insertTableAtPlaceholder(doc, para, request.getTable1(), false);
+            }
+            if (text.contains("{{TABLE2_PLACEHOLDER}}")) {
+                insertTableAtPlaceholder(doc, para, request.getTable2(), false);
+            }
+            if (text.contains("{{TABLE3_PLACEHOLDER}}")) {
+                insertTableAtPlaceholder(doc, para, request.getTable3(), false);
+            }
+            if (text.contains("{{TABLE_HM_PLACEHOLDER}}")) {
+                insertTableAtPlaceholder(doc, para, request.getHanMucTable(), false);
+            }
+            if (text.contains("{{TABLE_CP_PLACEHOLDER}}")) {
+                insertTableAtPlaceholder(doc, para, request.getChiPhiTable(), false);
+            }
+        }
+
+// Bước 3: xử lý các paragraph text khác
         List<XWPFParagraph> docParas = new ArrayList<>(doc.getParagraphs());
         for (XWPFParagraph paragraph : docParas) {
             processParagraph(paragraph, replacements);
         }
 
+// Bước 4: xử lý các paragraph trong bảng
         for (XWPFTable table : doc.getTables()) {
             for (XWPFTableRow row : table.getRows()) {
-                List<XWPFTableCell> cells = new ArrayList<>(row.getTableCells());
-                for (XWPFTableCell cell : cells) {
+                for (XWPFTableCell cell : row.getTableCells()) {
                     List<XWPFParagraph> paras = new ArrayList<>(cell.getParagraphs());
                     for (XWPFParagraph paragraph : paras) {
                         processParagraph(paragraph, replacements);
@@ -565,7 +614,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             }
         }
     }
-    private static final String[] units = {
+        private static final String[] units = {
             "không", "một", "hai", "ba", "bốn", "năm", "sáu", "bảy", "tám", "chín"
     };
 
@@ -637,7 +686,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
 
     private Map<String, String> calculatePercents(double tongVonLuuDong, double vonTuCo, double vonKhac, double tienSo, boolean isThoaThuan) {
         // Nếu là thỏa thuận thì base = tongVonLuuDong, ngược lại base = tongVonLuuDong / 1.2
-        double baseTotal = isThoaThuan ? tongVonLuuDong/1.2 : tongVonLuuDong;
+        double baseTotal = isThoaThuan ? tongVonLuuDong / 1.2 : tongVonLuuDong;
 
         Map<String, String> result = new HashMap<>();
 
@@ -660,46 +709,60 @@ public class CreditContractServiceIMPL implements ICreditContractService {
     }
 
 
-    private void insertTableAtPlaceholder(XWPFDocument doc, XWPFParagraph para,
-                                          TableRequest tableRequest, boolean checkDrawTable) {
-        // Lấy con trỏ trước khi xóa nội dung
-        XmlCursor cursor = para.getCTP().newCursor();
+//    private void insertTableAtPlaceholder(XWPFDocument doc, XWPFParagraph para,
+//                                          TableRequest tableRequest, boolean checkDrawTable) {
+//        // Lấy con trỏ trước khi xóa nội dung
+//        XmlCursor cursor = para.getCTP().newCursor();
+//
+//        // Xóa nội dung placeholder (runs), nhưng giữ paragraph tạm thời
+//        for (int i = para.getRuns().size() - 1; i >= 0; i--) {
+//            para.removeRun(i);
+//        }
+//
+//        if (tableRequest != null) {
+//            if (!checkDrawTable || tableRequest.isDrawTable()) {
+//                // Chèn bảng tại vị trí con trỏ
+//                XWPFTable table = doc.insertNewTbl(cursor);
+//                if (table != null) {
+//                    // Xóa row mặc định ngay lập tức để tránh thừa hàng trống
+//                    if (table.getNumberOfRows() == 1) {
+//                        table.removeRow(0);
+//                    }
+//
+//                    // Điền dữ liệu vào bảng
+//                    fillInsertedTable(table, tableRequest, checkDrawTable);
+//                }
+//            }
+//        }
+//    }
+//
+private void insertTableAtPlaceholder(XWPFDocument doc, XWPFParagraph para,
+                                      TableRequest tableRequest, boolean checkDrawTable) {
+    // Lấy vị trí của paragraph trong body
+    int paraPos = doc.getPosOfParagraph(para);
 
-        // Xóa nội dung placeholder (runs), nhưng giữ paragraph tạm thời
-        for (int i = para.getRuns().size() - 1; i >= 0; i--) {
-            para.removeRun(i);
-        }
+    // Tạo con trỏ tại paragraph
+    XmlCursor cursor = para.getCTP().newCursor();
 
-        if (tableRequest != null) {
-            if (!checkDrawTable || tableRequest.isDrawTable()) {
-                // Chèn bảng tại vị trí con trỏ
-                XWPFTable table = doc.insertNewTbl(cursor);
-                if (table != null) {
-                    // Thay vì xóa row mặc định ngay, hãy điền dữ liệu vào đó
-                    if (table.getNumberOfRows() == 1 && table.getRow(0).getTableCells().size() == 1) {
-                        // Nếu không muốn dùng row mặc định, thêm row mới trước rồi mới xóa
-                        table.createRow();
-                        table.removeRow(0);
-                    }
+    // Xóa hẳn paragraph placeholder khỏi document
+    doc.removeBodyElement(paraPos);
 
-                    // Điền dữ liệu vào bảng
-                    fillInsertedTable(table, tableRequest, checkDrawTable);
+    if (tableRequest != null) {
+        if (!checkDrawTable || tableRequest.isDrawTable()) {
+            // Chèn bảng tại vị trí con trỏ
+            XWPFTable table = doc.insertNewTbl(cursor);
+            if (table != null) {
+                // Xóa row mặc định ngay lập tức để tránh thừa hàng trống
+                if (table.getNumberOfRows() == 1) {
+                    table.removeRow(0);
                 }
+
+                // Điền dữ liệu vào bảng
+                fillInsertedTable(table, tableRequest, checkDrawTable);
             }
         }
-
-        // Sau khi chèn bảng, xóa paragraph placeholder để tránh dư thừa
-        IBody body = para.getBody();
-        if (body instanceof XWPFDocument d) {
-            int pos = d.getPosOfParagraph(para);
-            if (pos >= 0) d.removeBodyElement(pos);
-        } else if (body instanceof XWPFTableCell cell) {
-            int idx = cell.getParagraphs().indexOf(para);
-            if (idx >= 0) cell.removeParagraph(idx);
-        }
     }
-
-
+}
 
 
     private String capitalizeWords(String str) {
