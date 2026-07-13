@@ -8,6 +8,8 @@ import java.math.BigInteger;
 import java.text.NumberFormat;
 import java.util.Locale;
 
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTHMerge;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.STMerge;
 import com.example.demo.model.User;
 import com.example.demo.repository.ICreditContractRepository;
 import com.example.demo.repository.IFileMetadataRepository;
@@ -528,35 +530,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             replacements.put("{{tstc}}", doanVanBan);
             replacements.put("{{dvb}}", "của Bên B");
         }
-// Tìm paragraph có placeholder
-//        for (XWPFParagraph para : new ArrayList<>(doc.getParagraphs())) {
-//            String text = para.getText();
-//            if (text != null) {
-//                if (text.contains("{{TABLE_PLACEHOLDER}}")) {
-//                    // bảng tuỳ chọn, chỉ tạo nếu drawTable = true
-//                    System.err.println("getTableRequest -------> "+request.getTableRequest());
-//                    insertTableAtPlaceholder(doc, para, request.getTableRequest(), true);
-//                }
-//                if (text.contains("{{TABLE1_PLACEHOLDER}}")) {
-//                    // bảng bắt buộc, luôn tạo
-//                    insertTableAtPlaceholder(doc, para, request.getTable1(), false);
-//                }
-//                if (text.contains("{{TABLE2_PLACEHOLDER}}")) {
-//                    insertTableAtPlaceholder(doc, para, request.getTable2(), false);
-//                }
-//                if (text.contains("{{TABLE3_PLACEHOLDER}}")) {
-//                    insertTableAtPlaceholder(doc, para, request.getTable3(), false);
-//                }
-//                if (text.contains("{{TABLE_HM_PLACEHOLDER}}")) {
-//                    insertTableAtPlaceholder(doc, para, request.getHanMucTable(), false);
-//                }
-//                if (text.contains("{{TABLE_CP_PLACEHOLDER}}")) {
-//                    insertTableAtPlaceholder(doc, para, request.getChiPhiTable(), false);
-//                }
-//            }
-//        }
-        // Tạo bản copy để duyệt, tránh ConcurrentModificationException
-        // Bước 1: tìm tất cả paragraph chứa placeholder
+    // Bước 1: tìm tất cả paragraph chứa placeholder
         List<XWPFParagraph> targets = new ArrayList<>();
         for (XWPFParagraph para : doc.getParagraphs()) {
             String text = para.getText();
@@ -571,7 +545,6 @@ public class CreditContractServiceIMPL implements ICreditContractService {
                 targets.add(para);
             }
         }
-
 // Bước 2: thay thế placeholder bằng bảng
         for (XWPFParagraph para : targets) {
             String text = para.getText();
@@ -614,7 +587,8 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             }
         }
     }
-        private static final String[] units = {
+
+    private static final String[] units = {
             "không", "một", "hai", "ba", "bốn", "năm", "sáu", "bảy", "tám", "chín"
     };
 
@@ -709,7 +683,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
     }
 
 
-//    private void insertTableAtPlaceholder(XWPFDocument doc, XWPFParagraph para,
+    //    private void insertTableAtPlaceholder(XWPFDocument doc, XWPFParagraph para,
 //                                          TableRequest tableRequest, boolean checkDrawTable) {
 //        // Lấy con trỏ trước khi xóa nội dung
 //        XmlCursor cursor = para.getCTP().newCursor();
@@ -736,33 +710,109 @@ public class CreditContractServiceIMPL implements ICreditContractService {
 //        }
 //    }
 //
-private void insertTableAtPlaceholder(XWPFDocument doc, XWPFParagraph para,
-                                      TableRequest tableRequest, boolean checkDrawTable) {
-    // Lấy vị trí của paragraph trong body
-    int paraPos = doc.getPosOfParagraph(para);
+    private void insertTableAtPlaceholder(XWPFDocument doc,
+                                          XWPFParagraph para,
+                                          TableRequest tableRequest,
+                                          boolean checkDrawTable) {
 
-    // Tạo con trỏ tại paragraph
-    XmlCursor cursor = para.getCTP().newCursor();
+        if (tableRequest == null) {
+            return;
+        }
 
-    // Xóa hẳn paragraph placeholder khỏi document
-    doc.removeBodyElement(paraPos);
+        if (checkDrawTable && !tableRequest.isDrawTable()) {
+            return;
+        }
 
-    if (tableRequest != null) {
-        if (!checkDrawTable || tableRequest.isDrawTable()) {
-            // Chèn bảng tại vị trí con trỏ
-            XWPFTable table = doc.insertNewTbl(cursor);
-            if (table != null) {
-                // Xóa row mặc định ngay lập tức để tránh thừa hàng trống
-                if (table.getNumberOfRows() == 1) {
-                    table.removeRow(0);
-                }
+        XmlCursor cursor = para.getCTP().newCursor();
 
-                // Điền dữ liệu vào bảng
-                fillInsertedTable(table, tableRequest, checkDrawTable);
-            }
+        // INSERT TABLE TRƯỚC
+        XWPFTable table = doc.insertNewTbl(cursor);
+
+        // Sau đó mới xóa paragraph placeholder
+        int paraPos = doc.getPosOfParagraph(para);
+        if (paraPos >= 0) {
+            doc.removeBodyElement(paraPos);
+        }
+
+        if (table.getNumberOfRows() > 0) {
+            table.removeRow(0);
+        }
+
+        String tableType = tableRequest.getTableType();
+
+        if ("hanMuc".equalsIgnoreCase(tableType)) {
+            fillHanMucTable(table, tableRequest);
+        } else if ("chiPhi".equalsIgnoreCase(tableType)) {
+            fillChiPhiTable(table, tableRequest);
+        } else {
+            fillGenericTable(table, tableRequest);
         }
     }
-}
+
+
+    private void fillGenericTable(XWPFTable table, TableRequest tableRequest) {
+        if (table == null || tableRequest == null) return;
+        if (!tableRequest.isDrawTable()) return;
+
+        // Xác định số cột: nếu có header thì lấy header.size(), nếu không thì lấy row dài nhất
+        int colCount = tableRequest.getHeaders() != null ? tableRequest.getHeaders().size() : 0;
+        for (List<String> rowData : tableRequest.getRows()) {
+            if (rowData.size() > colCount) colCount = rowData.size();
+        }
+
+        // Header nếu có
+        if (tableRequest.getHeaders() != null && !tableRequest.getHeaders().isEmpty()) {
+            XWPFTableRow headerRow = table.createRow();
+            while (headerRow.getTableCells().size() < colCount) {
+                XWPFTableCell cell = headerRow.addNewTableCell();
+                cell.addParagraph(); // đảm bảo có <p>
+            }
+            for (int c = 0; c < tableRequest.getHeaders().size(); c++) {
+                XWPFTableCell cell = headerRow.getCell(c);
+                XWPFParagraph para = cell.getParagraphs().isEmpty() ? cell.addParagraph() : cell.getParagraphs().get(0);
+                XWPFRun run = para.createRun();
+                run.setBold(true);
+                run.setFontFamily("Times New Roman");
+                run.setFontSize(13);
+                run.setText(tableRequest.getHeaders().get(c));
+            }
+            applyBordersToRow(headerRow);
+        }
+
+        // Data rows
+        for (List<String> rowData : tableRequest.getRows()) {
+            XWPFTableRow row = table.createRow();
+            while (row.getTableCells().size() < colCount) {
+                XWPFTableCell cell = row.addNewTableCell();
+                cell.addParagraph(); // đảm bảo có <p>
+            }
+            for (int c = 0; c < colCount; c++) {
+                String cellValue = c < rowData.size() ? rowData.get(c) : "";
+                XWPFTableCell cell = row.getCell(c);
+                XWPFParagraph para = cell.getParagraphs().isEmpty() ? cell.addParagraph() : cell.getParagraphs().get(0);
+                XWPFRun run = para.createRun();
+                run.setFontFamily("Times New Roman");
+                run.setFontSize(13);
+                run.setText(cellValue != null ? cellValue : "");
+            }
+            applyBordersToRow(row);
+            // Sau khi fill xong
+            for (XWPFTableRow row3 : table.getRows()) {
+                for (XWPFTableCell cell : row3.getTableCells()) {
+                    System.out.println("Cell paragraphs Generic: " + cell.getParagraphs().size());
+                }
+            }
+
+        }
+
+        // Rebuild grid
+        CTTbl ctTbl = table.getCTTbl();
+        CTTblGrid tblGrid = ctTbl.getTblGrid() == null ? ctTbl.addNewTblGrid() : ctTbl.getTblGrid();
+        while (tblGrid.sizeOfGridColArray() > 0) tblGrid.removeGridCol(0);
+        for (int i = 0; i < colCount; i++) {
+            tblGrid.addNewGridCol().setW(BigInteger.valueOf(2000));
+        }
+    }
 
 
     private String capitalizeWords(String str) {
@@ -861,173 +911,186 @@ private void insertTableAtPlaceholder(XWPFDocument doc, XWPFParagraph para,
 //            System.err.println("Run text: " + run.getText(0));
 //        }
     }
+    private void fillHanMucTable(XWPFTable table, TableRequest tableRequest) {
+        int numCols = tableRequest.getHeaders().size();
+
+        // ===== Set border cho bảng =====
+        CTTblBorders borders = table.getCTTbl().getTblPr().isSetTblBorders()
+                ? table.getCTTbl().getTblPr().getTblBorders()
+                : table.getCTTbl().getTblPr().addNewTblBorders();
+
+        setBorder(borders.addNewInsideH());
+        setBorder(borders.addNewInsideV());
+        setBorder(borders.addNewTop());
+        setBorder(borders.addNewBottom());
+        setBorder(borders.addNewLeft());
+        setBorder(borders.addNewRight());
+
+        // ===== Header =====
+        XWPFTableRow headerRow = table.createRow();
+        ensureCells(headerRow, numCols);
+        for (int i = 0; i < numCols; i++) {
+            setCellText(headerRow.getCell(i), tableRequest.getHeaders().get(i), true); // căn giữa header
+        }
+
+        // ===== Dữ liệu =====
+        for (List<String> rowData : tableRequest.getRows()) {
+            XWPFTableRow row = table.createRow();
+            ensureCells(row, numCols);
+            for (int i = 0; i < rowData.size(); i++) {
+                setCellText(row.getCell(i), rowData.get(i), false); // căn trái nội dung
+            }
+        }
+
+        // ===== Merge theo cấu hình =====
+        if (tableRequest.getMerges() != null) {
+            for (MergeInfoRequest merge : tableRequest.getMerges()) {
+                int rowIndex = merge.getRowIndex();
+                List<String> targets = merge.getMergeTargets();
+
+                if (targets != null && !targets.isEmpty()) {
+                    int startCol = Integer.parseInt(targets.get(0));
+                    int endCol = Integer.parseInt(targets.get(targets.size() - 1));
+
+                    XWPFTableCell baseCell = table.getRow(rowIndex + 1).getCell(startCol);
+                    setCellText(baseCell, merge.getMergedValue(), false);
+
+                    CTTcPr tcPr = baseCell.getCTTc().isSetTcPr() ? baseCell.getCTTc().getTcPr() : baseCell.getCTTc().addNewTcPr();
+                    CTHMerge hMerge = tcPr.isSetHMerge() ? tcPr.getHMerge() : tcPr.addNewHMerge();
+                    hMerge.setVal(STMerge.RESTART);
+
+                    for (int c = startCol + 1; c <= endCol; c++) {
+                        XWPFTableCell cell = table.getRow(rowIndex + 1).getCell(c);
+                        CTTcPr tcPr2 = cell.getCTTc().isSetTcPr() ? cell.getCTTc().getTcPr() : cell.getCTTc().addNewTcPr();
+                        CTHMerge hMerge2 = tcPr2.isSetHMerge() ? tcPr2.getHMerge() : tcPr2.addNewHMerge();
+                        hMerge2.setVal(STMerge.CONTINUE);
+                    }
+                }
+            }
+        }
+    }
+
+    // ===== Hàm phụ đảm bảo đủ số cell =====
+    private void ensureCells(XWPFTableRow row, int numCols) {
+        int existing = row.getTableCells().size();
+        for (int i = existing; i < numCols; i++) {
+            row.addNewTableCell();
+        }
+    }
+
+    // ===== Hàm phụ set text với font Times New Roman =====
+    private void setCellText(XWPFTableCell cell, String text, boolean isHeader) {
+        cell.removeParagraph(0);
+        XWPFParagraph para = cell.addParagraph();
+        para.setAlignment(isHeader ? ParagraphAlignment.CENTER : ParagraphAlignment.LEFT);
+        XWPFRun run = para.createRun();
+        run.setFontFamily("Times New Roman");
+        run.setFontSize(12);
+        run.setBold(isHeader); // header in đậm
+        run.setText(text);
+    }
+
+    // ===== Hàm phụ set border =====
+    private void setBorder(CTBorder border) {
+        border.setVal(STBorder.SINGLE);
+        border.setSz(BigInteger.valueOf(4)); // độ dày border
+        border.setColor("000000"); // màu đen
+    }
 
 
-    private void fillInsertedTable(XWPFTable table, TableRequest tableRequest, boolean checkDrawTable) {
+    private void applyBordersToRow(XWPFTableRow row) {
+        for (XWPFTableCell cell : row.getTableCells()) {
+            CTTcPr tcPr = cell.getCTTc().isSetTcPr() ? cell.getCTTc().getTcPr() : cell.getCTTc().addNewTcPr();
+            CTTcBorders borders = tcPr.isSetTcBorders() ? tcPr.getTcBorders() : tcPr.addNewTcBorders();
+
+            CTBorder top = borders.isSetTop() ? borders.getTop() : borders.addNewTop();
+            top.setVal(STBorder.SINGLE);
+            top.setSz(BigInteger.valueOf(4));   // độ dày
+            top.setColor("000000");             // màu đen
+
+            CTBorder bottom = borders.isSetBottom() ? borders.getBottom() : borders.addNewBottom();
+            bottom.setVal(STBorder.SINGLE);
+            bottom.setSz(BigInteger.valueOf(4));
+            bottom.setColor("000000");
+
+            CTBorder left = borders.isSetLeft() ? borders.getLeft() : borders.addNewLeft();
+            left.setVal(STBorder.SINGLE);
+            left.setSz(BigInteger.valueOf(4));
+            left.setColor("000000");
+
+            CTBorder right = borders.isSetRight() ? borders.getRight() : borders.addNewRight();
+            right.setVal(STBorder.SINGLE);
+            right.setSz(BigInteger.valueOf(4));
+            right.setColor("000000");
+        }
+    }
+
+
+    private void fillChiPhiTable(XWPFTable table, TableRequest tableRequest) {
         if (table == null || tableRequest == null) return;
-        if (checkDrawTable && !tableRequest.isDrawTable()) return;
+        if (!tableRequest.isDrawTable()) return;
 
-        int dataRowCount = tableRequest.getRows().size();
-        int colCount = dataRowCount > 0 ? tableRequest.getRows().get(0).size() : 0;
+        int colCount = tableRequest.getHeaders() != null ? tableRequest.getHeaders().size() : 0;
 
-        table.setTableAlignment(TableRowAlign.CENTER);
-        table.setWidth("8000");
-
-        // ===== Header row =====
+        // Header
         if (tableRequest.getHeaders() != null && !tableRequest.getHeaders().isEmpty()) {
             XWPFTableRow headerRow = table.createRow();
-            while (headerRow.getTableCells().size() < tableRequest.getHeaders().size()) {
-                headerRow.addNewTableCell();
-            }
-            for (int c = 0; c < tableRequest.getHeaders().size(); c++) {
+            while (headerRow.getTableCells().size() < colCount) headerRow.addNewTableCell();
+            for (int c = 0; c < colCount; c++) {
                 XWPFTableCell cell = headerRow.getCell(c);
-                if (cell == null) cell = headerRow.addNewTableCell();
-                XWPFParagraph para = cell.getParagraphs().get(0);
-                para.setAlignment(ParagraphAlignment.CENTER);
-                para.removeRun(0);
-                XWPFRun run = para.createRun();
+                while (!cell.getParagraphs().isEmpty()) cell.removeParagraph(0);
+                XWPFRun run = cell.addParagraph().createRun();
                 run.setBold(true);
                 run.setFontFamily("Times New Roman");
                 run.setFontSize(13);
                 run.setText(tableRequest.getHeaders().get(c));
             }
+            applyBordersToRow(headerRow);
         }
 
-        // ===== Data rows =====
-        for (int r = 0; r < dataRowCount; r++) {
+        // Data rows
+        for (List<String> rowData : tableRequest.getRows()) {
             XWPFTableRow row = table.createRow();
-            while (row.getTableCells().size() < colCount) {
-                row.addNewTableCell();
-            }
-            List<String> rowData = tableRequest.getRows().get(r);
+            while (row.getTableCells().size() < colCount) row.addNewTableCell();
             for (int c = 0; c < colCount; c++) {
                 String cellValue = c < rowData.size() ? rowData.get(c) : "";
                 XWPFTableCell cell = row.getCell(c);
-                if (cell == null) cell = row.addNewTableCell();
-                XWPFParagraph para = cell.getParagraphs().get(0);
-                para.setAlignment(ParagraphAlignment.CENTER);
-                for (int i = para.getRuns().size() - 1; i >= 0; i--) para.removeRun(i);
-                XWPFRun run = para.createRun();
+                while (!cell.getParagraphs().isEmpty()) cell.removeParagraph(0);
+                XWPFRun run = cell.addParagraph().createRun();
                 run.setFontFamily("Times New Roman");
                 run.setFontSize(13);
                 run.setText(cellValue);
             }
+            applyBordersToRow(row);
         }
 
-        // ===== Merge xử lý từ frontend =====
-        if (tableRequest.getMerges() != null) {
-            for (MergeInfoRequest merge : tableRequest.getMerges()) {
-                int rowPos = merge.getRowIndex() + (tableRequest.getHeaders().isEmpty() ? 0 : 1);
-                XWPFTableRow row = table.getRow(rowPos);
-                if (row != null) {
-                    int span = merge.getMergeTargets().size();
-                    if (span > 0) {
-                        XWPFTableCell cell0 = row.getCell(0);
-                        CTTcPr tcPr0 = cell0.getCTTc().isSetTcPr() ? cell0.getCTTc().getTcPr() : cell0.getCTTc().addNewTcPr();
-                        tcPr0.addNewGridSpan().setVal(BigInteger.valueOf(span));
-
-                        // Xóa cell thừa
-                        for (int j = 1; j < span; j++) {
-                            row.removeCell(1);
-                        }
-
-                        // Set nội dung merge
-                        XWPFParagraph para0 = cell0.getParagraphs().get(0);
-                        for (int i = para0.getRuns().size() - 1; i >= 0; i--) para0.removeRun(i);
-                        XWPFRun run0 = para0.createRun();
-                        run0.setFontFamily("Times New Roman");
-                        run0.setFontSize(13);
-                        run0.setBold(true);
-                        run0.setText(merge.getMergedValue());
-
-                        // Set border cho cell merge
-                        CTTcBorders borders = tcPr0.isSetTcBorders() ? tcPr0.getTcBorders() : tcPr0.addNewTcBorders();
-                        borders.addNewTop().setVal(STBorder.SINGLE);
-                        borders.addNewBottom().setVal(STBorder.SINGLE);
-                        borders.addNewLeft().setVal(STBorder.SINGLE);
-                        borders.addNewRight().setVal(STBorder.SINGLE);
-
-                        // In đậm toàn bộ row merge
-                        for (XWPFTableCell cell : row.getTableCells()) {
-                            XWPFParagraph para = cell.getParagraphs().get(0);
-                            for (XWPFRun run : para.getRuns()) {
-                                run.setBold(true);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        // ===== Nếu là hanMucTable thì xử lý row cuối cùng đặc biệt =====
-        if ("hanMuc".equals(tableRequest.getTableType()) && dataRowCount > 0) {
-            String totalValue = "";
-            List<String> lastRowData = tableRequest.getRows().get(dataRowCount - 1);
-            if (lastRowData.size() > 3) {
-                totalValue = lastRowData.get(3);
-            }
-
-            XWPFTableRow lastRow = table.getRow(table.getNumberOfRows() - 1);
-
-            while (lastRow.getTableCells().size() > 0) {
-                lastRow.removeCell(0);
-            }
-
-            lastRow.addNewTableCell();
-            lastRow.addNewTableCell();
-            lastRow.addNewTableCell();
-
-            XWPFTableCell cell0 = lastRow.getCell(0);
-            CTTcPr tcPr0 = cell0.getCTTc().isSetTcPr() ? cell0.getCTTc().getTcPr() : cell0.getCTTc().addNewTcPr();
-            tcPr0.addNewGridSpan().setVal(BigInteger.valueOf(3));
-
-            XWPFParagraph para0 = cell0.getParagraphs().get(0);
-            for (int i = para0.getRuns().size() - 1; i >= 0; i--) para0.removeRun(i);
-            XWPFRun run0 = para0.createRun();
-            run0.setFontFamily("Times New Roman");
-            run0.setFontSize(13);
-            run0.setBold(true);
-            run0.setText("Tổng số ngày bình quân");
-
-            XWPFTableCell cell2 = lastRow.getCell(2);
-            XWPFParagraph para2 = cell2.getParagraphs().get(0);
-            para2.setAlignment(ParagraphAlignment.CENTER);
-            XWPFRun run2 = para2.createRun();
-            run2.setFontFamily("Times New Roman");
-            run2.setFontSize(13);
-            run2.setBold(true);
-            run2.setText(totalValue != null ? totalValue : "");
-        }
-
-        // ===== Rebuild lại grid theo số cell thực tế =====
+        // Rebuild grid
         CTTbl ctTbl = table.getCTTbl();
-        CTTblGrid tblGrid = ctTbl.getTblGrid();
-        if (tblGrid == null) {
-            tblGrid = ctTbl.addNewTblGrid();
+        CTTblGrid tblGrid = ctTbl.getTblGrid() == null ? ctTbl.addNewTblGrid() : ctTbl.getTblGrid();
+        while (tblGrid.sizeOfGridColArray() > 0) tblGrid.removeGridCol(0);
+        for (int i = 0; i < colCount; i++) {
+            tblGrid.addNewGridCol().setW(BigInteger.valueOf(2000));
         }
-        // Xóa grid cũ
-        while (tblGrid.sizeOfGridColArray() > 0) {
-            tblGrid.removeGridCol(0);
-        }
-        // Lấy số cell thực tế của row đầu tiên sau merge
-        int actualColCount = table.getRow(0).getTableCells().size();
-        for (int i = 0; i < actualColCount; i++) {
-            tblGrid.addNewGridCol().setW(BigInteger.valueOf(2000)); // width tùy chỉnh
-        }
-
-        // ===== Đảm bảo toàn bảng có border =====
-        CTTblPr tblPr = ctTbl.getTblPr() == null ? ctTbl.addNewTblPr() : ctTbl.getTblPr();
-        CTTblBorders borders = tblPr.isSetTblBorders() ? tblPr.getTblBorders() : tblPr.addNewTblBorders();
-
-        borders.addNewTop().setVal(STBorder.SINGLE);
-        borders.addNewBottom().setVal(STBorder.SINGLE);
-        borders.addNewLeft().setVal(STBorder.SINGLE);
-        borders.addNewRight().setVal(STBorder.SINGLE);
-        borders.addNewInsideH().setVal(STBorder.SINGLE);
-        borders.addNewInsideV().setVal(STBorder.SINGLE);
     }
 
 
+    private XWPFTableRow createRow(XWPFTable table, int colCount) {
+        XWPFTableRow row = table.createRow();
+
+        while (row.getTableCells().size() < colCount) {
+            row.createCell();
+        }
+
+        for (XWPFTableCell cell : row.getTableCells()) {
+            while (cell.getParagraphs().size() > 1) {
+                cell.removeParagraph(1);
+            }
+            if (cell.getParagraphs().isEmpty()) {
+                cell.addParagraph();
+            }
+        }
+        return row;
+    }
 
     private String extractPhuong(String diaChi) {
         if (diaChi == null) return "";
