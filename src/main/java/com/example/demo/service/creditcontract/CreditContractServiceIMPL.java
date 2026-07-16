@@ -306,6 +306,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         replacements.put("{{dcntbd}}", Optional.ofNullable(request.getDiaChiThuongTruDungTenBiaDo2()).orElse(""));
         replacements.put("{{nsntbd}}", Optional.ofNullable(request.getNamSinhDungTenBiaDo2()).orElse(""));
         replacements.put("{{lv}}", Optional.ofNullable(request.getLoaiVay()).orElse(""));
+        replacements.put("{{tgvv}}", Optional.ofNullable(request.getHanMuc()).orElse(""));
         if (request.getLoaiVay().equalsIgnoreCase("NGẮN HẠN (Thỏa thuận)")) {
             replacements.put("{{lvt}}", Optional.ofNullable("Ngắn hạn").orElse(""));
             replacements.put("{{slv}}", "hạn mức");
@@ -321,8 +322,11 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             replacements.put("{{ms6d}}", "Thời hạn cho vay của từng khoản cấp tín dụng cụ thể được tính từ ngày tiếp theo của ngày giải ngân cho đến thời điểm trả hết toàn bộ tiền gốc, lãi tiền vay và các chi phí phát sinh liên quan. Trong trường hợp Bên B sử dụng tiền vay chưa đủ một ngày, thì tính từ thời điểm nhận tiền vay và thời gian vay vốn được tính là 01 (một) ngày và trường hợp ngày cuối cùng của thời hạn vay là ngày lễ hoặc thứ 7, chủ nhật hàng tuần, thì ngày đến hạn chuyển sang ngày làm việc tiếp theo.");
             replacements.put("{{tghm}}", "Thời gian xác định bình quân cho một chu kỳ sản xuất, kinh doanh.");
             replacements.put("{{vqhm}}", "Vòng quay vốn lưu động = Tổng số ngày 01 năm/Tổng số ngày bình quân = 365/304 = 1,2 vòng.");
-            replacements.put("{{tgvv}}", "Thời gian duy trì hàn mức: " + request.getHanMuc());
             replacements.put("{{vongQuay}}", "- Số vòng quay vốn bình quân:  1,2  Vòng/năm.");
+            replacements.put("{{hm1}}","+ Chính sách bán hàng: Bán buôn và bán lẻ cho các hộ kinh doanh, các đại lý trên địa bàn tỉnh và các vùng lân cận.");
+            replacements.put("{{hm2}}","+ Chính sách thu tiền hàng: Cho phép bên mua trả chậm tối đa không quá 90 ngày.");
+            replacements.put("{{hm3}}","* Xác điịnh thời gian bình quân cho một chu kỳ sản xuất:");
+            replacements.put("{{tgpa}}","duy trì hàn mức");
         } else {
             replacements.put("{{lvt}}", Optional.ofNullable(capitalizeWords(request.getLoaiVay())).orElse(""));
             replacements.put("{{slv}}", "từng lần");
@@ -337,8 +341,11 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             replacements.put("{{ms6d}}", "");
             replacements.put("{{tghm}}", "");
             replacements.put("{{vqhm}}", "");
-            replacements.put("{{tgvv}}", "- Thời gian vay vốn: " + request.getThoiHanVay() + " năm");
             replacements.put("{{vongQuay}}", "");
+            replacements.put("{{hm1}}","");
+            replacements.put("{{hm2}}","");
+            replacements.put("{{hm3}}","");
+            replacements.put("{{tgpa}}","sử dụng vốn vay");
         }
         CreditContractTSBDRequest tsbdDto = request.getTsbdRequest();
         if (tsbdDto != null && Boolean.TRUE.equals(tsbdDto.getCheckTaiSanGanLienVoiDat())) {
@@ -499,7 +506,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         } else if (request.getNguoiDaiDien().equalsIgnoreCase("pgd")) {
             replacements.put("{{pgd}}", " - PHÒNG GIAO DỊCH AN LẠC");
             replacements.put("{{pgdvt}}", capitalizeWords(" - PHÒNG GIAO DỊCH AN LẠC"));
-            replacements.put("{{dcpgd}}", "Địa chỉ: Bờ Đa, phường Lê Đại Hành, thành phố Hải Phòng. " +
+            replacements.put("{{dcpgd}}", "Địa chỉ: TDP Lạc Đạo, phường Lê Đại Hành, thành phố Hải Phòng. " +
                     "Giấy phép đăng ký kinh doanh: 0800001806; Điện thoại: 0220.3596.266");
             replacements.put("{{ndd}}", "ông: VŨ THANH HẢI Chức vụ: Phó Giám Đốc - Trưởng PGD An Lạc.\n" +
                     "CCCD số: 030083003225;\n" +
@@ -1042,14 +1049,23 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         }
 
         // ===== Merge =====
+        // ===== Merge =====
         if (tableRequest.getMerges() != null) {
+            // ánh xạ tên cột sang index
+            Map<String, Integer> colIndexMap = new HashMap<>();
+            colIndexMap.put("stt", 0);
+            colIndexMap.put("danhMuc", 1);
+            colIndexMap.put("donVi", 2);
+            colIndexMap.put("soLuong", 3);
+            colIndexMap.put("donGia", 4);
+
             for (MergeInfoRequest merge : tableRequest.getMerges()) {
                 int rowIndex = merge.getRowIndex();
                 List<String> targets = merge.getMergeTargets();
                 if (targets == null || targets.isEmpty()) continue;
 
-                int startCol = Integer.parseInt(targets.get(0));
-                int endCol = Integer.parseInt(targets.get(targets.size() - 1));
+                int startCol = colIndexMap.getOrDefault(targets.get(0), 0);
+                int endCol = colIndexMap.getOrDefault(targets.get(targets.size() - 1), startCol);
 
                 int tableRowIndex = hasHeader ? rowIndex + 1 : rowIndex;
                 if (tableRowIndex < 0 || tableRowIndex >= table.getNumberOfRows()) continue;
@@ -1067,7 +1083,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
                     while (contCell.getParagraphs().size() > 0) {
                         contCell.removeParagraph(0);
                     }
-                    contCell.addParagraph();
+                    // KHÔNG thêm contCell.addParagraph();
                     CTTcPr tcPr2 = contCell.getCTTc().isSetTcPr() ? contCell.getCTTc().getTcPr() : contCell.getCTTc().addNewTcPr();
                     CTHMerge hMerge2 = tcPr2.isSetHMerge() ? tcPr2.getHMerge() : tcPr2.addNewHMerge();
                     hMerge2.setVal(STMerge.CONTINUE);
@@ -1075,9 +1091,11 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             }
         }
 
+
         // ===== Rebuild grid =====
         rebuildTableGrid(table, colCount);
     }
+
 
 // ======= Hàm phụ dùng chung =======
 
