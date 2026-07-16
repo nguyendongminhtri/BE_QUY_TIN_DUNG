@@ -943,7 +943,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             // đảm bảo mỗi cell có paragraph
             ensureParagraphsInRow(headerRow);
             for (int i = 0; i < numCols; i++) {
-                setCellText(headerRow.getCell(i), tableRequest.getHeaders().get(i), true);
+                setCellText(headerRow.getCell(i), tableRequest.getHeaders().get(i), true, false);
             }
             applyBordersToRow(headerRow);
         }
@@ -956,7 +956,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             for (int i = 0; i < numCols; i++) {
                 String value = i < rowData.size() ? rowData.get(i) : "";
                 // luôn gọi setCellText để tạo paragraph + run (dù rỗng)
-                setCellText(row.getCell(i), value, false);
+                setCellText(row.getCell(i), value, false, false);
             }
             applyBordersToRow(row);
         }
@@ -979,7 +979,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
                 XWPFTableCell baseCell = table.getRow(tableRowIndex).getCell(startCol);
                 // đảm bảo baseCell tồn tại
                 if (baseCell == null) continue;
-                setCellText(baseCell, merge.getMergedValue() != null ? merge.getMergedValue() : "", false);
+                setCellText(baseCell, merge.getMergedValue() != null ? merge.getMergedValue() : "", false, true);
                 CTTcPr tcPr = baseCell.getCTTc().isSetTcPr() ? baseCell.getCTTc().getTcPr() : baseCell.getCTTc().addNewTcPr();
                 CTHMerge hMerge = tcPr.isSetHMerge() ? tcPr.getHMerge() : tcPr.addNewHMerge();
                 hMerge.setVal(STMerge.RESTART);
@@ -995,7 +995,6 @@ public class CreditContractServiceIMPL implements ICreditContractService {
                     // thêm paragraph rỗng (bắt buộc để tránh lỗi XML)
                     contCell.addParagraph();
                     // đảm bảo không có run chứa text
-                    // (không gọi setCellText để tránh tạo run)
                     CTTcPr tcPr2 = contCell.getCTTc().isSetTcPr() ? contCell.getCTTc().getTcPr() : contCell.getCTTc().addNewTcPr();
                     CTHMerge hMerge2 = tcPr2.isSetHMerge() ? tcPr2.getHMerge() : tcPr2.addNewHMerge();
                     hMerge2.setVal(STMerge.CONTINUE);
@@ -1031,7 +1030,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             ensureCells(headerRow, colCount);
             ensureParagraphsInRow(headerRow);
             for (int c = 0; c < colCount; c++) {
-                setCellText(headerRow.getCell(c), tableRequest.getHeaders().get(c), true);
+                setCellText(headerRow.getCell(c), tableRequest.getHeaders().get(c), true, false);
             }
             applyBordersToRow(headerRow);
         }
@@ -1043,12 +1042,11 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             ensureParagraphsInRow(row);
             for (int c = 0; c < colCount; c++) {
                 String cellValue = c < rowData.size() ? rowData.get(c) : "";
-                setCellText(row.getCell(c), cellValue, false);
+                setCellText(row.getCell(c), cellValue, false, false);
             }
             applyBordersToRow(row);
         }
 
-        // ===== Merge =====
         // ===== Merge =====
         if (tableRequest.getMerges() != null) {
             // ánh xạ tên cột sang index
@@ -1058,6 +1056,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             colIndexMap.put("donVi", 2);
             colIndexMap.put("soLuong", 3);
             colIndexMap.put("donGia", 4);
+            colIndexMap.put("thanhTien", 5);
 
             for (MergeInfoRequest merge : tableRequest.getMerges()) {
                 int rowIndex = merge.getRowIndex();
@@ -1070,20 +1069,32 @@ public class CreditContractServiceIMPL implements ICreditContractService {
                 int tableRowIndex = hasHeader ? rowIndex + 1 : rowIndex;
                 if (tableRowIndex < 0 || tableRowIndex >= table.getNumberOfRows()) continue;
 
-                XWPFTableCell baseCell = table.getRow(tableRowIndex).getCell(startCol);
+                XWPFTableRow mergedRow = table.getRow(tableRowIndex);
+
+                // In đậm toàn bộ hàng merge
+                for (int c = 0; c < mergedRow.getTableCells().size(); c++) {
+                    XWPFTableCell cell = mergedRow.getCell(c);
+                    if (cell != null) {
+                        String text = cell.getText();
+                        setCellText(cell, text, false, true);
+                    }
+                }
+
+                // Xử lý merge như trước
+                XWPFTableCell baseCell = mergedRow.getCell(startCol);
                 if (baseCell == null) continue;
-                setCellText(baseCell, merge.getMergedValue() != null ? merge.getMergedValue() : "", false);
+                setCellText(baseCell, merge.getMergedValue() != null ? merge.getMergedValue() : "", false, true);
                 CTTcPr tcPr = baseCell.getCTTc().isSetTcPr() ? baseCell.getCTTc().getTcPr() : baseCell.getCTTc().addNewTcPr();
                 CTHMerge hMerge = tcPr.isSetHMerge() ? tcPr.getHMerge() : tcPr.addNewHMerge();
                 hMerge.setVal(STMerge.RESTART);
 
                 for (int c = startCol + 1; c <= endCol; c++) {
-                    XWPFTableCell contCell = table.getRow(tableRowIndex).getCell(c);
+                    XWPFTableCell contCell = mergedRow.getCell(c);
                     if (contCell == null) continue;
                     while (contCell.getParagraphs().size() > 0) {
                         contCell.removeParagraph(0);
                     }
-                    // KHÔNG thêm contCell.addParagraph();
+                    contCell.addParagraph();
                     CTTcPr tcPr2 = contCell.getCTTc().isSetTcPr() ? contCell.getCTTc().getTcPr() : contCell.getCTTc().addNewTcPr();
                     CTHMerge hMerge2 = tcPr2.isSetHMerge() ? tcPr2.getHMerge() : tcPr2.addNewHMerge();
                     hMerge2.setVal(STMerge.CONTINUE);
@@ -1091,10 +1102,10 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             }
         }
 
-
         // ===== Rebuild grid =====
         rebuildTableGrid(table, colCount);
     }
+
 
 
 // ======= Hàm phụ dùng chung =======
@@ -1117,8 +1128,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
     }
 
     // Set text an toàn: luôn tạo paragraph mới, font Times New Roman
-    private void setCellText(XWPFTableCell cell, String text, boolean isHeader) {
-        // Xóa tất cả paragraph cũ để tránh giữ run cũ
+    private void setCellText(XWPFTableCell cell, String text, boolean isHeader, boolean isBold) {
         while (cell.getParagraphs().size() > 0) {
             cell.removeParagraph(0);
         }
@@ -1127,14 +1137,15 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         XWPFRun run = para.createRun();
         run.setFontFamily("Times New Roman");
         run.setFontSize(12);
-        run.setBold(isHeader);
+        run.setBold(isHeader || isBold);
+
         if (text != null && !text.isEmpty()) {
             run.setText(text);
-        } else {
-            // nếu rỗng, vẫn giữ paragraph rỗng (không thêm run text)
-            // nhưng để an toàn, ta có thể thêm run rỗng (không cần thiết)
         }
     }
+
+
+
 
     // Set border cho CTBorder
     private void setBorder(CTBorder border) {
