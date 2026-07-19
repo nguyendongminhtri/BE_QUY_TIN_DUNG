@@ -284,7 +284,11 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         replacements.put("{{thsd}}", Optional.ofNullable(request.getThoiHanSuDung()).orElse(""));
         replacements.put("{{bbdg}}", Optional.ofNullable(request.getSoBienBanDinhGia()).orElse(""));
         replacements.put("{{ndtt}}", Optional.ofNullable(request.getNoiDungThoaThuan()).orElse(""));
-        replacements.put("{{ngsd}}", Optional.ofNullable("Nguồn gốc sử dụng: " + request.getNguonGocSuDung()).orElse(""));
+        if (request.getCheckNguonGocSuDung()) {
+            replacements.put("{{ngsd}}", Optional.ofNullable("Nguồn gốc sử dụng: " + request.getNguonGocSuDung()).orElse(""));
+        } else {
+            replacements.put("{{ngsd}}", "");
+        }
         replacements.put("{{gc}}", Optional.ofNullable(request.getGhiChu()).orElse(""));
         replacements.put("{{chv}}", Optional.ofNullable(request.getChoVay()).orElse(""));
         replacements.put("{{gtqsdd}}", Optional.ofNullable(formattedGtqsdd).orElse(""));
@@ -323,10 +327,10 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             replacements.put("{{tghm}}", "Thời gian xác định bình quân cho một chu kỳ sản xuất, kinh doanh.");
             replacements.put("{{vqhm}}", "Vòng quay vốn lưu động = Tổng số ngày 01 năm/Tổng số ngày bình quân = 365/304 = 1,2 vòng.");
             replacements.put("{{vongQuay}}", "- Số vòng quay vốn bình quân:  1,2  Vòng/năm.");
-            replacements.put("{{hm1}}","+ Chính sách bán hàng: Bán buôn và bán lẻ cho các hộ kinh doanh, các đại lý trên địa bàn tỉnh và các vùng lân cận.");
-            replacements.put("{{hm2}}","+ Chính sách thu tiền hàng: Cho phép bên mua trả chậm tối đa không quá 90 ngày.");
-            replacements.put("{{hm3}}","* Xác điịnh thời gian bình quân cho một chu kỳ sản xuất:");
-            replacements.put("{{tgpa}}","duy trì hàn mức");
+            replacements.put("{{hm1}}", "+ Chính sách bán hàng: Bán buôn và bán lẻ cho các hộ kinh doanh, các đại lý trên địa bàn tỉnh và các vùng lân cận.");
+            replacements.put("{{hm2}}", "+ Chính sách thu tiền hàng: Cho phép bên mua trả chậm tối đa không quá 90 ngày.");
+            replacements.put("{{hm3}}", "* Xác điịnh thời gian bình quân cho một chu kỳ sản xuất:");
+            replacements.put("{{tgpa}}", "duy trì hàn mức");
         } else {
             replacements.put("{{lvt}}", Optional.ofNullable(capitalizeWords(request.getLoaiVay())).orElse(""));
             replacements.put("{{slv}}", "từng lần");
@@ -342,16 +346,20 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             replacements.put("{{tghm}}", "");
             replacements.put("{{vqhm}}", "");
             replacements.put("{{vongQuay}}", "");
-            replacements.put("{{hm1}}","");
-            replacements.put("{{hm2}}","");
-            replacements.put("{{hm3}}","");
-            replacements.put("{{tgpa}}","sử dụng vốn vay");
+            replacements.put("{{hm1}}", "");
+            replacements.put("{{hm2}}", "");
+            replacements.put("{{hm3}}", "");
+            replacements.put("{{tgpa}}", "sử dụng vốn vay");
         }
         CreditContractTSBDRequest tsbdDto = request.getTsbdRequest();
         if (tsbdDto != null && Boolean.TRUE.equals(tsbdDto.getCheckTaiSanGanLienVoiDat())) {
             replacements.put("{{dienTichTS}}", Optional.ofNullable(tsbdDto.getDienTichTS()).orElse(""));
             replacements.put("{{ketCauXayDung}}", Optional.ofNullable(tsbdDto.getKetCauXayDung()).orElse(""));
             replacements.put("{{loaiNha}}", Optional.ofNullable(tsbdDto.getLoaiNha()).orElse(""));
+        } else {
+            replacements.put("{{dienTichTS}}", "0");
+            replacements.put("{{ketCauXayDung}}", "0");
+            replacements.put("{{loaiNha}}", "0");
         }
         CreditContractPAVVRequest pavvDto = request.getPavvRequest();
         if (pavvDto != null && Boolean.TRUE.equals(pavvDto.getCheckAddress())) {
@@ -363,10 +371,10 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         if (pavvDto != null) {
             replacements.put("{{tenpavv}}", Optional.ofNullable(pavvDto.getName()).orElse(""));
             replacements.put("{{ldpavv}}", Optional.ofNullable(pavvDto.getReason()).orElse(""));
-            replacements.put("{{tongVon}}", Optional.ofNullable(pavvDto.getTongVon()).orElse(""));
-            replacements.put("{{tongVonLuuDong}}", Optional.ofNullable(pavvDto.getTongVonLuuDong()).orElse(""));
-            replacements.put("{{vonTuCo}}", Optional.ofNullable(pavvDto.getVonTuCo()).orElse(""));
-            replacements.put("{{vonKhac}}", Optional.ofNullable(pavvDto.getVonKhac()).orElse(""));
+//            replacements.put("{{tongVon}}", Optional.ofNullable(pavvDto.getTongVon()).orElse(""));
+//            replacements.put("{{tongVonLuuDong}}", Optional.ofNullable(pavvDto.getTongVonLuuDong()).orElse(""));
+//            replacements.put("{{vonTuCo}}", Optional.ofNullable(pavvDto.getVonTuCo()).orElse(""));
+//            replacements.put("{{vonKhac}}", Optional.ofNullable(pavvDto.getVonKhac()).orElse(""));
             //TÍNH TOÁN PHẦN TRĂM TỔNG TIỀN VAY VỐN
             double tongVonLuuDong = Optional.ofNullable(pavvDto.getTongVonLuuDong())
                     .filter(v -> !v.toString().isBlank()) // bỏ qua chuỗi rỗng
@@ -413,7 +421,9 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         replacements.put("{{dayBD}}", String.format("%02d", dateBD.getDayOfMonth()));
         replacements.put("{{monthBD}}", String.format("%02d", dateBD.getMonthValue()));
         replacements.put("{{yearBD}}", String.valueOf(dateBD.getYear()));
-        // Thêm placeholder mới dựa vào biến checkNguoiDungTenBiaDo2
+        replacements.put("{{canBoTD}}", "VŨ XUÂN LONG");
+        replacements.put("{{sdtCanBoTD}}", "0987858237");
+        replacements.put("{{canBoTDVT}}", capitalizeWords("VŨ XUÂN LONG"));
         String regex = "\\d+(,\\d+)?";
         java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(regex);
         java.util.regex.Matcher matcher = pattern.matcher(request.getLaiSuat());
@@ -498,29 +508,31 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             replacements.put("{{chuTichPhuong}}", "..........................");
             replacements.put("{{nguoiTiepNhanHoSo}}", "Phạm Thị Thơm");
             replacements.put("{{diaChiLienHe}}", "Số 178 Ninh Chấp 5, phường Chu Văn An,");
-            replacements.put("{{canBoTD}}", "VŨ XUÂN LONG");
-            replacements.put("{{canBoTDVT}}", capitalizeWords("VŨ XUÂN LONG"));
-            replacements.put("{{sdtCanBoTD}}", "0987858237");
+//            replacements.put("{{canBoTD}}", "VŨ XUÂN LONG");
+//            replacements.put("{{canBoTDVT}}", capitalizeWords("VŨ XUÂN LONG"));
+//            replacements.put("{{sdtCanBoTD}}", "0987858237");
             replacements.put("{{gmail}}", "thaihocqtd@gmail.com");
             replacements.put("{{nddpl}}", "Giám Đốc");
+            replacements.put("{{gdpgd}}", "Phùng Thị Loan");
         } else if (request.getNguoiDaiDien().equalsIgnoreCase("pgd")) {
             replacements.put("{{pgd}}", " - PHÒNG GIAO DỊCH AN LẠC");
             replacements.put("{{pgdvt}}", capitalizeWords(" - PHÒNG GIAO DỊCH AN LẠC"));
             replacements.put("{{dcpgd}}", "Địa chỉ: TDP Lạc Đạo, phường Lê Đại Hành, thành phố Hải Phòng. " +
                     "Giấy phép đăng ký kinh doanh: 0800001806; Điện thoại: 0220.3596.266");
-            replacements.put("{{ndd}}", "ông: VŨ THANH HẢI Chức vụ: Phó Giám Đốc - Trưởng PGD An Lạc.\n" +
-                    "CCCD số: 030083003225;\n" +
+            replacements.put("{{ndd}}", "ông: DƯƠNG QUANG TUẤN Chức vụ: Giám Đốc - PGD An Lạc.\n" +
+                    "CCCD số: 030087002460;\n" +
                     "(Theo văn bản ủy quyền số: 01/2026/UQ-TN Ngày 05 tháng 01 năm 2026)");
-            replacements.put("{{ndd1}}", "Ông: " + capitalizeWords("VŨ THANH HẢI") + " - Chức vụ: Phó Giám Đốc - Trưởng PGD An Lạc.");
+            replacements.put("{{ndd1}}", "Ông: " + capitalizeWords("DƯƠNG QUANG TUẤN") + " - Chức vụ: Giám Đốc - PGD An Lạc.");
             replacements.put("{{phuong}}", "Lê Đại Hành");
             replacements.put("{{chuTichPhuong}}", "Phương Quốc Luyện");
             replacements.put("{{nguoiTiepNhanHoSo}}", "Nguyễn Văn Chiến");
-            replacements.put("{{diaChiLienHe}}", "Bờ Đa, phường Lê Đại Hành,");
-            replacements.put("{{canBoTD}}", "DƯƠNG QUANG TUẤN");
-            replacements.put("{{canBoTDVT}}", capitalizeWords("DƯƠNG QUANG TUẤN"));
-            replacements.put("{{sdtCanBoTD}}", "0906676333");
+            replacements.put("{{diaChiLienHe}}", "TDP Lạc Đạo, phường Lê Đại Hành,");
+//            replacements.put("{{canBoTD}}", "DƯƠNG QUANG TUẤN");
+//            replacements.put("{{canBoTDVT}}", capitalizeWords("DƯƠNG QUANG TUẤN"));
+//            replacements.put("{{sdtCanBoTD}}", "0906676333");
             replacements.put("{{gmail}}", "pgdanlac888@gmail.com");
-            replacements.put("{{nddpl}}", "Trưởng Phòng");
+            replacements.put("{{nddpl}}", "Giám Đốc PGD");
+            replacements.put("{{gdpgd}}", "Dương Quang Tuấn");
         }
         if (request.getCheckHopDongBaoLanh()) {
             String doanVanBan = "Bên B dùng tài sản này để đảm bảo việc thanh toán được kịp thời, đầy đủ và thực hiện một cách " +
@@ -537,7 +549,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             replacements.put("{{tstc}}", doanVanBan);
             replacements.put("{{dvb}}", "của Bên B");
         }
-    // Bước 1: tìm tất cả paragraph chứa placeholder
+        // Bước 1: tìm tất cả paragraph chứa placeholder
         List<XWPFParagraph> targets = new ArrayList<>();
         for (XWPFParagraph para : doc.getParagraphs()) {
             String text = para.getText();
@@ -548,7 +560,9 @@ public class CreditContractServiceIMPL implements ICreditContractService {
                     || text.contains("{{TABLE2_PLACEHOLDER}}")
                     || text.contains("{{TABLE3_PLACEHOLDER}}")
                     || text.contains("{{TABLE_HM_PLACEHOLDER}}")
-                    || text.contains("{{TABLE_CP_PLACEHOLDER}}")) {
+                    || text.contains("{{TABLE_CP_PLACEHOLDER}}")
+                    || text.contains("{{TABLE_TN_PLACEHOLDER}}")
+            ) {
                 targets.add(para);
             }
         }
@@ -557,22 +571,33 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             String text = para.getText();
 
             if (text.contains("{{TABLE_PLACEHOLDER}}")) {
-                insertTableAtPlaceholder(doc, para, request.getTableRequest(), true);
+                insertTableAtPlaceholder(doc, para, request.getTableRequest(), true, replacements, request);
+            }
+            if (text.contains("{{TABLE_TN_PLACEHOLDER}}")) {
+                insertTableAtPlaceholder(doc, para, request.getThuNhapDuKienTable(), false, replacements, request);
             }
             if (text.contains("{{TABLE1_PLACEHOLDER}}")) {
-                insertTableAtPlaceholder(doc, para, request.getTable1(), false);
+                insertTableAtPlaceholder(doc, para, request.getTable1(), false, replacements, request);
             }
             if (text.contains("{{TABLE2_PLACEHOLDER}}")) {
-                insertTableAtPlaceholder(doc, para, request.getTable2(), false);
+                insertTableAtPlaceholder(doc, para, request.getTable2(), false, replacements, request);
             }
             if (text.contains("{{TABLE3_PLACEHOLDER}}")) {
-                insertTableAtPlaceholder(doc, para, request.getTable3(), false);
+                insertTableAtPlaceholder(doc, para, request.getTable3(), false, replacements, request);
             }
             if (text.contains("{{TABLE_HM_PLACEHOLDER}}")) {
-                insertTableAtPlaceholder(doc, para, request.getHanMucTable(), false);
+                if (request.getLoaiVay().equalsIgnoreCase("NGẮN HẠN (Thỏa thuận)")) {
+                    insertTableAtPlaceholder(doc, para, request.getHanMucTable(), false, replacements, request);
+                } else {
+                    // Nếu không phải ngắn hạn thỏa thuận thì xóa placeholder để tránh in header rỗng
+                    int paraPos = doc.getPosOfParagraph(para);
+                    if (paraPos >= 0) {
+                        doc.removeBodyElement(paraPos);
+                    }
+                }
             }
             if (text.contains("{{TABLE_CP_PLACEHOLDER}}")) {
-                insertTableAtPlaceholder(doc, para, request.getChiPhiTable(), false);
+                insertTableAtPlaceholder(doc, para, request.getChiPhiTable(), false, replacements, request);
             }
         }
 
@@ -689,38 +714,12 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         return result;
     }
 
-
-    //    private void insertTableAtPlaceholder(XWPFDocument doc, XWPFParagraph para,
-//                                          TableRequest tableRequest, boolean checkDrawTable) {
-//        // Lấy con trỏ trước khi xóa nội dung
-//        XmlCursor cursor = para.getCTP().newCursor();
-//
-//        // Xóa nội dung placeholder (runs), nhưng giữ paragraph tạm thời
-//        for (int i = para.getRuns().size() - 1; i >= 0; i--) {
-//            para.removeRun(i);
-//        }
-//
-//        if (tableRequest != null) {
-//            if (!checkDrawTable || tableRequest.isDrawTable()) {
-//                // Chèn bảng tại vị trí con trỏ
-//                XWPFTable table = doc.insertNewTbl(cursor);
-//                if (table != null) {
-//                    // Xóa row mặc định ngay lập tức để tránh thừa hàng trống
-//                    if (table.getNumberOfRows() == 1) {
-//                        table.removeRow(0);
-//                    }
-//
-//                    // Điền dữ liệu vào bảng
-//                    fillInsertedTable(table, tableRequest, checkDrawTable);
-//                }
-//            }
-//        }
-//    }
-//
     private void insertTableAtPlaceholder(XWPFDocument doc,
                                           XWPFParagraph para,
                                           TableRequest tableRequest,
-                                          boolean checkDrawTable) {
+                                          boolean checkDrawTable,
+                                          Map<String, String> replacements,
+                                          ContractRequest request) {
 
         if (tableRequest == null) {
             return;
@@ -750,7 +749,9 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         if ("hanMuc".equalsIgnoreCase(tableType)) {
             fillHanMucTable(table, tableRequest);
         } else if ("chiPhi".equalsIgnoreCase(tableType)) {
-            fillChiPhiTable(table, tableRequest);
+            fillChiPhiTable(table, tableRequest, replacements, request);
+        } else if ("thuNhapDuKien".equalsIgnoreCase(tableType)) {
+            fillThuNhapTable(table, tableRequest, replacements);
         } else {
             fillGenericTable(table, tableRequest);
         }
@@ -839,53 +840,6 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         return sb.toString().trim();
     }
 
-
-//    private void processParagraph(XWPFParagraph paragraph, Map<String, String> replacements) {
-//        List<XWPFRun> runs = paragraph.getRuns();
-//        if (runs == null || runs.isEmpty()) return;
-//
-//        // Ghép toàn bộ text của paragraph
-//        StringBuilder fullText = new StringBuilder();
-//        for (XWPFRun run : runs) {
-//            String text = run.getText(0);
-//            if (text != null) fullText.append(text);
-//        }
-//        String paragraphText = fullText.toString();
-//        if (paragraphText.isEmpty()) return;
-//
-//        // Thay thế tất cả placeholder trong đoạn văn
-//        String replacedText = paragraphText;
-//        for (Map.Entry<String, String> entry : replacements.entrySet()) {
-//            replacedText = replacedText.replace(entry.getKey(), entry.getValue());
-//        }
-//
-//        // Nếu sau khi thay thế mà chỉ còn trống hoặc toàn khoảng trắng → xóa paragraph
-//        if (replacedText.trim().isEmpty()) {
-//            IBody body = paragraph.getBody();
-//            if (body instanceof XWPFDocument d) {
-//                int pos = d.getPosOfParagraph(paragraph);
-//                if (pos >= 0) d.removeBodyElement(pos);
-//            } else if (body instanceof XWPFTableCell cell) {
-//                int idx = cell.getParagraphs().indexOf(paragraph);
-//                if (idx >= 0) cell.removeParagraph(idx);
-//            }
-//            return;
-//        }
-//
-//        // Nếu không có thay đổi thì bỏ qua
-//        if (replacedText.equals(paragraphText)) return;
-//
-//        // Xóa nội dung cũ trong các run nhưng giữ style
-//        for (XWPFRun run : runs) {
-//            run.setText("", 0);
-//
-//        }
-//
-//        // Ghi lại text đã thay thế vào run đầu tiên
-//        XWPFRun baseRun = runs.get(0);
-//        baseRun.setText(replacedText, 0);
-//    }
-
     private void processParagraph(XWPFParagraph paragraph, Map<String, String> replacements) {
         List<XWPFRun> runs = paragraph.getRuns();
         if (runs == null || runs.isEmpty()) return;
@@ -914,10 +868,134 @@ public class CreditContractServiceIMPL implements ICreditContractService {
                 if (idx >= 0) cell.removeParagraph(idx);
             }
         }
-//        for (XWPFRun run : paragraph.getRuns()) {
-//            System.err.println("Run text: " + run.getText(0));
-//        }
+
     }
+
+    private void fillThuNhapTable(XWPFTable table,
+                                  TableRequest tableRequest,
+                                  Map<String, String> replacements) {
+        if (table == null || tableRequest == null || !tableRequest.isDrawTable()) return;
+
+        int colCount = tableRequest.getHeaders() != null ? tableRequest.getHeaders().size() : 0;
+
+        // ===== Set border cho bảng =====
+        CTTblBorders tblBorders = table.getCTTbl().getTblPr().isSetTblBorders()
+                ? table.getCTTbl().getTblPr().getTblBorders()
+                : table.getCTTbl().getTblPr().addNewTblBorders();
+        setBorder(tblBorders.addNewInsideH());
+        setBorder(tblBorders.addNewInsideV());
+        setBorder(tblBorders.addNewTop());
+        setBorder(tblBorders.addNewBottom());
+        setBorder(tblBorders.addNewLeft());
+        setBorder(tblBorders.addNewRight());
+
+        // ===== Header =====
+        boolean hasHeader = tableRequest.getHeaders() != null && !tableRequest.getHeaders().isEmpty();
+        if (hasHeader) {
+            XWPFTableRow headerRow = table.createRow();
+            ensureCells(headerRow, colCount);
+            ensureParagraphsInRow(headerRow);
+            for (int c = 0; c < colCount; c++) {
+                setCellText(headerRow.getCell(c), tableRequest.getHeaders().get(c), true, false);
+            }
+            applyBordersToRow(headerRow);
+        }
+
+        // ===== Data rows =====
+        NumberFormat nf = NumberFormat.getInstance(new Locale("vi", "VN"));
+        for (List<String> rowData : tableRequest.getRows()) {
+            XWPFTableRow row = table.createRow();
+            ensureCells(row, colCount);
+            ensureParagraphsInRow(row);
+            for (int c = 0; c < colCount; c++) {
+                String cellValue = c < rowData.size() ? rowData.get(c) : "";
+
+                // Format số cho các cột số lượng, đơn giá, thành tiền
+                if (c == 2 || c == 3 || c == 4) {
+                    try {
+                        if (cellValue != null && !cellValue.isBlank()) {
+                            long number = Long.parseLong(cellValue.replace(".", "").trim());
+                            cellValue = nf.format(number);
+                        }
+                    } catch (NumberFormatException e) {
+                        // giữ nguyên nếu không parse được
+                    }
+                }
+
+                setCellText(row.getCell(c), cellValue, false, false);
+            }
+            applyBordersToRow(row);
+        }
+
+        // ===== Tính tổng và gán vào hàng cuối =====
+        long tongThuNhap = 0;
+        for (List<String> rowData : tableRequest.getRows()) {
+            if (rowData.size() > 4 && !"Tổng cộng:".equals(rowData.get(0))) {
+                tongThuNhap += parseLongSafe(rowData.get(4));
+            }
+        }
+        List<String> lastRow = tableRequest.getRows().get(tableRequest.getRows().size() - 1);
+        lastRow.set(4, nf.format(tongThuNhap));
+
+        // ===== Merge hàng cuối (Tổng cộng) =====
+        Map<String, Integer> colIndexMap = new HashMap<>();
+        colIndexMap.put("noiDung", 0);
+        colIndexMap.put("donVi", 1);
+        colIndexMap.put("soLuong", 2);
+        colIndexMap.put("donGia", 3);
+        colIndexMap.put("thanhTien", 4);
+
+        if (tableRequest.getMerges() != null) {
+            for (MergeInfoRequest merge : tableRequest.getMerges()) {
+                int rowIndex = merge.getRowIndex();
+                List<String> targets = merge.getMergeTargets();
+                if (targets == null || targets.isEmpty()) continue;
+
+                int startCol = colIndexMap.getOrDefault(targets.get(0), 0);
+                int endCol = colIndexMap.getOrDefault(targets.get(targets.size() - 1), startCol);
+
+                int tableRowIndex = hasHeader ? rowIndex + 1 : rowIndex;
+                if (tableRowIndex < 0 || tableRowIndex >= table.getNumberOfRows()) continue;
+
+                XWPFTableRow mergedRow = table.getRow(tableRowIndex);
+
+                // In đậm toàn bộ hàng merge
+                for (int c = 0; c < mergedRow.getTableCells().size(); c++) {
+                    XWPFTableCell cell = mergedRow.getCell(c);
+                    if (cell != null) {
+                        String text = cell.getText();
+                        setCellText(cell, text, false, true);
+                    }
+                }
+
+                // Xử lý merge
+                XWPFTableCell baseCell = mergedRow.getCell(startCol);
+                if (baseCell == null) continue;
+                setCellText(baseCell, merge.getMergedValue() != null ? merge.getMergedValue() : "", false, true);
+                CTTcPr tcPr = baseCell.getCTTc().isSetTcPr() ? baseCell.getCTTc().getTcPr() : baseCell.getCTTc().addNewTcPr();
+                CTHMerge hMerge = tcPr.isSetHMerge() ? tcPr.getHMerge() : tcPr.addNewHMerge();
+                hMerge.setVal(STMerge.RESTART);
+
+                for (int c = startCol + 1; c <= endCol; c++) {
+                    XWPFTableCell contCell = mergedRow.getCell(c);
+                    if (contCell == null) continue;
+                    while (contCell.getParagraphs().size() > 0) {
+                        contCell.removeParagraph(0);
+                    }
+                    contCell.addParagraph();
+                    CTTcPr tcPr2 = contCell.getCTTc().isSetTcPr() ? contCell.getCTTc().getTcPr() : contCell.getCTTc().addNewTcPr();
+                    CTHMerge hMerge2 = tcPr2.isSetHMerge() ? tcPr2.getHMerge() : tcPr2.addNewHMerge();
+                    hMerge2.setVal(STMerge.CONTINUE);
+                }
+            }
+        }
+
+        // ===== Rebuild grid =====
+        rebuildTableGrid(table, colCount);
+    }
+
+
+
     // ======= Hàm chính: fillHanMucTable =======
     private void fillHanMucTable(XWPFTable table, TableRequest tableRequest) {
         if (table == null || tableRequest == null || !tableRequest.isDrawTable()) return;
@@ -1007,7 +1085,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
     }
 
     // ======= Hàm chính: fillChiPhiTable =======
-    private void fillChiPhiTable(XWPFTable table, TableRequest tableRequest) {
+    private void fillChiPhiTable(XWPFTable table, TableRequest tableRequest, Map<String, String> replacements, ContractRequest request) {
         if (table == null || tableRequest == null || !tableRequest.isDrawTable()) return;
 
         int colCount = tableRequest.getHeaders() != null ? tableRequest.getHeaders().size() : 0;
@@ -1036,12 +1114,26 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         }
 
         // ===== Data rows =====
+        NumberFormat nf = NumberFormat.getInstance(new Locale("vi", "VN")); // formatter tiền tệ VN
         for (List<String> rowData : tableRequest.getRows()) {
             XWPFTableRow row = table.createRow();
             ensureCells(row, colCount);
             ensureParagraphsInRow(row);
             for (int c = 0; c < colCount; c++) {
                 String cellValue = c < rowData.size() ? rowData.get(c) : "";
+
+                // Format các cột số: Số lượng (3), Đơn giá (4), Thành tiền (5)
+                if (c == 3 || c == 4 || c == 5) {
+                    try {
+                        if (cellValue != null && !cellValue.isBlank()) {
+                            long number = Long.parseLong(cellValue.replace(".", "").trim());
+                            cellValue = nf.format(number);
+                        }
+                    } catch (NumberFormatException e) {
+                        // giữ nguyên nếu không parse được
+                    }
+                }
+
                 setCellText(row.getCell(c), cellValue, false, false);
             }
             applyBordersToRow(row);
@@ -1049,7 +1141,6 @@ public class CreditContractServiceIMPL implements ICreditContractService {
 
         // ===== Merge =====
         if (tableRequest.getMerges() != null) {
-            // ánh xạ tên cột sang index
             Map<String, Integer> colIndexMap = new HashMap<>();
             colIndexMap.put("stt", 0);
             colIndexMap.put("danhMuc", 1);
@@ -1080,7 +1171,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
                     }
                 }
 
-                // Xử lý merge như trước
+                // Xử lý merge
                 XWPFTableCell baseCell = mergedRow.getCell(startCol);
                 if (baseCell == null) continue;
                 setCellText(baseCell, merge.getMergedValue() != null ? merge.getMergedValue() : "", false, true);
@@ -1104,12 +1195,61 @@ public class CreditContractServiceIMPL implements ICreditContractService {
 
         // ===== Rebuild grid =====
         rebuildTableGrid(table, colCount);
+
+        // ===== Tính {{tongNCV}} =====
+        long tongChiPhi = 0;
+        long chiPhiGianTiep = 0;
+
+        for (MergeInfoRequest merge : tableRequest.getMerges()) {
+            String mergedValue = merge.getMergedValue();
+            if (mergedValue != null) {
+                if (mergedValue.toLowerCase().contains("tổng chi phí")) {
+                    List<String> row = tableRequest.getRows().get(merge.getRowIndex());
+                    tongChiPhi = parseLongSafe(row.get(5));
+                }
+                if (mergedValue.toLowerCase().contains("chi phí gián tiếp")) {
+                    List<String> row = tableRequest.getRows().get(merge.getRowIndex());
+                    chiPhiGianTiep = parseLongSafe(row.get(5));
+                }
+            }
+        }
+
+        long tongNCV = tongChiPhi - chiPhiGianTiep;
+        String tongNCVFormatted = nf.format(tongNCV);
+        replacements.put("{{tongNCV}}", tongNCVFormatted);
+        // Lấy tiền số từ request
+        long tienSo = 0;
+        try {
+            tienSo = Long.parseLong(Optional.ofNullable(request.getTienSo()).orElse("0").replace(".", "").trim());
+            System.err.println("TIEN SO ====> " + tienSo);
+        } catch (Exception e) {
+            tienSo = 0;
+        }
+
+        // Tính vonTuCo
+        long vonTuCo = tongNCV - tienSo;
+        System.err.println("VON TU CO ====> " + vonTuCo);
+        // Tính phần trăm
+        double phanTramVTC = tongNCV > 0 ? (double) vonTuCo / tongNCV * 100 : 0;
+        double phanTramVV = tongNCV > 0 ? (double) tienSo / tongNCV * 100 : 0;
+
+        // Format và gán vào replacements
+//        NumberFormat nf = NumberFormat.getInstance(new Locale("vi", "VN"));
+        replacements.put("{{vonTuCo}}", nf.format(vonTuCo));
+        replacements.put("{{phanTramVTC}}", String.format("%.2f", phanTramVTC) + "%");
+        replacements.put("{{phanTramVV}}", String.format("%.2f", phanTramVV) + "%");
     }
 
+    // Hàm phụ để parse số an toàn
+    private long parseLongSafe(String value) {
+        try {
+            return Long.parseLong(value.replace(".", "").trim());
+        } catch (Exception e) {
+            return 0;
+        }
+    }
 
-
-// ======= Hàm phụ dùng chung =======
-
+    // ======= Hàm phụ dùng chung =======
     // Đảm bảo row có đủ số cell
     private void ensureCells(XWPFTableRow row, int numCols) {
         int existing = row.getTableCells().size();
@@ -1143,8 +1283,6 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             run.setText(text);
         }
     }
-
-
 
 
     // Set border cho CTBorder
@@ -1181,6 +1319,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             right.setColor("000000");
         }
     }
+
     /**
      * Scan all tables/cells in the document, report cells missing <p> and fix them by adding an empty paragraph.
      * Call this right before writing the document to disk.

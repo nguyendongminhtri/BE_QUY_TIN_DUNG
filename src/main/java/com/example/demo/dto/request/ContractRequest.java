@@ -72,6 +72,7 @@ public class ContractRequest {
     private TableRequest table3;
     private TableRequest hanMucTable;
     private TableRequest chiPhiTable;
+    private TableRequest thuNhapDuKienTable;
     private String ngayKetThucKyHanVay;
     private String dungTenBiaDo1;
     private Boolean checkNguoiDungTenBiaDo2;

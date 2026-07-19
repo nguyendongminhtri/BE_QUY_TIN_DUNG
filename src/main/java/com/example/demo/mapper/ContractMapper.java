@@ -203,6 +203,13 @@ public class ContractMapper {
             hm.setCreditContract(entity);
             entity.getTables().add(hm);
         }
+        if (request.getThuNhapDuKienTable() != null) {
+            CreditContractTableEntity hm = new CreditContractTableEntity();
+            hm.setTableName("thuNhapDuKienTable");
+            hm.setTableJson(mapper.writeValueAsString(request.getThuNhapDuKienTable()));
+            hm.setCreditContract(entity);
+            entity.getTables().add(hm);
+        }
     }
 
     public ContractRequest mapEntityToRequest(CreditContractEntity entity) throws JsonProcessingException {
@@ -246,8 +253,6 @@ public class ContractMapper {
 
             request.setPavvRequest(pavvDto);
         }
-
-
 
 
         // map các field cơ bản
@@ -375,6 +380,9 @@ public class ContractMapper {
                     case "chiPhiTable":
                         request.setChiPhiTable(tableReq);
                         break;
+                    case "thuNhapDuKienTable":
+                        request.setThuNhapDuKienTable(tableReq);
+                        break;
                 }
             }
         }
@@ -399,7 +407,7 @@ public class ContractMapper {
                 .stream()
                 .map(FileMetadataDto::getFileName)
                 .toList();
-        System.err.println("newFileNames --> "+newFileNames);
+        System.err.println("newFileNames --> " + newFileNames);
 
         // Xóa avatar cũ nếu không nằm trong danh sách mới
         Iterator<AvatarEntity> iterator = entity.getAvatars().iterator();
@@ -450,7 +458,6 @@ public class ContractMapper {
                 throw new RuntimeException("Không thể xử lý file avatar: " + dto.getFileName(), e);
             }
         }
-
 
 
     }
