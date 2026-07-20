@@ -451,6 +451,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         if (request.getCheckNguoiDungTenBiaDo2()) {
             System.err.println("===============DUNG TEN BI DO 2 ========================");
             replacements.put("{{ntbdd1}}", request.getGioiTinhDungTenBiaDo2() + ": " + request.getDungTenBiaDo2() + "; Sinh năm: " + request.getNamSinhDungTenBiaDo2() + ".");
+            replacements.put("{{ntbd}}", "và "+ request.getGioiTinhDungTenBiaDo2() + ": " + request.getDungTenBiaDo2());
             replacements.put("{{ntbdd2}}", "CCCD số: " + request.getCccdDungTenBiaDo2() + "; Ngày cấp: " + request.getNgayCapCCCDDungTenBiaDo2() + "; Nơi cấp: " + request.getNoiCapCCCDDungTenBiaDo2() + ".");
             replacements.put("{{ntbdd3}}", "Địa chỉ thường trú: " + request.getDiaChiThuongTruDungTenBiaDo2() + ".");
             replacements.put("{{ntbdd4}}", "3.6. Họ và tên đầy đủ đối với cá nhân/tên đầy đủ đối với tổ chức: (viết chữ IN HOA)");
@@ -518,10 +519,10 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             replacements.put("{{pgdvt}}", capitalizeWords(" - PHÒNG GIAO DỊCH AN LẠC"));
             replacements.put("{{dcpgd}}", "Địa chỉ: TDP Lạc Đạo, phường Lê Đại Hành, thành phố Hải Phòng. " +
                     "Giấy phép đăng ký kinh doanh: 0800001806; Điện thoại: 0220.3596.266");
-            replacements.put("{{ndd}}", "ông: DƯƠNG QUANG TUẤN Chức vụ: Giám Đốc - PGD An Lạc.\n" +
+            replacements.put("{{ndd}}", "ông: DƯƠNG QUANG TUẤN Chức vụ: Giám Đốc PGD An Lạc.\n" +
                     "CCCD số: 030087002460;\n" +
-                    "(Theo văn bản ủy quyền số: 01/2026/UQ-TN Ngày 05 tháng 01 năm 2026)");
-            replacements.put("{{ndd1}}", "Ông: " + capitalizeWords("DƯƠNG QUANG TUẤN") + " - Chức vụ: Giám Đốc - PGD An Lạc.");
+                    "(Theo văn bản ủy quyền số: 02/UQ-TN Ngày 15 tháng 07 năm 2026)");
+            replacements.put("{{ndd1}}", "Ông: " + capitalizeWords("DƯƠNG QUANG TUẤN") + " - Chức vụ: Giám Đốc PGD An Lạc.");
             replacements.put("{{phuong}}", "Lê Đại Hành");
             replacements.put("{{chuTichPhuong}}", "Phương Quốc Luyện");
             replacements.put("{{nguoiTiepNhanHoSo}}", "Nguyễn Văn Chiến");
@@ -869,7 +870,6 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         }
 
     }
-
     private void fillThuNhapTable(XWPFTable table,
                                   TableRequest tableRequest,
                                   Map<String, String> replacements) {
@@ -936,6 +936,9 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         List<String> lastRow = tableRequest.getRows().get(tableRequest.getRows().size() - 1);
         lastRow.set(4, nf.format(tongThuNhap));
 
+        // 👉 Gán vào replacements để dùng cho placeholder {{tongDoanhThu}}
+        replacements.put("{{tongDoanhThu}}", nf.format(tongThuNhap));
+
         // ===== Merge hàng cuối (Tổng cộng) =====
         Map<String, Integer> colIndexMap = new HashMap<>();
         colIndexMap.put("noiDung", 0);
@@ -988,11 +991,20 @@ public class CreditContractServiceIMPL implements ICreditContractService {
                 }
             }
         }
-
+        calculateLoiNhuan(replacements);
         // ===== Rebuild grid =====
         rebuildTableGrid(table, colCount);
     }
 
+
+    private void calculateLoiNhuan(Map<String, String> replacements) {
+        long tongDoanhThu = parseLongSafe(replacements.get("{{tongDoanhThu}}"));
+        long tongChiPhi   = parseLongSafe(replacements.get("{{tongChiPhi}}"));
+
+        long loiNhuan = tongDoanhThu - tongChiPhi;
+        NumberFormat nf = NumberFormat.getInstance(new Locale("vi", "VN"));
+        replacements.put("{{loiNhuan}}", nf.format(loiNhuan));
+    }
 
 
     // ======= Hàm chính: fillHanMucTable =======
@@ -1215,7 +1227,9 @@ public class CreditContractServiceIMPL implements ICreditContractService {
 
         long tongNCV = tongChiPhi - chiPhiGianTiep;
         String tongNCVFormatted = nf.format(tongNCV);
+        String tongChiPhiFormatted = nf.format(tongChiPhi);
         replacements.put("{{tongNCV}}", tongNCVFormatted);
+        replacements.put("{{tongChiPhi}}", tongChiPhiFormatted);
         // Lấy tiền số từ request
         long tienSo = 0;
         try {
@@ -1235,8 +1249,8 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         // Format và gán vào replacements
 //        NumberFormat nf = NumberFormat.getInstance(new Locale("vi", "VN"));
         replacements.put("{{vonTuCo}}", nf.format(vonTuCo));
-        replacements.put("{{phanTramVTC}}", String.format("%.2f", phanTramVTC) + "%");
-        replacements.put("{{phanTramVV}}", String.format("%.2f", phanTramVV) + "%");
+        replacements.put("{{phanTramVTC}}", String.format("%.1f", phanTramVTC) + "%");
+        replacements.put("{{phanTramVV}}", String.format("%.1f", phanTramVV) + "%");
     }
 
     // Hàm phụ để parse số an toàn
