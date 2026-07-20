@@ -101,7 +101,6 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         fileUrls.add(generateContractFile(request, date, dateTC, dateBD, user, "BaoCaoDeNghiGiaiNganKiemGiayNhanNo.docx"));
         fileUrls.add(generateContractFile(request, date, dateTC, dateBD, user, "BaoCaoThongTinVeNguoiCoLienQuan.docx"));
         fileUrls.add(generateContractFile(request, date, dateTC, dateBD, user, "ThongBao.docx"));
-
         return fileUrls;
     }
 
@@ -118,12 +117,11 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         contractMapper.processAvatars(request, entity, tempDir, uploadDir, fileMetadataRepository);
 
         List<String> fileUrls = new ArrayList<>();
-        fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "HopDongTinDung.docx"));
+        fileUrls.add(generateContractFile(request, date, dateTC, dateBD, user, "HopDongTinDung.docx"));
         fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "HopDongTheChap.docx"));
         fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "PhieuBaoDamQSDD.docx"));
         fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "GiayDeNghiVayVon.docx"));
         fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "DanhMucHoSoChoVay.docx"));
-//        fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "PhuLucHopDong.docx"));
         fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "BienBanKiemTraSauKhiChoVay.docx"));
         fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "BienBanXetDuyetChoVay.docx"));
         fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "BienBanXacDinhGiaTriTaiSanBaoDam.docx"));
@@ -194,19 +192,21 @@ public class CreditContractServiceIMPL implements ICreditContractService {
                     .toUriString();
         }
     }
-
-    @NotNull
-    public String generateContractFileExport(@NotNull ContractRequest request,
-                                             @NotNull LocalDate date,
-                                             @NotNull LocalDate dateTC,
-                                             @NotNull LocalDate dateBD,
-                                             @NotNull User user,
-                                             @NotNull String templateName) throws IOException {
+    // 👉 Helper: sinh một file duy nhất từ template
+    private String generateContractFileExport(@NotNull ContractRequest request,
+                                              @NotNull LocalDate date,
+                                              @NotNull LocalDate dateTC,
+                                              @NotNull LocalDate dateBD,
+                                              @NotNull User user,
+                                              @NotNull String templateName) throws IOException {
         try (InputStream is = new ClassPathResource("templates/" + templateName).getInputStream();
              XWPFDocument doc = new XWPFDocument(is)) {
 
             replacePlaceholders(doc, request, date, dateTC, dateBD);
             fixTablesEnsureParagraphs(doc);
+            expandTablesFullWidth(doc);
+            // centerTableContent(doc); // nếu muốn căn giữa nội dung
+
             String fileName = templateName.replace(".docx", "")
                     + "_export_" + user.getId()
                     + "_" + System.currentTimeMillis()
@@ -219,7 +219,6 @@ public class CreditContractServiceIMPL implements ICreditContractService {
                 doc.write(os);
             }
 
-            // ✅ Trả về đường dẫn vật lý
             return outputPath.toString();
         }
     }
@@ -1415,5 +1414,20 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         creditContractRepository.delete(entity);
     }
 
+    private void expandTablesFullWidth(XWPFDocument doc) {
+        for (XWPFTable table : doc.getTables()) {
+            CTTblPr tblPr = table.getCTTbl().getTblPr();
+            if (tblPr == null) {
+                tblPr = table.getCTTbl().addNewTblPr();
+            }
+            CTTblWidth tblWidth = tblPr.getTblW();
+            if (tblWidth == null) {
+                tblWidth = tblPr.addNewTblW();
+            }
+            // Đặt chiều rộng bảng = 100% trang
+            tblWidth.setType(STTblWidth.PCT);
+            tblWidth.setW(BigInteger.valueOf(5000)); // 5000 = 100% theo chuẩn Word XML
+        }
+    }
 
 }
