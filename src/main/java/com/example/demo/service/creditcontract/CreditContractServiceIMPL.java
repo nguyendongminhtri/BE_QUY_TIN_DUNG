@@ -599,6 +599,16 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             if (text.contains("{{TABLE_CP_PLACEHOLDER}}")) {
                 insertTableAtPlaceholder(doc, para, request.getChiPhiTable(), false, replacements, request);
             }
+            long tienSo = 0;
+            try {
+                tienSo = Long.parseLong(Optional.ofNullable(request.getTienSo()).orElse("0").replace(".", "").trim());
+                System.err.println("TIEN SO ====> " + tienSo);
+            } catch (Exception e) {
+                tienSo = 0;
+            }
+            long loiNhuan = parseLongSafe(replacements.get("{{loiNhuan}}"));
+            long thuHoiVon = tienSo - loiNhuan;
+            replacements.put("{{thuHoiVon}}", nf.format(thuHoiVon));
         }
 
 // Bước 3: xử lý các paragraph text khác
@@ -1000,7 +1010,6 @@ public class CreditContractServiceIMPL implements ICreditContractService {
     private void calculateLoiNhuan(Map<String, String> replacements) {
         long tongDoanhThu = parseLongSafe(replacements.get("{{tongDoanhThu}}"));
         long tongChiPhi   = parseLongSafe(replacements.get("{{tongChiPhi}}"));
-
         long loiNhuan = tongDoanhThu - tongChiPhi;
         NumberFormat nf = NumberFormat.getInstance(new Locale("vi", "VN"));
         replacements.put("{{loiNhuan}}", nf.format(loiNhuan));
