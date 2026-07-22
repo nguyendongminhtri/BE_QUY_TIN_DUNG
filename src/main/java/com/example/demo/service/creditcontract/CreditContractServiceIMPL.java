@@ -5,6 +5,7 @@ import com.example.demo.mapper.ContractMapper;
 import com.example.demo.model.CreditContractEntity;
 
 import java.math.BigInteger;
+import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Locale;
 
@@ -101,6 +102,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         fileUrls.add(generateContractFile(request, date, dateTC, dateBD, user, "BaoCaoDeNghiGiaiNganKiemGiayNhanNo.docx"));
         fileUrls.add(generateContractFile(request, date, dateTC, dateBD, user, "BaoCaoThongTinVeNguoiCoLienQuan.docx"));
         fileUrls.add(generateContractFile(request, date, dateTC, dateBD, user, "ThongBao.docx"));
+        fileUrls.add(generateContractFile(request, date, dateTC, dateBD, user, "BaoCaoThamDinhVaDeXuatChoVay.docx"));
         return fileUrls;
     }
 
@@ -129,6 +131,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "BaoCaoDeNghiGiaiNganKiemGiayNhanNo.docx"));
         fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "BaoCaoThongTinVeNguoiCoLienQuan.docx"));
         fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "ThongBao.docx"));
+        fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "BaoCaoThamDinhVaDeXuatChoVay.docx"));
 
         creditContractRepository.save(entity);
         return fileUrls;
@@ -162,6 +165,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "BaoCaoDeNghiGiaiNganKiemGiayNhanNo.docx"));
         fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "BaoCaoThongTinVeNguoiCoLienQuan.docx"));
         fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "ThongBao.docx"));
+        fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "BaoCaoThamDinhVaDeXuatChoVay.docx"));
 
         creditContractRepository.save(entity);
         return fileUrls;
@@ -222,7 +226,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             return outputPath.toString();
         }
     }
-
+    Map<String, String> replacements = new HashMap<>();
 
     private void replacePlaceholders(XWPFDocument doc, ContractRequest request, LocalDate date, LocalDate dateTC, LocalDate dateBD) {
         System.err.println("request --> " + request);
@@ -236,7 +240,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
 // Định dạng theo locale Việt Nam
         NumberFormat nf = NumberFormat.getInstance(new Locale("vi", "VN"));
         String formattedGtqsdd = nf.format(gtqsdd);
-        Map<String, String> replacements = new HashMap<>(); // Các placeholder mặc định
+       // Các placeholder mặc định
 //        replacements.put("{{gd}}", Optional.ofNullable(request.getNguoiDaiDien()).orElse(""));
 
         replacements.put("{{dateTextWords}}", dateToWords(date));
@@ -301,8 +305,12 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         replacements.put("{{ngckhbd}}", Optional.ofNullable(request.getNgayCapCCCDDungTenBiaDo1()).orElse(""));
         replacements.put("{{nccccdkhbd}}", Optional.ofNullable(request.getNoiCapCCCDDungTenBiaDo1()).orElse(""));
         replacements.put("{{dckhbd}}", Optional.ofNullable(request.getDiaChiThuongTruDungTenBiaDo1()).orElse(""));
+        System.err.println("==============biado2"+request.getDungTenBiaDo2());
         replacements.put("{{ntbd}}", Optional.ofNullable(request.getDungTenBiaDo2()).orElse(""));
+        System.err.println("sau::::::"+replacements.get("{{ntbd}}"));
         replacements.put("{{gtntbd}}", Optional.ofNullable(request.getGioiTinhDungTenBiaDo2()).orElse(""));
+        replacements.put("{{gtntbdt}}", Optional.ofNullable(request.getGioiTinhDungTenBiaDo2().toLowerCase()).orElse(""));
+        System.err.println("gt::::::"+replacements.get("{{gtntbdt}}"));
         replacements.put("{{cccdntbd}}", Optional.ofNullable(request.getCccdDungTenBiaDo2()).orElse(""));
         replacements.put("{{ngcntbd}}", Optional.ofNullable(request.getNgayCapCCCDDungTenBiaDo2()).orElse(""));
         replacements.put("{{nccccdntbd}}", Optional.ofNullable(request.getNoiCapCCCDDungTenBiaDo2()).orElse(""));
@@ -312,7 +320,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         replacements.put("{{tgvv}}", Optional.ofNullable(request.getHanMuc()).orElse(""));
         if (request.getLoaiVay().equalsIgnoreCase("NGẮN HẠN (Thỏa thuận)")) {
             replacements.put("{{lvt}}", Optional.ofNullable("Ngắn hạn").orElse(""));
-            replacements.put("{{slv}}", "hạn mức");
+            replacements.put("{{slv}}", "Hạn mức");
             System.err.println("get::" + replacements.get("{{slv}}"));
             replacements.put("{{ms1t}}", "Phương thức cho vay: Cho vay theo hạn mức");
             replacements.put("{{ms1d}}", "");
@@ -332,7 +340,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             replacements.put("{{tgpa}}", "duy trì hàn mức");
         } else {
             replacements.put("{{lvt}}", Optional.ofNullable(capitalizeWords(request.getLoaiVay())).orElse(""));
-            replacements.put("{{slv}}", "từng lần");
+            replacements.put("{{slv}}", "Từng lần");
             replacements.put("{{ms1t}}", "Số tiền cho vay:");
             replacements.put("{{ms1d}}", "Theo các điều khoản và điều kiện của Hợp đồng tín dụng này, bên A cho bên B vay khoản tiền bằng đồng Việt Nam. Số tiền vay là: " + request.getTienSo() + " đồng, (Bằng chữ: " + request.getTienChu() + " ).");
             replacements.put("{{ms2t}}", "Thời hạn cho vay: ");
@@ -610,7 +618,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             long thuHoiVon = tienSo - loiNhuan;
             replacements.put("{{thuHoiVon}}", nf.format(thuHoiVon));
         }
-
+        calculateTyLeChoVay(replacements, request);
 // Bước 3: xử lý các paragraph text khác
         List<XWPFParagraph> docParas = new ArrayList<>(doc.getParagraphs());
         for (XWPFParagraph paragraph : docParas) {
@@ -628,6 +636,25 @@ public class CreditContractServiceIMPL implements ICreditContractService {
                 }
             }
         }
+
+    }
+    private void calculateTyLeChoVay(Map<String, String> replacements, ContractRequest request) {
+        NumberFormat nf = NumberFormat.getInstance(new Locale("vi", "VN"));
+
+        // Lấy giá trị tsbds
+        long tsbds = parseLongSafe(Optional.ofNullable(request.getTongTaiSanBD()).orElse("0").replace(".", "").trim());
+
+        // Lấy giá trị tienSo
+        long tienSo = parseLongSafe(Optional.ofNullable(request.getTienSo()).orElse("0").replace(".", "").trim());
+
+        double tyLe = 0.0;
+        if (tienSo > 0) {
+            tyLe = ((double) tsbds / (double) tienSo) * 100;
+        }
+
+        // Format với 2 chữ số thập phân
+        DecimalFormat df = new DecimalFormat("#.##");
+        replacements.put("{{tyLeChoVay}}", df.format(tyLe));
     }
 
     private static final String[] units = {
@@ -770,7 +797,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
 
     private void fillGenericTable(XWPFTable table, TableRequest tableRequest) {
         if (table == null || tableRequest == null) return;
-        if (!tableRequest.isDrawTable()) return;
+//        if (!tableRequest.isDrawTable()) return;
 
         // Xác định số cột: nếu có header thì lấy header.size(), nếu không thì lấy row dài nhất
         int colCount = tableRequest.getHeaders() != null ? tableRequest.getHeaders().size() : 0;
@@ -820,7 +847,6 @@ public class CreditContractServiceIMPL implements ICreditContractService {
                     System.out.println("Cell paragraphs Generic: " + cell.getParagraphs().size());
                 }
             }
-
         }
 
         // Rebuild grid
@@ -945,7 +971,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         }
         List<String> lastRow = tableRequest.getRows().get(tableRequest.getRows().size() - 1);
         lastRow.set(4, nf.format(tongThuNhap));
-
+        System.err.println("tong doanh thu --> "+tongThuNhap);
         // 👉 Gán vào replacements để dùng cho placeholder {{tongDoanhThu}}
         replacements.put("{{tongDoanhThu}}", nf.format(tongThuNhap));
 
@@ -1011,9 +1037,20 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         long tongDoanhThu = parseLongSafe(replacements.get("{{tongDoanhThu}}"));
         long tongChiPhi   = parseLongSafe(replacements.get("{{tongChiPhi}}"));
         long loiNhuan = tongDoanhThu - tongChiPhi;
+        System.err.println("loi Nhuan --> "+loiNhuan);
         NumberFormat nf = NumberFormat.getInstance(new Locale("vi", "VN"));
         replacements.put("{{loiNhuan}}", nf.format(loiNhuan));
+
+        // Thêm placeholder mới: 20% của lợi nhuận
+        long loiNhuanNamTruoc = Math.round(loiNhuan * 0.15);
+        replacements.put("{{loiNhuanNamTruoc}}", nf.format(loiNhuanNamTruoc));
+
+        // Thêm placeholder mới: lợi nhuận dự kiến = lợi nhuận - lợi nhuận năm trước
+        long loiNhuanDuKien = loiNhuan - loiNhuanNamTruoc;
+        replacements.put("{{loiNhuanDuKien}}", nf.format(loiNhuanDuKien));
     }
+
+
 
 
     // ======= Hàm chính: fillHanMucTable =======
