@@ -529,7 +529,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
                     "Giấy phép đăng ký kinh doanh: 0800001806; Điện thoại: 0220.3596.266");
             replacements.put("{{ndd}}", "ông: DƯƠNG QUANG TUẤN Chức vụ: Giám Đốc PGD An Lạc.\n" +
                     "CCCD số: 030087002460;\n" +
-                    "(Theo văn bản ủy quyền số: 02/UQ-TN Ngày 15 tháng 07 năm 2026)");
+                    "(Theo văn bản ủy quyền số: 02/UQ-TN Ngày 15 tháng 07 năm 2026) của Giám Đốc Quỹ Tín Dụng Nhân Dân Thái Học");
             replacements.put("{{ndd1}}", "Ông: " + capitalizeWords("DƯƠNG QUANG TUẤN") + " - Chức vụ: Giám Đốc PGD An Lạc.");
             replacements.put("{{phuong}}", "Lê Đại Hành");
             replacements.put("{{chuTichPhuong}}", "Phương Quốc Luyện");
