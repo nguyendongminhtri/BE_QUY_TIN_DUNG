@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -86,10 +88,22 @@ public class CreditContractController {
 
         try (ZipOutputStream zos = new ZipOutputStream(Files.newOutputStream(zipPath))) {
             for (String filePath : filePaths) {
-                Path path = Paths.get(filePath);
-                zos.putNextEntry(new ZipEntry(path.getFileName().toString()));
-                Files.copy(path, zos);
-                zos.closeEntry();
+                if (filePath.startsWith("http")) {
+                    // Trường hợp là URL
+                    URL url = new URL(filePath);
+                    try (InputStream in = url.openStream()) {
+                        String entryName = Paths.get(url.getPath()).getFileName().toString();
+                        zos.putNextEntry(new ZipEntry(entryName));
+                        in.transferTo(zos);
+                        zos.closeEntry();
+                    }
+                } else {
+                    // Trường hợp là đường dẫn local
+                    Path path = Paths.get(filePath);
+                    zos.putNextEntry(new ZipEntry(path.getFileName().toString()));
+                    Files.copy(path, zos);
+                    zos.closeEntry();
+                }
             }
         }
 
@@ -100,6 +114,7 @@ public class CreditContractController {
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .body(resource);
     }
+
 
     @GetMapping("/{id}")
     public ResponseEntity<ContractRequest> detailContract(@PathVariable Long id) throws JsonProcessingException {

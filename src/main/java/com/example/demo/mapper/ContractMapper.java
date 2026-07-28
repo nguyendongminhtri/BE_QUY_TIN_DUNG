@@ -123,6 +123,17 @@ public class ContractMapper {
                 tsbd = new CreditContractTSBDEntity();
                 tsbd.setCreditContract(entity); // liên kết ngược
             }
+            // Người đứng tên bìa đỏ 1
+            tsbd.setCheckCMNDDungTenBiaDo1(dto.getCheckCMNDDungTenBiaDo1());
+            tsbd.setCmndDungTenBiaDo1(dto.getCmndDungTenBiaDo1());
+            tsbd.setCheckNgayCapCCCDTruocDayDungTenBiaDo1(dto.getCheckNgayCapCCCDTruocDayDungTenBiaDo1());
+            tsbd.setNgayCapCCCDTruocDayDungTenBiaDo1(dto.getNgayCapCCCDTruocDayDungTenBiaDo1());
+
+            // Người đứng tên bìa đỏ 2
+            tsbd.setCheckCMNDDungTenBiaDo2(dto.getCheckCMNDDungTenBiaDo2());
+            tsbd.setCmndDungTenBiaDo2(dto.getCmndDungTenBiaDo2());
+            tsbd.setCheckNgayCapCCCDTruocDayDungTenBiaDo2(dto.getCheckNgayCapCCCDTruocDayDungTenBiaDo2());
+            tsbd.setNgayCapCCCDTruocDayDungTenBiaDo2(dto.getNgayCapCCCDTruocDayDungTenBiaDo2());
 
             tsbd.setCheckTaiSanGanLienVoiDat(dto.getCheckTaiSanGanLienVoiDat());
             tsbd.setDienTichTS(dto.getDienTichTS());
