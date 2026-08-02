@@ -374,11 +374,11 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         }
 
         if (Boolean.TRUE.equals(tsbdDto.getCheckNgayCapCCCDTruocDayDungTenBiaDo1())) {
-            replacements.put("{{ncbd1}}", "CC/CCCD Số: "+request.getCccdDungTenBiaDo1()+";"+" Ngày cấp: "+tsbdDto.getNgayCapCCCDTruocDayDungTenBiaDo1()+";" + "(Cấp lại ngày: "+request.getNgayCapCCCDDungTenBiaDo1()+" );"+" Nơi cấp: "+request.getNoiCapCCCDDungTenBiaDo1());
+            replacements.put("{{ncbd1}}", "CC/CCCD Số: "+request.getCccdDungTenBiaDo1()+";"+" Ngày cấp: "+tsbdDto.getNgayCapCCCDTruocDayDungTenBiaDo1()+";" + "(Cấp lại ngày: "+request.getNgayCapCCCDDungTenBiaDo1()+" );");
         } else {
-            replacements.put("{{ncbd1}}", "CC/CCCD Số: "+request.getCccdDungTenBiaDo1()+";"+" Ngày cấp: "+request.getNgayCapCCCDDungTenBiaDo1()+";"+" Nơi cấp: "+request.getNoiCapCCCDDungTenBiaDo1());
+            replacements.put("{{ncbd1}}", "CC/CCCD Số: "+request.getCccdDungTenBiaDo1()+";"+" Ngày cấp: "+request.getNgayCapCCCDDungTenBiaDo1()+";");
         }
-
+        replacements.put("{{noiCapbd1}}", "Nơi cấp: "+request.getNoiCapCCCDDungTenBiaDo1());
         if (Boolean.TRUE.equals(tsbdDto.getCheckCMNDDungTenBiaDo2())) {
             replacements.put("{{cmnd2}}", tsbdDto.getCmndDungTenBiaDo2());
         } else {
@@ -483,12 +483,12 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         //CUỐI TẠO END DATE
         if (request.getCheckNguoiDungTenBiaDo2()) {
             System.err.println("===============DUNG TEN BI DO 2 ========================");
-            replacements.put("{{ntbdd1}}", "- Họ tên người liên đới tài sản: " + request.getDungTenBiaDo2() + "; Sinh năm: " + request.getNamSinhDungTenBiaDo2() + ".");
-            replacements.put("{{ntbd}}", "và " + request.getGioiTinhDungTenBiaDo2() + ": " + request.getDungTenBiaDo2());
+            replacements.put("{{ntbdd1}}","- "+ request.getGioiTinhDungTenBiaDo2() + ": "+ request.getDungTenBiaDo2() + "; Sinh ngày: " + request.getNamSinhDungTenBiaDo2() + ".");
+            replacements.put("{{ntbd}}",request.getDungTenBiaDo2());
 //            replacements.put("{{ntbdd2}}", "CC/CCCD số: " + request.getCccdDungTenBiaDo2() + "; Ngày cấp: " + request.getNgayCapCCCDDungTenBiaDo2() + "; Nơi cấp: " + request.getNoiCapCCCDDungTenBiaDo2() + ".");
             replacements.put("{{ntbdd3}}", "- Cùng địa chỉ thường trú: " + request.getDiaChiThuongTruDungTenBiaDo2() + ".");
             replacements.put("{{ntbdd4}}", "3.6. Họ và tên đầy đủ đối với cá nhân/tên đầy đủ đối với tổ chức: (viết chữ IN HOA)");
-            replacements.put("{{ntbdd5}}", "Năm sinh: " + request.getNamSinhDungTenBiaDo2());
+            replacements.put("{{ntbdd5}}", "Ngày sinh: " + request.getNamSinhDungTenBiaDo2());
             replacements.put("{{ntbdd6}}", "3.7. Địa chỉ thường trú:  " + request.getDiaChiThuongTruDungTenBiaDo2());
             replacements.put("{{ntbdd7}}", "3.8. Giấy tờ xác định tư cách pháp lý: ");
             replacements.put("{{ntbdd8}}", "☑ Chứng minh nhân dân/Căn cước công dân/Chứng minh quân đội");
@@ -497,10 +497,11 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             replacements.put("{{ntbdd11}}", "3.9. Thuộc đối tượng không phải nộp phí đăng ký □");
             replacements.put("{{ntbdd12}}", "3.10. Số điện thoại (nếu có):…..Fax (nếu có):……Thư điện tử (nếu có):………………..");
             if (Boolean.TRUE.equals(tsbdDto.getCheckNgayCapCCCDTruocDayDungTenBiaDo2())) {
-                replacements.put("{{ncbd2}}", "CC/CCCD Số: "+request.getCccdDungTenBiaDo2()+";"+" Ngày cấp: "+tsbdDto.getNgayCapCCCDTruocDayDungTenBiaDo2()+";" + "(Cấp lại ngày: "+request.getNgayCapCCCDDungTenBiaDo2()+" );"+" Nơi cấp: "+request.getNoiCapCCCDDungTenBiaDo2());
+                replacements.put("{{ncbd2}}", "CC/CCCD Số: "+request.getCccdDungTenBiaDo2()+";"+" Ngày cấp: "+tsbdDto.getNgayCapCCCDTruocDayDungTenBiaDo2()+";" + "(Cấp lại ngày: "+request.getNgayCapCCCDDungTenBiaDo2()+" );");
             } else {
-                replacements.put("{{ncbd2}}", "CC/CCCD Số: "+request.getCccdDungTenBiaDo2()+";"+" Ngày cấp: "+request.getNgayCapCCCDDungTenBiaDo2()+";"+" Nơi cấp: "+request.getNoiCapCCCDDungTenBiaDo1());
+                replacements.put("{{ncbd2}}", "CC/CCCD Số: "+request.getCccdDungTenBiaDo2()+";"+" Ngày cấp: "+request.getNgayCapCCCDDungTenBiaDo2()+";");
             }
+            replacements.put("{{noiCapbd2}}","Nơi cấp: "+request.getNoiCapCCCDDungTenBiaDo2());
             System.err.println("===============END DUNG TEN BI DO 2 ========================");
         } else {
             replacements.put("{{ntbdd1}}", "");
@@ -524,19 +525,19 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         if (request.getCheckNguoiMangTenBiaDo()) {
             replacements.put("{{ndtbd}}", request.getNguoiMangTen());
         } else {
-            String nguoiMangTen = request.getGioiTinhDungTenBiaDo1() + ": " + capitalizeWords(request.getDungTenBiaDo1());
+            String nguoiMangTen =  request.getGioiTinhDungTenBiaDo1().toLowerCase() + " "+capitalizeWords(request.getDungTenBiaDo1());
             if (request.getCheckNguoiDungTenBiaDo2()) {
-                nguoiMangTen += " và  ";
-                nguoiMangTen += request.getGioiTinhDungTenBiaDo2();
-                nguoiMangTen += ": ";
+                nguoiMangTen += " ";
+                nguoiMangTen +=request.getGioiTinhDungTenBiaDo2().toLowerCase();
+                nguoiMangTen += " ";
                 nguoiMangTen += capitalizeWords(request.getDungTenBiaDo2());
             }
             System.err.println("nguoiMangTen: " + nguoiMangTen);
             replacements.put("{{ndtbd}}", nguoiMangTen);
         }
         if (request.getNguoiDaiDien().equalsIgnoreCase("gd")) {
-            replacements.put("{{dcpgd}}", "Trụ sở tại: Số 178, TDP Ninh Chấp 5, phường Chu Văn An, thành phố Hải Phòng.\n" +
-                    "Giấy phép đăng ký kinh doanh: 0800001806; Điện thoại: 02203.882.700\n");
+            replacements.put("{{dcpgd1}}", "Trụ sở tại: Số 178, TDP Ninh Chấp 5, phường Chu Văn An, thành phố Hải Phòng.");
+            replacements.put("{{dcpgd2}}","Giấy phép đăng ký kinh doanh: 0800001806; Điện thoại: 02203.882.700");
             replacements.put("{{ndd}}", "bà: PHÙNG THỊ LOAN Chức vụ: Giám Đốc điều hành\n" +
                     "CCCD số: 030182016564; Cấp ngày: 22/12/2021. Nơi cấp: Cục cảnh sát quản lý hành chính về trật tự xã hội.");
             replacements.put("{{ndd1}}", "Bà: " + capitalizeWords("PHÙNG THỊ LOAN") + " - Chức vụ: Giám Đốc điều hành.");
@@ -552,14 +553,16 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             replacements.put("{{gmail}}", "thaihocqtd@gmail.com");
             replacements.put("{{nddpl}}", "Giám Đốc");
             replacements.put("{{gdpgd}}", "Phùng Thị Loan");
+            replacements.put("{{nddPGD1}}","");
+            replacements.put("{{nddPGD2}}","");
         } else if (request.getNguoiDaiDien().equalsIgnoreCase("pgd")) {
             replacements.put("{{pgd}}", " - PHÒNG GIAO DỊCH AN LẠC");
             replacements.put("{{pgdvt}}", capitalizeWords(" - PHÒNG GIAO DỊCH AN LẠC"));
-            replacements.put("{{dcpgd}}", "Địa chỉ: TDP Lạc Đạo, phường Lê Đại Hành, thành phố Hải Phòng. " +
-                    "Giấy phép đăng ký kinh doanh: 0800001806; Điện thoại: 0220.3596.266");
-            replacements.put("{{ndd}}", "ông: DƯƠNG QUANG TUẤN Chức vụ: Giám Đốc PGD An Lạc.\n" +
-                    "CCCD số: 030087002460;\n" +
-                    "(Theo văn bản ủy quyền số: 02/UQ-TN Ngày 15 tháng 07 năm 2026 của Giám Đốc Quỹ Tín Dụng Nhân Dân Thái Học)");
+            replacements.put("{{dcpgd1}}", "Địa chỉ: TDP Lạc Đạo, phường Lê Đại Hành, thành phố Hải Phòng.");
+            replacements.put("{{dcpgd2}}","Giấy phép đăng ký kinh doanh: 0800001806; Điện thoại: 0220.3596.266");
+            replacements.put("{{ndd}}", "ông: DƯƠNG QUANG TUẤN Chức vụ: Giám Đốc PGD An Lạc.");
+            replacements.put("{{nddPGD1}}", "CCCD số: 030087002460; (Theo văn bản ủy quyền số: 02/UQ-TN Ngày 15 tháng ");
+            replacements.put("{{nddPGD2}}", "07 năm 2026 của Giám Đốc Quỹ Tín Dụng Nhân Dân Thái Học).");
             replacements.put("{{ndd1}}", "Ông: " + capitalizeWords("DƯƠNG QUANG TUẤN") + " - Chức vụ: Giám Đốc PGD An Lạc.");
             replacements.put("{{phuong}}", "Lê Đại Hành");
             replacements.put("{{chuTichPhuong}}", "Phương Quốc Luyện");
@@ -1078,7 +1081,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         NumberFormat nf = NumberFormat.getInstance(new Locale("vi", "VN"));
         replacements.put("{{loiNhuan}}", nf.format(loiNhuan));
         // Thêm placeholder mới: 20% của lợi nhuận
-        long loiNhuanNamTruoc = Math.round(loiNhuan * 0.15);
+        long loiNhuanNamTruoc = Math.round(loiNhuan / 1.15);
         replacements.put("{{loiNhuanNamTruoc}}", nf.format(loiNhuanNamTruoc));
         // Thêm placeholder mới: lợi nhuận dự kiến = lợi nhuận - lợi nhuận năm trước
         long loiNhuanDuKien = loiNhuan - loiNhuanNamTruoc;

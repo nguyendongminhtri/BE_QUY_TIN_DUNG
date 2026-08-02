@@ -246,7 +246,14 @@ public class ContractMapper {
             dto.setDienTichTS(tsbd.getDienTichTS());
             dto.setKetCauXayDung(tsbd.getKetCauXayDung());
             dto.setLoaiNha(tsbd.getLoaiNha());
-
+            dto.setCheckCMNDDungTenBiaDo1(tsbd.getCheckCMNDDungTenBiaDo1());
+            dto.setCmndDungTenBiaDo1(tsbd.getCmndDungTenBiaDo1());
+            dto.setCheckNgayCapCCCDTruocDayDungTenBiaDo1(tsbd.getCheckNgayCapCCCDTruocDayDungTenBiaDo1());
+            dto.setNgayCapCCCDTruocDayDungTenBiaDo1(tsbd.getNgayCapCCCDTruocDayDungTenBiaDo1());
+            dto.setCheckCMNDDungTenBiaDo2(tsbd.getCheckCMNDDungTenBiaDo2());
+            dto.setCmndDungTenBiaDo2(tsbd.getCmndDungTenBiaDo2());
+            dto.setCheckNgayCapCCCDTruocDayDungTenBiaDo2(tsbd.getCheckNgayCapCCCDTruocDayDungTenBiaDo2());
+            dto.setNgayCapCCCDTruocDayDungTenBiaDo2(tsbd.getNgayCapCCCDTruocDayDungTenBiaDo2());
             request.setTsbdRequest(dto);
         }
         if (entity.getContractPAVV() != null) {
