@@ -1,5 +1,6 @@
 package com.example.demo.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.ToString;
 
@@ -107,4 +108,5 @@ public class ContractRequest {
     private String giaTriQuyenSuDungDat;
     private CreditContractTSBDRequest tsbdRequest;
     private CreditContractPAVVRequest pavvRequest;
+//    private Boolean vayLai;
 }

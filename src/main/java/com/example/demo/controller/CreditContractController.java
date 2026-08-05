@@ -88,22 +88,18 @@ public class CreditContractController {
 
         try (ZipOutputStream zos = new ZipOutputStream(Files.newOutputStream(zipPath))) {
             for (String filePath : filePaths) {
+                Path path;
                 if (filePath.startsWith("http")) {
-                    // Trường hợp là URL
-                    URL url = new URL(filePath);
-                    try (InputStream in = url.openStream()) {
-                        String entryName = Paths.get(url.getPath()).getFileName().toString();
-                        zos.putNextEntry(new ZipEntry(entryName));
-                        in.transferTo(zos);
-                        zos.closeEntry();
-                    }
+                    // Lấy tên file từ URL nhưng đọc từ thư mục local
+                    String fileName = Paths.get(new URL(filePath).getPath()).getFileName().toString();
+                    path = Paths.get(contractFilesDir, fileName);
                 } else {
-                    // Trường hợp là đường dẫn local
-                    Path path = Paths.get(filePath);
-                    zos.putNextEntry(new ZipEntry(path.getFileName().toString()));
-                    Files.copy(path, zos);
-                    zos.closeEntry();
+                    path = Paths.get(filePath);
                 }
+
+                zos.putNextEntry(new ZipEntry(path.getFileName().toString()));
+                Files.copy(path, zos);
+                zos.closeEntry();
             }
         }
 
@@ -114,6 +110,7 @@ public class CreditContractController {
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .body(resource);
     }
+
 
 
     @GetMapping("/{id}")

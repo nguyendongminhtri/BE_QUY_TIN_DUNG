@@ -27,4 +27,6 @@ public class CreditContractPAVVEntity {
     private String tongVonLuuDong;
     private String vonTuCo;
     private String vonKhac;
+    private Integer reLoanSequence;
+    private Boolean vayLai;
 }

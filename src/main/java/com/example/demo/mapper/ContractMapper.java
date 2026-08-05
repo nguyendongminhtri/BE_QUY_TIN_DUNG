@@ -128,12 +128,16 @@ public class ContractMapper {
             tsbd.setCmndDungTenBiaDo1(dto.getCmndDungTenBiaDo1());
             tsbd.setCheckNgayCapCCCDTruocDayDungTenBiaDo1(dto.getCheckNgayCapCCCDTruocDayDungTenBiaDo1());
             tsbd.setNgayCapCCCDTruocDayDungTenBiaDo1(dto.getNgayCapCCCDTruocDayDungTenBiaDo1());
+            tsbd.setCheckDiaChiThuongTruDungTenBiaDo1(dto.getCheckDiaChiThuongTruDungTenBiaDo1());
+            tsbd.setDiaChiThuongTruDungTenBiaDo1(dto.getDiaChiThuongTruDungTenBiaDo1());
 
             // Người đứng tên bìa đỏ 2
             tsbd.setCheckCMNDDungTenBiaDo2(dto.getCheckCMNDDungTenBiaDo2());
             tsbd.setCmndDungTenBiaDo2(dto.getCmndDungTenBiaDo2());
             tsbd.setCheckNgayCapCCCDTruocDayDungTenBiaDo2(dto.getCheckNgayCapCCCDTruocDayDungTenBiaDo2());
             tsbd.setNgayCapCCCDTruocDayDungTenBiaDo2(dto.getNgayCapCCCDTruocDayDungTenBiaDo2());
+            tsbd.setCheckDiaChiThuongTruDungTenBiaDo2(dto.getCheckDiaChiThuongTruDungTenBiaDo2());
+            tsbd.setDiaChiThuongTruDungTenBiaDo2(dto.getDiaChiThuongTruDungTenBiaDo2());
 
             tsbd.setCheckTaiSanGanLienVoiDat(dto.getCheckTaiSanGanLienVoiDat());
             tsbd.setDienTichTS(dto.getDienTichTS());
@@ -157,6 +161,8 @@ public class ContractMapper {
             pavv.setTongVon(dto.getTongVon());
             pavv.setVonTuCo(dto.getVonTuCo());
             pavv.setVonKhac(dto.getVonKhac());
+            pavv.setReLoanSequence(dto.getReLoanSequence());
+            pavv.setVayLai(dto.getVayLai());
             entity.setContractPAVV(pavv); // liên kết xuôi
         }
 
@@ -254,6 +260,10 @@ public class ContractMapper {
             dto.setCmndDungTenBiaDo2(tsbd.getCmndDungTenBiaDo2());
             dto.setCheckNgayCapCCCDTruocDayDungTenBiaDo2(tsbd.getCheckNgayCapCCCDTruocDayDungTenBiaDo2());
             dto.setNgayCapCCCDTruocDayDungTenBiaDo2(tsbd.getNgayCapCCCDTruocDayDungTenBiaDo2());
+            dto.setCheckDiaChiThuongTruDungTenBiaDo1(tsbd.getCheckDiaChiThuongTruDungTenBiaDo1());
+            dto.setDiaChiThuongTruDungTenBiaDo1(tsbd.getDiaChiThuongTruDungTenBiaDo1());
+            dto.setCheckDiaChiThuongTruDungTenBiaDo2(tsbd.getCheckDiaChiThuongTruDungTenBiaDo2());
+            dto.setDiaChiThuongTruDungTenBiaDo2(tsbd.getDiaChiThuongTruDungTenBiaDo2());
             request.setTsbdRequest(dto);
         }
         if (entity.getContractPAVV() != null) {
@@ -268,7 +278,8 @@ public class ContractMapper {
             pavvDto.setTongVonLuuDong(pavv.getTongVonLuuDong()); // nếu có field này
             pavvDto.setVonTuCo(pavv.getVonTuCo());
             pavvDto.setVonKhac(pavv.getVonKhac());
-
+            pavvDto.setReLoanSequence(pavv.getReLoanSequence());
+            pavvDto.setVayLai(pavv.getVayLai());
             request.setPavvRequest(pavvDto);
         }
 
