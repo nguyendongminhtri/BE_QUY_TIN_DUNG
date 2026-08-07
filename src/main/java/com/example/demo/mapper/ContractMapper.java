@@ -163,6 +163,9 @@ public class ContractMapper {
             pavv.setVonKhac(dto.getVonKhac());
             pavv.setReLoanSequence(dto.getReLoanSequence());
             pavv.setVayLai(dto.getVayLai());
+            pavv.setHeSoVonTuCo(dto.getHeSoVonTuCo());
+            pavv.setNguoiChuyenKhoan(dto.getNguoiChuyenKhoan());
+            pavv.setLoaiPhuongAn(dto.getLoaiPhuongAn());
             entity.setContractPAVV(pavv); // liên kết xuôi
         }
 
@@ -280,6 +283,9 @@ public class ContractMapper {
             pavvDto.setVonKhac(pavv.getVonKhac());
             pavvDto.setReLoanSequence(pavv.getReLoanSequence());
             pavvDto.setVayLai(pavv.getVayLai());
+            pavvDto.setHeSoVonTuCo(pavv.getHeSoVonTuCo());
+            pavvDto.setNguoiChuyenKhoan(pavv.getNguoiChuyenKhoan());
+            pavvDto.setLoaiPhuongAn(pavv.getLoaiPhuongAn());
             request.setPavvRequest(pavvDto);
         }
 

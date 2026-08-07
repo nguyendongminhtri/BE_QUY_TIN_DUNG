@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ICreditContractPAVVRepository extends JpaRepository<CreditContractPAVVEntity, Long> {
-    boolean existsByReLoanSequence(Integer reLoanSequence);
+    boolean existsByReLoanSequenceAndCreditContract_Id(Integer reLoanSequence, Long contractId);
 }

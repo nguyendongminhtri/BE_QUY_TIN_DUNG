@@ -29,4 +29,7 @@ public class CreditContractPAVVEntity {
     private String vonKhac;
     private Integer reLoanSequence;
     private Boolean vayLai;
+    private Double heSoVonTuCo;
+    private String nguoiChuyenKhoan;
+    private String loaiPhuongAn;
 }

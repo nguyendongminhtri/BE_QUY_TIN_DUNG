@@ -15,4 +15,7 @@ public class CreditContractPAVVRequest {
     private Integer reLoanSequence;
     // 👉 thêm trường vayLai
     private Boolean vayLai;
+    private Double heSoVonTuCo;
+    private String nguoiChuyenKhoan;
+    private String loaiPhuongAn;
 }
