@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "credit_contract_tsbd")
@@ -38,4 +39,8 @@ public class CreditContractTSBDEntity {
     private String ngayCapCCCDTruocDayDungTenBiaDo2;
     private Boolean checkDiaChiThuongTruDungTenBiaDo2;
     private String diaChiThuongTruDungTenBiaDo2;
+
+    //Xử lý HĐ HM Vay lại
+    private String soHDTDCu;
+    private LocalDate ngayHDTDCu;
 }

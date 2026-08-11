@@ -2,6 +2,8 @@ package com.example.demo.dto.request;
 
 import lombok.Data;
 
+import java.time.LocalDate;
+
 @Data
 public class CreditContractTSBDRequest {
     private Boolean checkTaiSanGanLienVoiDat;
@@ -23,4 +25,8 @@ public class CreditContractTSBDRequest {
     private String ngayCapCCCDTruocDayDungTenBiaDo2;
     private Boolean checkDiaChiThuongTruDungTenBiaDo2;
     private String diaChiThuongTruDungTenBiaDo2;
+
+    //Xử lý HĐ HM Vay lại
+    private String soHDTDCu;
+    private LocalDate ngayHDTDCu;
 }

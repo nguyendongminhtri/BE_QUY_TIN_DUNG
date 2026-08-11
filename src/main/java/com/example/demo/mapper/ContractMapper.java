@@ -143,6 +143,8 @@ public class ContractMapper {
             tsbd.setDienTichTS(dto.getDienTichTS());
             tsbd.setKetCauXayDung(dto.getKetCauXayDung());
             tsbd.setLoaiNha(dto.getLoaiNha());
+            tsbd.setSoHDTDCu(dto.getSoHDTDCu());
+            tsbd.setNgayHDTDCu(dto.getNgayHDTDCu());
             entity.setContractTSBD(tsbd); // liên kết xuôi
         }
         if (request.getPavvRequest() != null) {
@@ -230,6 +232,13 @@ public class ContractMapper {
             hm.setCreditContract(entity);
             entity.getTables().add(hm);
         }
+        if (request.getThuNhapDuKienTable() != null) {
+            CreditContractTableEntity hm = new CreditContractTableEntity();
+            hm.setTableName("phuLucHanMucTable");
+            hm.setTableJson(mapper.writeValueAsString(request.getPhuLucHanMucTable()));
+            hm.setCreditContract(entity);
+            entity.getTables().add(hm);
+        }
     }
 
     public ContractRequest mapEntityToRequest(CreditContractEntity entity) throws JsonProcessingException {
@@ -267,6 +276,8 @@ public class ContractMapper {
             dto.setDiaChiThuongTruDungTenBiaDo1(tsbd.getDiaChiThuongTruDungTenBiaDo1());
             dto.setCheckDiaChiThuongTruDungTenBiaDo2(tsbd.getCheckDiaChiThuongTruDungTenBiaDo2());
             dto.setDiaChiThuongTruDungTenBiaDo2(tsbd.getDiaChiThuongTruDungTenBiaDo2());
+            dto.setSoHDTDCu(tsbd.getSoHDTDCu());
+            dto.setNgayHDTDCu(tsbd.getNgayHDTDCu());
             request.setTsbdRequest(dto);
         }
         if (entity.getContractPAVV() != null) {
@@ -417,6 +428,9 @@ public class ContractMapper {
                         break;
                     case "thuNhapDuKienTable":
                         request.setThuNhapDuKienTable(tableReq);
+                        break;
+                    case "phuLucHanMucTable":
+                        request.setPhuLucHanMucTable(tableReq);
                         break;
                 }
             }

@@ -108,6 +108,9 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         fileUrls.add(generateContractFile(request, date, dateTC, dateBD, user, "BaoCaoThamDinhVaDeXuatChoVay.docx"));
         fileUrls.add(generateContractFile(request, date, dateTC, dateBD, user, "BaoCaoSuDungVonVay.docx"));
         fileUrls.add(generateContractFile(request, date, dateTC, dateBD, user, "BaoCaoThucTrangTaiChinh.docx"));
+        if(Boolean.TRUE.equals(request.getPavvRequest().getVayLai()) && request.getLoaiVay().equalsIgnoreCase("NGẮN HẠN (Thỏa thuận)")){
+            fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "PhuLucHanMuc.docx"));
+        }
         return fileUrls;
     }
 
@@ -141,7 +144,9 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "BaoCaoThamDinhVaDeXuatChoVay.docx"));
         fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "BaoCaoSuDungVonVay.docx"));
         fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "BaoCaoThucTrangTaiChinh.docx"));
-
+        if(Boolean.TRUE.equals(request.getPavvRequest().getVayLai()) && request.getLoaiVay().equalsIgnoreCase("NGẮN HẠN (Thỏa thuận)")){
+            fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "PhuLucHanMuc.docx"));
+        }
         creditContractRepository.save(entity);
         return fileUrls;
     }
@@ -155,10 +160,23 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         LocalDate date = LocalDate.parse(request.getContractDate());
         LocalDate dateTC = LocalDate.parse(request.getNgayTheChap());
         LocalDate dateBD = LocalDate.parse(request.getNgayBaoDam());
-
+        // Update entity theo id
+        CreditContractEntity entity = creditContractRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy hợp đồng"));
+        String soHDTDCu = entity.getSoHopDongTD();
+        LocalDate ngayHDTDCu = entity.getContractDate();
         if (Boolean.TRUE.equals(request.getPavvRequest().getVayLai())) {
             Integer reLoanSeq = request.getPavvRequest().getReLoanSequence();
             System.err.println("reLoanSeq: " + reLoanSeq);
+            System.err.println("So HDTD cu: " + entity.getSoHopDongTD());
+            System.err.println("Ngay ky HDTD cu: " + entity.getContractDate());
+            System.err.println("So HDTD moi: " + request.getSoHopDongTD());
+            System.err.println("Ngay ky HDTD cu: " + request.getContractDate());
+            // Gán giá trị cũ vào TsbdRequest để dùng trong replacePlaceholders
+            if (request.getTsbdRequest() != null) {
+                request.getTsbdRequest().setSoHDTDCu(soHDTDCu);
+                request.getTsbdRequest().setNgayHDTDCu(ngayHDTDCu);
+            }
             if (reLoanSeq != null) {
                 // ⚠️ Check theo cả reLoanSeq và contractId
                 boolean exists = creditContractPAVVRepository.existsByReLoanSequenceAndCreditContract_Id(reLoanSeq, id);
@@ -176,9 +194,6 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             }
         }
 
-        // Update entity theo id
-        CreditContractEntity entity = creditContractRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy hợp đồng"));
         contractMapper.mapRequestToEntity(request, entity, user, date, dateTC, dateBD);
         contractMapper.processAvatars(request, entity, tempDir, uploadDir, fileMetadataRepository);
 
@@ -199,6 +214,9 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "BaoCaoThamDinhVaDeXuatChoVay.docx"));
         fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "BaoCaoSuDungVonVay.docx"));
         fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "BaoCaoThucTrangTaiChinh.docx"));
+        if(Boolean.TRUE.equals(request.getPavvRequest().getVayLai()) && request.getLoaiVay().equalsIgnoreCase("NGẮN HẠN (Thỏa thuận)")){
+            fileUrls.add(generateContractFileExport(request, date, dateTC, dateBD, user, "PhuLucHanMuc.docx"));
+        }
         creditContractRepository.save(entity);
         return fileUrls;
     }
@@ -377,10 +395,15 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             safePutReplacement("{{ms1d}}", "");
             safePutReplacement("{{ms2t}}", "Hạn mức cho vay:");
             safePutReplacement("{{ms2d}}", "Bên A cam kết cho bên B vay các khoản cấp tín dụng bằng đồng Việt Nam với hạn mức cho vay là: " + request.getTienSo() + " đồng, (Bằng chữ: " + request.getTienChu() + " )");
-//            if (Boolean.TRUE.equals(request.getPavvRequest().getVayLai())) {
-//                CreditContractEntity entity = creditContractRepository.findById(id)
-//                        .orElseThrow(() -> new RuntimeException("Không tìm thấy hợp đồng"));
-//            }
+            if (Boolean.TRUE.equals(request.getPavvRequest().getVayLai())) {
+                CreditContractTSBDRequest tsbd = request.getTsbdRequest();
+                safePutReplacement("{{ms2e}}", "Hạn mức cho vay bao gồm các khoản nợ được điều chỉnh bởi Hợp đồng cho vay hạn mức số " + tsbd.getSoHDTDCu() + "HĐTD, ký ngày " + tsbd.getNgayHDTDCu().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) + " giữa bên A (Bên cho vay) và bên B (Bên vay vốn) theo liệt kê chi tiết tại Phụ Lục " + request.getPavvRequest().getReLoanSequence() + " Hợp đồng này. ");
+                safePutReplacement("{{soHDTDcu}}", tsbd.getSoHDTDCu());
+                safePutReplacement("{{ngayHDTDcu}}", tsbd.getNgayHDTDCu().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+            } else {
+                safePutReplacement("{{ms2e}}", "Hạn mức cho vay này bao gồm các khoản nợ được điều chỉnh bởi hợp đồng cho vay hạn mức được ký kêt giữa bên A và bên B theo liệt kê chi tiết tại Phụ lục Hợp đồng này, đồng thời thống nhất việc xử lý số dư nợ vay được liệt kê theo nguyên tắc tham chiếu chi tiết kèm theo.");
+            }
+            safePutReplacement("{{ms2f}}", "Trong thời hạn duy trì hạn mức tín dụng Bên B được Bên A xem xét cho vay, nhưng dư nợ tại bất kỳ một thời điểm nào cũng không vượt quá hạn mức tín dụng tại khoản 1, Điều này.");
             safePutReplacement("{{ms3}}", "Mục đích sử dụng tiền vay: " + request.getMuchDichVay());
             safePutReplacement("{{ms4}}", "Thời hạn duy trì hạn mức: " + request.getHanMuc() + ", kể từ ngày ký thỏa thuận Hợp đồng tín dụng này. Trong khoảng thời gian này Bên B được đề nghị Bên A cấp tín dụng phù hợp với mục đích sử dụng vốn và có thể đề nghị giải ngân một lần hoặc nhiều lần trong hạn mức nêu tại Hợp đồng tín dụng này. Hết thời hạn duy trì hạn mức hợp đồng này, bên A không có nghĩa vụ giải ngân bất kỳ khoản vay nợ nào");
             safePutReplacement("{{ms5}}", "5. Một năm ít nhất một lần bên A có trách nhiệm xem xét, xác định lại hạn mức cho vay tối đa và thời gian duy trì hạn mức Hợp đồng này.");
@@ -391,7 +414,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             safePutReplacement("{{vongQuay}}", "- Số vòng quay vốn bình quân:  1,2  Vòng/năm.");
             safePutReplacement("{{hm1}}", "+ Chính sách bán hàng: Bán buôn và bán lẻ cho các hộ kinh doanh, các đại lý trên địa bàn tỉnh và các vùng lân cận.");
             safePutReplacement("{{hm2}}", "+ Chính sách thu tiền hàng: Cho phép bên mua trả chậm tối đa không quá 90 ngày.");
-            safePutReplacement("{{hm3}}", "* Xác điịnh thời gian bình quân cho một chu kỳ sản xuất:");
+            safePutReplacement("{{hm3}}", "* Xác định thời gian bình quân cho một chu kỳ sản xuất:");
             safePutReplacement("{{tgpa}}", "duy trì hàn mức");
         } else {
             safePutReplacement("{{lvt}}", Optional.ofNullable(capitalizeWords(request.getLoaiVay())).orElse(""));
@@ -400,6 +423,8 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             safePutReplacement("{{ms1d}}", "Theo các điều khoản và điều kiện của Hợp đồng tín dụng này, bên A cho bên B vay khoản tiền bằng đồng Việt Nam. Số tiền vay là: " + request.getTienSo() + " đồng, (Bằng chữ: " + request.getTienChu() + " ).");
             safePutReplacement("{{ms2t}}", "Thời hạn cho vay: ");
             safePutReplacement("{{ms2d}}", "Thời hạn cho vay là: " + request.getHanMuc() + ", được tính từ ngày tiếp theo của ngày giải ngân đến ngày " + ngayKetThuc + " (trường hợp ngày cuối cùng của thời hạn vay là ngày lễ hoặc là ngày thứ 7, chủ nhật hàng tuần, thì ngày đến hạn chuyển sang ngày làm việc tiếp theo; nếu trường hợp bên B sử dụng chưa đủ một ngày, thì tính từ thời điểm nhận tiền vay và thời gian vay vốn được tính là 01 (một) ngày)");
+            safePutReplacement("{{ms2e}}", "");
+            safePutReplacement("{{ms2f}}", "");
             safePutReplacement("{{ms3}}", "Phương thức cho vay: Cho vay Từng lần.");
             safePutReplacement("{{ms4}}", "Mục đích sử dụng vốn vay: " + request.getMuchDichVay());
             safePutReplacement("{{ms5}}", "");
@@ -412,6 +437,8 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             safePutReplacement("{{hm2}}", "");
             safePutReplacement("{{hm3}}", "");
             safePutReplacement("{{tgpa}}", "sử dụng vốn vay");
+            safePutReplacement("{{soHDTDcu}}", "");
+            safePutReplacement("{{ngayHDTDcu}}", "");
         }
         CreditContractTSBDRequest tsbdDto = request.getTsbdRequest();
         if (Boolean.TRUE.equals(tsbdDto.getCheckCMNDDungTenBiaDo1())) {
@@ -452,26 +479,26 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         if (pavvDto != null) {
             safePutReplacement("{{tenpavv}}", Optional.ofNullable(pavvDto.getName()).orElse(""));
             safePutReplacement("{{ldpavv}}", Optional.ofNullable(pavvDto.getReason()).orElse(""));
-            if(pavvDto.getLoaiPhuongAn().equals("chanNuoi")){
-                safePutReplacement("{{loaiPhuongAn}}","chăn nuôi");
-                safePutReplacement("{{sanPhamSX}}","Sản phẩm của khách hàng là nguồn lương thực thực phẩm cẩn thiết được chế biến và cung cấp trên thị trường, phù hợp với nhu cầu của người tiêu dùng. Việc mở rộng quy mô chăn nuôi mang lại kinh tế cho khách hàng, nâng cao năng suất, hiệu quả và sức cạnh tranh trong cơ chế thị trường.");
-                safePutReplacement("{{thiTruongDV}}","Nguồn cung ứng nguyên vật liệu, thiết bị và dịch vụ phục vụ sản xuất – kinh doanh hiện nay rất đa dạng, phong phú và có chất lượng ổn định. Doanh nghiệp có nhiều lựa chọn từ các nhà cung cấp uy tín, đảm bảo tiêu chuẩn kỹ thuật và giá cả cạnh tranh. Hệ thống giao thông thuận tiện giúp việc vận chuyển nguyên liệu, hàng hóa nhanh chóng, tiết kiệm thời gian và chi phí. Bên cạnh đó, nhiều chương trình hỗ trợ từ phía nhà sản xuất, nhà phân phối và chính quyền địa phương giúp doanh nghiệp giảm thiểu chi phí đầu vào, tạo điều kiện thuận lợi để tối ưu hóa hiệu quả sản xuất – kinh doanh.");
-                safePutReplacement("{{pavv1}}","- Vị trí xây dựng ao chuồng phù hợp về phát triển chăn nuôi ở địa phương.");
-                safePutReplacement("{{pavv2}}","- Có nguồn nước đảm bảo chất lượng, khu tập kết và xử lý chất thải.");
-                safePutReplacement("{{pavv3}}","- Các biện pháp về bảo vệ môi trường được đảm bảo theo quy định.");
-                safePutReplacement("{{pavv4}}","- Có diện tích ao chuồng khoảng 1000 m², mang thiết bị đảm bảo cho việc chăn nuôi.");
-                safePutReplacement("{{pavv5}}","- Có nhật ký ghi chép trong quá trình hoạt động chăn nuôi.");
-                safePutReplacement("{{pavv6}}","- Có khoảng cách an toàn từ khu vực chăn nuôi đến các Tổ Dân Phố.");
+            if (pavvDto.getLoaiPhuongAn().equals("chanNuoi")) {
+                safePutReplacement("{{loaiPhuongAn}}", "chăn nuôi");
+                safePutReplacement("{{sanPhamSX}}", "Sản phẩm của khách hàng là nguồn lương thực thực phẩm cẩn thiết được chế biến và cung cấp trên thị trường, phù hợp với nhu cầu của người tiêu dùng. Việc mở rộng quy mô chăn nuôi mang lại kinh tế cho khách hàng, nâng cao năng suất, hiệu quả và sức cạnh tranh trong cơ chế thị trường.");
+                safePutReplacement("{{thiTruongDV}}", "Nguồn cung ứng nguyên vật liệu, thiết bị và dịch vụ phục vụ sản xuất – kinh doanh hiện nay rất đa dạng, phong phú và có chất lượng ổn định. Doanh nghiệp có nhiều lựa chọn từ các nhà cung cấp uy tín, đảm bảo tiêu chuẩn kỹ thuật và giá cả cạnh tranh. Hệ thống giao thông thuận tiện giúp việc vận chuyển nguyên liệu, hàng hóa nhanh chóng, tiết kiệm thời gian và chi phí. Bên cạnh đó, nhiều chương trình hỗ trợ từ phía nhà sản xuất, nhà phân phối và chính quyền địa phương giúp doanh nghiệp giảm thiểu chi phí đầu vào, tạo điều kiện thuận lợi để tối ưu hóa hiệu quả sản xuất – kinh doanh.");
+                safePutReplacement("{{pavv1}}", "- Vị trí xây dựng ao chuồng phù hợp về phát triển chăn nuôi ở địa phương.");
+                safePutReplacement("{{pavv2}}", "- Có nguồn nước đảm bảo chất lượng, khu tập kết và xử lý chất thải.");
+                safePutReplacement("{{pavv3}}", "- Các biện pháp về bảo vệ môi trường được đảm bảo theo quy định.");
+                safePutReplacement("{{pavv4}}", "- Có diện tích ao chuồng khoảng 1000 m², mang thiết bị đảm bảo cho việc chăn nuôi.");
+                safePutReplacement("{{pavv5}}", "- Có nhật ký ghi chép trong quá trình hoạt động chăn nuôi.");
+                safePutReplacement("{{pavv6}}", "- Có khoảng cách an toàn từ khu vực chăn nuôi đến các Tổ Dân Phố.");
             } else {
-                safePutReplacement("{{loaiPhuongAn}}","sản xuất, kinh doanh");
-                safePutReplacement("{{sanPhamSX}}","Sản phẩm dịch vụ sản xuất, kinh doanh của khách hàng đang có nhu cầu lớn trên thị trường, đồng thời phù hợp với nhu cầu của người sử dụng. Việc mở rộng quy mô sản xuất và nâng cao chất lượng sản phẩm, thu hút được khách hàng và sản phẩm có tính cạnh tranh cao hơn trên thị trường.");
-                safePutReplacement("{{thiTruongDV}}","Có nhiều nhà cung cấp chất lượng để lựa chọn, giao thông thuận tiện để vận chuyển nguồn thức ăn. Nhà sản xuất có nhiều chương trình hỗ trợ người chăn nuôi nên giá đầu vào thấp hơn, giảm thiểu chi phí đầu vào tối đa.");
-                safePutReplacement("{{pavv1}}","- Khả năng thực hiện phương án là khả thi.");
-                safePutReplacement("{{pavv2}}","- Điều kiện về môi trường được đảm bảo, thực hiện đúng quy định địa phương về vệ sinh môi trường, không để ảnh hưởng đến hộ dân xung quanh, nguồn nước. Tuân thủ phòng chống cháy nổ theo quy định của pháp luật.");
-                safePutReplacement("{{pavv3}}","");
-                safePutReplacement("{{pavv4}}","");
-                safePutReplacement("{{pavv5}}","");
-                safePutReplacement("{{pavv6}}","");
+                safePutReplacement("{{loaiPhuongAn}}", "sản xuất, kinh doanh");
+                safePutReplacement("{{sanPhamSX}}", "Sản phẩm dịch vụ sản xuất, kinh doanh của khách hàng đang có nhu cầu lớn trên thị trường, đồng thời phù hợp với nhu cầu của người sử dụng. Việc mở rộng quy mô sản xuất và nâng cao chất lượng sản phẩm, thu hút được khách hàng và sản phẩm có tính cạnh tranh cao hơn trên thị trường.");
+                safePutReplacement("{{thiTruongDV}}", "Có nhiều nhà cung cấp chất lượng để lựa chọn, giao thông thuận tiện để vận chuyển nguồn thức ăn. Nhà sản xuất có nhiều chương trình hỗ trợ người chăn nuôi nên giá đầu vào thấp hơn, giảm thiểu chi phí đầu vào tối đa.");
+                safePutReplacement("{{pavv1}}", "- Khả năng thực hiện phương án là khả thi.");
+                safePutReplacement("{{pavv2}}", "- Điều kiện về môi trường được đảm bảo, thực hiện đúng quy định địa phương về vệ sinh môi trường, không để ảnh hưởng đến hộ dân xung quanh, nguồn nước. Tuân thủ phòng chống cháy nổ theo quy định của pháp luật.");
+                safePutReplacement("{{pavv3}}", "");
+                safePutReplacement("{{pavv4}}", "");
+                safePutReplacement("{{pavv5}}", "");
+                safePutReplacement("{{pavv6}}", "");
             }
 //           safePutReplacement("{{tongVon}}", Optional.ofNullable(pavvDto.getTongVon()).orElse(""));
 //           safePutReplacement("{{tongVonLuuDong}}", Optional.ofNullable(pavvDto.getTongVonLuuDong()).orElse(""));
@@ -560,18 +587,21 @@ public class CreditContractServiceIMPL implements ICreditContractService {
                 safePutReplacement("{{noiDung}}", "Biên bản xác định lại giá trị tài sản bổ sung cho HĐTC số: " + request.getSoHopDongTheChapQSDD()
                         + " Ngày " + String.format("%02d", dateTC.getDayOfMonth()) + " tháng " + String.format("%02d", dateTC.getMonthValue()) + " năm " + String.valueOf(dateTC.getYear()));
                 // Số hợp đồng vay lại
-                safePutReplacement("{{shdvl}}", "." + pavvDtoVayLai.getReLoanSequence());
+                safePutReplacement("{{shdvl}}",""+pavvDtoVayLai.getReLoanSequence());
+                safePutReplacement("{{shdvlts}}","."+pavvDtoVayLai.getReLoanSequence());
                 safePutReplacement("{{xdlai}}", "LẠI");
             } else {
                 safePutReplacement("{{noiDung}}", "");
                 safePutReplacement("{{shdvl}}", "");
+                safePutReplacement("{{shdvlts}}", "");
             }
+
         } else {
             // Nếu không phải vay lại thì để trống hoặc giữ nguyên logic cũ
             safePutReplacement("{{noiDung}}", "");
-            safePutReplacement("{{soHopDongVayLai}}", "");
             safePutReplacement("{{xdlai}}", "");
             safePutReplacement("{{shdvl}}", "");
+            safePutReplacement("{{shdvlts}}", "");
         }
         if (Boolean.TRUE.equals(tsbdDto.getCheckDiaChiThuongTruDungTenBiaDo1())) {
             safePutReplacement("{{dcdtbd1}}", tsbdDto.getDiaChiThuongTruDungTenBiaDo1());
@@ -602,7 +632,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             safePutReplacement("{{ntbdd8}}", "☑ Chứng minh nhân dân/Căn cước công dân/Chứng minh quân đội");
             safePutReplacement("{{ntbdd9}}", "□ Hộ chiếu        □ Thẻ thường trú        □ Mã số thuế");
             safePutReplacement("{{ntbdd10}}", "CC/CCCD Số: " + request.getCccdDungTenBiaDo2() + "; Ngày cấp: " + request.getNgayCapCCCDDungTenBiaDo2() + ";");
-            safePutReplacement("{{ntbdd10s}}","Nơi cấp: " + request.getNoiCapCCCDDungTenBiaDo2() + ";");
+            safePutReplacement("{{ntbdd10s}}", "Nơi cấp: " + request.getNoiCapCCCDDungTenBiaDo2() + ";");
             safePutReplacement("{{ntbdd11}}", "3.9. Thuộc đối tượng không phải nộp phí đăng ký □");
             safePutReplacement("{{ntbdd12}}", "3.10. Số điện thoại (nếu có):…..Fax (nếu có):……Thư điện tử (nếu có):………………..");
             if (Boolean.TRUE.equals(tsbdDto.getCheckNgayCapCCCDTruocDayDungTenBiaDo2())) {
@@ -706,6 +736,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
                     || text.contains("{{TABLE_HM_PLACEHOLDER}}")
                     || text.contains("{{TABLE_CP_PLACEHOLDER}}")
                     || text.contains("{{TABLE_TN_PLACEHOLDER}}")
+                    || text.contains("{{TABLE_PLHM_PLACEHOLDER}}")
             ) {
                 targets.add(para);
             }
@@ -725,6 +756,9 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             }
             if (text.contains("{{TABLE2_PLACEHOLDER}}")) {
                 insertTableAtPlaceholder(doc, para, request.getTable2(), false, replacements, request);
+            }
+            if (text.contains("{{TABLE_PLHM_PLACEHOLDER}}")) {
+                insertTableAtPlaceholder(doc, para, request.getPhuLucHanMucTable(), false, replacements, request);
             }
             if (text.contains("{{TABLE3_PLACEHOLDER}}")) {
                 insertTableAtPlaceholder(doc, para, request.getTable3(), false, replacements, request);
@@ -748,7 +782,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         long tienSo = parseLongSafe(request.getTienSo());
         System.err.println("TIEN SO ====> " + tienSo);
         long tsbds = parseLongSafe(request.getTongTaiSanBD());
-        System.err.println("TSBD ==>"+tsbds);
+        System.err.println("TSBD ==>" + tsbds);
 // Tính tỷ lệ và làm tròn 1 chữ số thập phân
         double phanTramTyLe = 0.0;
         if (tsbds != 0) {
@@ -784,6 +818,85 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         }
 
     }
+
+    private void fillPhuLucHanMucTable(XWPFTable table, TableRequest tableRequest) {
+        if (table == null || tableRequest == null || !tableRequest.isDrawTable()) return;
+
+        int numCols = tableRequest.getHeaders() != null ? tableRequest.getHeaders().size() : 0;
+
+        // Set border toàn bảng
+        CTTblBorders tblBorders = table.getCTTbl().getTblPr().isSetTblBorders()
+                ? table.getCTTbl().getTblPr().getTblBorders()
+                : table.getCTTbl().getTblPr().addNewTblBorders();
+        setBorder(tblBorders.addNewInsideH());
+        setBorder(tblBorders.addNewInsideV());
+        setBorder(tblBorders.addNewTop());
+        setBorder(tblBorders.addNewBottom());
+        setBorder(tblBorders.addNewLeft());
+        setBorder(tblBorders.addNewRight());
+
+        // Header
+        boolean hasHeader = tableRequest.getHeaders() != null && !tableRequest.getHeaders().isEmpty();
+        if (hasHeader) {
+            XWPFTableRow headerRow = table.createRow();
+            ensureCells(headerRow, numCols);
+            ensureParagraphsInRow(headerRow);
+            for (int i = 0; i < numCols; i++) {
+                setCellText(headerRow.getCell(i), tableRequest.getHeaders().get(i), true, false, true);
+            }
+            applyBordersToRow(headerRow);
+        }
+
+        // Rows
+        for (List<String> rowData : tableRequest.getRows()) {
+            XWPFTableRow row = table.createRow();
+            ensureCells(row, numCols);
+            ensureParagraphsInRow(row);
+            for (int i = 0; i < numCols; i++) {
+                String value = i < rowData.size() ? rowData.get(i) : "";
+                setCellText(row.getCell(i), value, false, false, true);
+            }
+            applyBordersToRow(row);
+        }
+
+        // Merge (nếu có)
+        if (tableRequest.getMerges() != null) {
+            for (MergeInfoRequest merge : tableRequest.getMerges()) {
+                int rowIndex = merge.getRowIndex();
+                List<String> targets = merge.getMergeTargets();
+                if (targets == null || targets.isEmpty()) continue;
+
+                int startCol = Integer.parseInt(targets.get(0));
+                int endCol = Integer.parseInt(targets.get(targets.size() - 1));
+
+                int tableRowIndex = hasHeader ? rowIndex + 1 : rowIndex;
+                if (tableRowIndex < 0 || tableRowIndex >= table.getNumberOfRows()) continue;
+
+                XWPFTableCell baseCell = table.getRow(tableRowIndex).getCell(startCol);
+                if (baseCell == null) continue;
+                setCellText(baseCell, merge.getMergedValue() != null ? merge.getMergedValue() : "", false, true, true);
+                CTTcPr tcPr = baseCell.getCTTc().isSetTcPr() ? baseCell.getCTTc().getTcPr() : baseCell.getCTTc().addNewTcPr();
+                CTHMerge hMerge = tcPr.isSetHMerge() ? tcPr.getHMerge() : tcPr.addNewHMerge();
+                hMerge.setVal(STMerge.RESTART);
+
+                for (int c = startCol + 1; c <= endCol; c++) {
+                    XWPFTableCell contCell = table.getRow(tableRowIndex).getCell(c);
+                    if (contCell == null) continue;
+                    while (contCell.getParagraphs().size() > 0) {
+                        contCell.removeParagraph(0);
+                    }
+                    contCell.addParagraph();
+                    CTTcPr tcPr2 = contCell.getCTTc().isSetTcPr() ? contCell.getCTTc().getTcPr() : contCell.getCTTc().addNewTcPr();
+                    CTHMerge hMerge2 = tcPr2.isSetHMerge() ? tcPr2.getHMerge() : tcPr2.addNewHMerge();
+                    hMerge2.setVal(STMerge.CONTINUE);
+                }
+            }
+        }
+
+        rebuildTableGrid(table, numCols);
+    }
+
+
 
     private void calculateTyLeChoVay(Map<String, String> replacements, ContractRequest request) {
 //        NumberFormat nf = NumberFormat.getInstance(new Locale("vi", "VN"));
@@ -940,6 +1053,8 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             fillThuNhapTable(table, tableRequest, replacements);
         } else if ("chiPhi".equalsIgnoreCase(tableType)) {
             fillChiPhiTable(table, tableRequest, replacements, request);
+        } else if ("phuLucHanMuc".equalsIgnoreCase(tableType)) {
+            fillPhuLucHanMucTable(table, tableRequest);
         } else {
             fillGenericTable(table, tableRequest);
         }
