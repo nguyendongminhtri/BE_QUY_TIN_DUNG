@@ -29,4 +29,6 @@ public class CreditContractTSBDRequest {
     //Xử lý HĐ HM Vay lại
     private String soHDTDCu;
     private LocalDate ngayHDTDCu;
+    private Boolean checkChiMangTenNguoi1;
+    private Boolean checkChiMangTenNguoi2;
 }

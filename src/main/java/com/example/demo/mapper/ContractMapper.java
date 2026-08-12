@@ -145,6 +145,8 @@ public class ContractMapper {
             tsbd.setLoaiNha(dto.getLoaiNha());
             tsbd.setSoHDTDCu(dto.getSoHDTDCu());
             tsbd.setNgayHDTDCu(dto.getNgayHDTDCu());
+            tsbd.setCheckChiMangTenNguoi1(dto.getCheckChiMangTenNguoi1());
+            tsbd.setCheckChiMangTenNguoi2(dto.getCheckChiMangTenNguoi2());
             entity.setContractTSBD(tsbd); // liên kết xuôi
         }
         if (request.getPavvRequest() != null) {
@@ -168,6 +170,8 @@ public class ContractMapper {
             pavv.setHeSoVonTuCo(dto.getHeSoVonTuCo());
             pavv.setNguoiChuyenKhoan(dto.getNguoiChuyenKhoan());
             pavv.setLoaiPhuongAn(dto.getLoaiPhuongAn());
+            pavv.setDuNoTruoc(dto.getDuNoTruoc());
+            pavv.setSoTienVayLanNay(dto.getSoTienVayLanNay());
             entity.setContractPAVV(pavv); // liên kết xuôi
         }
 
@@ -258,7 +262,6 @@ public class ContractMapper {
         }
         if (entity.getContractTSBD() != null) {
             CreditContractTSBDEntity tsbd = entity.getContractTSBD();
-
             CreditContractTSBDRequest dto = new CreditContractTSBDRequest();
             dto.setCheckTaiSanGanLienVoiDat(tsbd.getCheckTaiSanGanLienVoiDat());
             dto.setDienTichTS(tsbd.getDienTichTS());
@@ -278,11 +281,12 @@ public class ContractMapper {
             dto.setDiaChiThuongTruDungTenBiaDo2(tsbd.getDiaChiThuongTruDungTenBiaDo2());
             dto.setSoHDTDCu(tsbd.getSoHDTDCu());
             dto.setNgayHDTDCu(tsbd.getNgayHDTDCu());
+            dto.setCheckChiMangTenNguoi1(tsbd.getCheckChiMangTenNguoi1());
+            dto.setCheckChiMangTenNguoi2(tsbd.getCheckChiMangTenNguoi2());
             request.setTsbdRequest(dto);
         }
         if (entity.getContractPAVV() != null) {
             CreditContractPAVVEntity pavv = entity.getContractPAVV();
-
             CreditContractPAVVRequest pavvDto = new CreditContractPAVVRequest();
             pavvDto.setName(pavv.getName());
             pavvDto.setAddress(pavv.getAddress());
@@ -297,6 +301,8 @@ public class ContractMapper {
             pavvDto.setHeSoVonTuCo(pavv.getHeSoVonTuCo());
             pavvDto.setNguoiChuyenKhoan(pavv.getNguoiChuyenKhoan());
             pavvDto.setLoaiPhuongAn(pavv.getLoaiPhuongAn());
+            pavvDto.setDuNoTruoc(pavv.getDuNoTruoc());
+            pavvDto.setSoTienVayLanNay(pavv.getSoTienVayLanNay());
             request.setPavvRequest(pavvDto);
         }
 
