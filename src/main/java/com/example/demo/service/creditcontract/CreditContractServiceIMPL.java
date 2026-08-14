@@ -468,7 +468,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         }
 
         if (Boolean.TRUE.equals(tsbdDto.getCheckNgayCapCCCDTruocDayDungTenBiaDo1())) {
-            safePutReplacement("{{ncbd1}}", "CC/CCCD Số: " + request.getCccdDungTenBiaDo1() + ";" + " Ngày cấp: " + tsbdDto.getNgayCapCCCDTruocDayDungTenBiaDo1() + ";" + "(Cấp lại ngày: " + request.getNgayCapCCCDDungTenBiaDo1() + " );");
+            safePutReplacement("{{ncbd1}}", "CC/CCCD Số: " + request.getCccdDungTenBiaDo1() + ";" + " Ngày cấp: " + tsbdDto.getNgayCapCCCDTruocDayDungTenBiaDo1() + ";" + "(Cấp lại ngày: " + request.getNgayCapCCCDDungTenBiaDo1() + ")");
         } else {
             safePutReplacement("{{ncbd1}}", "CC/CCCD Số: " + request.getCccdDungTenBiaDo1() + ";" + " Ngày cấp: " + request.getNgayCapCCCDDungTenBiaDo1() + ";");
         }
@@ -592,6 +592,11 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             CreditContractPAVVRequest pavvDtoVayLai = request.getPavvRequest();
             duNoTruoc = parseLongSafe(pavvDtoVayLai.getDuNoTruoc());
             soTienVayLaiLanNay = parseLongSafe(pavvDtoVayLai.getSoTienVayLanNay());
+//            if(soTienVayLaiLanNay)
+            System.err.println("soTienVayLaiLanNay --> "+soTienVayLaiLanNay);
+            if(soTienVayLaiLanNay == 0){
+                soTienVayLaiLanNay = tienSo;
+            }
             if (pavvDto != null && pavvDtoVayLai.getReLoanSequence() != null) {
                 System.err.println("so hop dong vay lai: " + pavvDtoVayLai.getReLoanSequence());
                 // Nội dung vay lại, bạn có thể tùy chỉnh câu văn
@@ -634,7 +639,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             System.err.println("===============DUNG TEN BI DO 2 ========================");
             safePutReplacement("{{ntbdd1}}","Và "+ request.getGioiTinhDungTenBiaDo2().toLowerCase() + ": " + request.getDungTenBiaDo2() + "; Sinh ngày: " + request.getNamSinhDungTenBiaDo2() + ".");
             safePutReplacement("{{ntbd}}", request.getDungTenBiaDo2());
-            safePutReplacement("{{ntbdTB}}", " và " + request.getDungTenBiaDo2());
+            safePutReplacement("{{ntbdTB}}",  request.getDungTenBiaDo2());
 //           safePutReplacement("{{ntbdd2}}", "CC/CCCD số: " + request.getCccdDungTenBiaDo2() + "; Ngày cấp: " + request.getNgayCapCCCDDungTenBiaDo2() + "; Nơi cấp: " + request.getNoiCapCCCDDungTenBiaDo2() + ".");
             if (Boolean.TRUE.equals(tsbdDto.getCheckDiaChiThuongTruDungTenBiaDo2())) {
                 safePutReplacement("{{ntbdd3}}", tsbdDto.getDiaChiThuongTruDungTenBiaDo2());
@@ -655,7 +660,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             safePutReplacement("{{ntbdd11}}", "3.9. Thuộc đối tượng không phải nộp phí đăng ký □");
             safePutReplacement("{{ntbdd12}}", "3.10. Số điện thoại (nếu có):…..Fax (nếu có):……Thư điện tử (nếu có):………………..");
             if (Boolean.TRUE.equals(tsbdDto.getCheckNgayCapCCCDTruocDayDungTenBiaDo2())) {
-                safePutReplacement("{{ncbd2}}", "CC/CCCD Số: " + request.getCccdDungTenBiaDo2() + ";" + " Ngày cấp: " + tsbdDto.getNgayCapCCCDTruocDayDungTenBiaDo2() + ";" + "(Cấp lại ngày: " + request.getNgayCapCCCDDungTenBiaDo2() + " );");
+                safePutReplacement("{{ncbd2}}", "CC/CCCD Số: " + request.getCccdDungTenBiaDo2() + ";" + " Ngày cấp: " + tsbdDto.getNgayCapCCCDTruocDayDungTenBiaDo2() + ";" + "(Cấp lại ngày: " + request.getNgayCapCCCDDungTenBiaDo2() + ")");
             } else {
                 safePutReplacement("{{ncbd2}}", "CC/CCCD Số: " + request.getCccdDungTenBiaDo2() + ";" + " Ngày cấp: " + request.getNgayCapCCCDDungTenBiaDo2() + ";");
             }
@@ -684,13 +689,12 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         if (request.getCheckNguoiMangTenBiaDo()) {
             safePutReplacement("{{ndtbd}}", request.getNguoiMangTen());
         } else {
-            String nguoiMangTen = request.getGioiTinhDungTenBiaDo1().toLowerCase() + " " + capitalizeWords(request.getDungTenBiaDo1());
+            String nguoiMangTen =  capitalizeWords(request.getDungTenBiaDo1());
             if (request.getCheckNguoiDungTenBiaDo2()) {
                 if (request.getTsbdRequest().getCheckChiMangTenNguoi2()
                         && !request.getTsbdRequest().getCheckChiMangTenNguoi1()) {
                     // chỉ người 2
-                    nguoiMangTen = request.getGioiTinhDungTenBiaDo2().toLowerCase() + " "
-                            + capitalizeWords(request.getDungTenBiaDo2());
+                    nguoiMangTen = capitalizeWords(request.getDungTenBiaDo2());
                 } else if (request.getTsbdRequest().getCheckChiMangTenNguoi2()
                         && request.getTsbdRequest().getCheckChiMangTenNguoi1()) {
                     // cả người 1 và người 2
