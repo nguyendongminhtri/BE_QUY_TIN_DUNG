@@ -1,10 +1,6 @@
 package com.example.demo.dto.request;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.ToString;
-
-import java.time.LocalDate;
 import java.util.List;
 
 @Data
@@ -13,7 +9,7 @@ public class ContractRequest {
     private Long id;
     private String contractDate;
     private String ngayTheChap;
-    private String ngayBaoDam;
+//    private String ngayBaoDam;
     private String nguoiDaiDien;
     private String gtkh;
     private String tenKhachHang;

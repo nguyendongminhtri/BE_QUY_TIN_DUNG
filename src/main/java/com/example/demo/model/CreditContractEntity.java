@@ -22,7 +22,7 @@ public class CreditContractEntity {
     private Long id;
     private LocalDate contractDate;
     private LocalDate ngayTheChap;
-    private LocalDate ngayBaoDam;
+//    private LocalDate ngayBaoDam;
     private String nguoiDaiDien;
     private String gtkh;
     private String tenKhachHang;
