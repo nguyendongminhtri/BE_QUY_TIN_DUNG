@@ -50,105 +50,131 @@ public class ContractMapper {
         entity.setNgayCapCCCDNguoiThan(request.getNgayCapCCCDNguoiThan());
         entity.setDiaChiThuongTruNguoiThan(request.getDiaChiThuongTruNguoiThan());
         entity.setQuanHe(request.getQuanHe());
-        entity.setNoiDungNgoaiBia(request.getNoiDungNgoaiBia());
         entity.setTienSo(request.getTienSo());
         entity.setTienChu(request.getTienChu());
         entity.setMuchDichVay(request.getMuchDichVay());
         entity.setHanMuc(request.getHanMuc());
         entity.setLaiSuat(request.getLaiSuat());
-        entity.setSoHopDongTheChapQSDD(request.getSoHopDongTheChapQSDD());
-
-        // Thông tin bìa đỏ
-        entity.setSerial(request.getSerial());
-        entity.setNoiCapSo(request.getNoiCapSo());
-        entity.setNgayCapSo(request.getNgayCapSo());
-        entity.setNoiDungVaoSo(request.getNoiDungVaoSo());
-        entity.setSoThuaDat(request.getSoThuaDat());
-        entity.setSoBanDo(request.getSoBanDo());
-        entity.setDiaChiThuaDat(request.getDiaChiThuaDat());
-        entity.setDienTichDatSo(request.getDienTichDatSo());
-        entity.setDienTichDatChu(request.getDienTichDatChu());
-        entity.setHinhThucSuDung(request.getHinhThucSuDung());
-        entity.setMuchDichSuDung(request.getMuchDichSuDung());
-        entity.setThoiHanSuDung(request.getThoiHanSuDung());
-        entity.setSoBienBanDinhGia(request.getSoBienBanDinhGia());
-        entity.setNoiDungThoaThuan(request.getNoiDungThoaThuan());
-        entity.setNguonGocSuDung(request.getNguonGocSuDung());
-        entity.setGhiChu(request.getGhiChu());
         entity.setChoVay(request.getChoVay());
         entity.setLoaiVay(request.getLoaiVay());
         entity.setCheckOption(request.getCheckOption());
-        entity.setCheckGhiChu(request.getCheckGhiChu());
-        entity.setCheckNguonGocSuDung(request.getCheckNguonGocSuDung());
         entity.setSoHopDongTD(request.getSoHopDongTD());
         entity.setNgayKetThucKyHanVay(request.getNgayKetThucKyHanVay());
-        entity.setDungTenBiaDo1(request.getDungTenBiaDo1());
-        entity.setCheckNguoiDungTenBiaDo2(request.getCheckNguoiDungTenBiaDo2());
-        entity.setDungTenBiaDo2(request.getDungTenBiaDo2());
-        entity.setLandItems(request.getLandItems());
         entity.setThoiHanVay(request.getThoiHanVay());
-        entity.setCheckNhaCoDinh(request.getCheckNhaCoDinh());
-        entity.setNhaCoDinh(request.getNhaCoDinh());
-        entity.setTongTaiSanBD(request.getTongTaiSanBD());
-        entity.setTongTaiSanBDChu(request.getTongTaiSanBDChu());
-        entity.setCheckMucDichSuDung(request.getCheckMucDich());
-        entity.setCheckLoaiDat(request.getCheckLoaiDat());
-        entity.setLoaiDat(request.getLoaiDat());
-        entity.setGioiTinhDungTenBiaDo1(request.getGioiTinhDungTenBiaDo1());
-        entity.setNamSinhDungTenBiaDo1(request.getNamSinhDungTenBiaDo1());
-        entity.setPhoneDungTenBiaDo1(request.getPhoneDungTenBiaDo1());
-        entity.setCccdDungTenBiaDo1(request.getCccdDungTenBiaDo1());
-        entity.setNgayCapCCCDDungTenBiaDo1(request.getNgayCapCCCDDungTenBiaDo1());
-        entity.setDiaChiThuongTruDungTenBiaDo1(request.getDiaChiThuongTruDungTenBiaDo1());
-        entity.setGioiTinhDungTenBiaDo2(request.getGioiTinhDungTenBiaDo2());
-        entity.setNamSinhDungTenBiaDo2(request.getNamSinhDungTenBiaDo2());
-        entity.setCccdDungTenBiaDo2(request.getCccdDungTenBiaDo2());
-        entity.setNgayCapCCCDDungTenBiaDo2(request.getNgayCapCCCDDungTenBiaDo2());
-        entity.setDiaChiThuongTruDungTenBiaDo2(request.getDiaChiThuongTruDungTenBiaDo2());
+//        entity.setTongTaiSanBD(request.getTongTaiSanBD());
+//        entity.setTongTaiSanBDChu(request.getTongTaiSanBDChu());
         entity.setPhongGiaoDich(request.getPhongGiaoDich());
         entity.setDiaChiPhongGiaoDich(request.getDiaChiPhongGiaoDich());
-        entity.setCheckNguoiMangTenBiaDo(request.getCheckNguoiMangTenBiaDo());
-        entity.setNguoiMangTen(request.getNguoiMangTen());
         entity.setNoiCapCCCDKhachHang(request.getNoiCapCCCDKhachHang());
         entity.setNoiCapCCCDNguoiThan(request.getNoiCapCCCDNguoiThan());
-        entity.setNoiCapCCCDDungTenBiaDo1(request.getNoiCapCCCDDungTenBiaDo1());
-        entity.setNoiCapCCCDDungTenBiaDo2(request.getNoiCapCCCDDungTenBiaDo2());
         entity.setCheckHopDongBaoLanh(request.getCheckHopDongBaoLanh());
         entity.setSoBBXetDuyetChoVay(request.getSoBBXetDuyetChoVay());
-        if (request.getTsbdRequest() != null) {
-            CreditContractTSBDRequest dto = request.getTsbdRequest();
-            CreditContractTSBDEntity tsbd = entity.getContractTSBD();
+        entity.getContractTSBDs().clear();
+        if (request.getTaiSanArray() != null) {
+            for (CreditContractTSBDRequest dto : request.getTaiSanArray()) {
+                CreditContractTSBDEntity tsbd = new CreditContractTSBDEntity();
+                tsbd.setCreditContract(entity);
 
-            if (tsbd == null) {
-                tsbd = new CreditContractTSBDEntity();
-                tsbd.setCreditContract(entity); // liên kết ngược
+                // Map các trường từ dto sang tsbd
+                tsbd.setSoHopDongTheChapQSDD(dto.getSoHopDongTheChapQSDD());
+                tsbd.setNgayTheChap(dto.getNgayTheChap());
+                tsbd.setNoiDungNgoaiBia(dto.getNoiDungNgoaiBia());
+                tsbd.setSerial(dto.getSerial());
+                tsbd.setNoiCapSo(dto.getNoiCapSo());
+                tsbd.setNgayCapSo(dto.getNgayCapSo());
+                tsbd.setNoiDungVaoSo(dto.getNoiDungVaoSo());
+                tsbd.setSoThuaDat(dto.getSoThuaDat());
+                tsbd.setSoBanDo(dto.getSoBanDo());
+                tsbd.setDiaChiThuaDat(dto.getDiaChiThuaDat());
+                tsbd.setDienTichDatSo(dto.getDienTichDatSo());
+                tsbd.setDienTichDatChu(dto.getDienTichDatChu());
+                tsbd.setThoiHanSuDung(dto.getThoiHanSuDung());
+                tsbd.setHinhThucSuDung(dto.getHinhThucSuDung());
+                tsbd.setMuchDichSuDung(dto.getMuchDichSuDung());
+                tsbd.setLoaiDat(dto.getLoaiDat());
+                tsbd.setNoiDungThoaThuan(dto.getNoiDungThoaThuan());
+                tsbd.setNguonGocSuDung(dto.getNguonGocSuDung());
+                tsbd.setGhiChu(dto.getGhiChu());
+                tsbd.setCheckMucDich(dto.getCheckMucDich());
+                tsbd.setCheckLoaiDat(dto.getCheckLoaiDat());
+                tsbd.setCheckNguonGocSuDung(dto.getCheckNguonGocSuDung());
+                tsbd.setCheckGhiChu(dto.getCheckGhiChu());
+                tsbd.setCheckHopDongBaoLanh(dto.getCheckHopDongBaoLanh());
+
+                // Người đứng tên bìa đỏ 1
+                tsbd.setDungTenBiaDo1(dto.getDungTenBiaDo1());
+                tsbd.setGioiTinhDungTenBiaDo1(dto.getGioiTinhDungTenBiaDo1());
+                tsbd.setNamSinhDungTenBiaDo1(dto.getNamSinhDungTenBiaDo1());
+                tsbd.setCccdDungTenBiaDo1(dto.getCccdDungTenBiaDo1());
+                tsbd.setNgayCapCCCDDungTenBiaDo1(dto.getNgayCapCCCDDungTenBiaDo1());
+                tsbd.setNoiCapCCCDDungTenBiaDo1(dto.getNoiCapCCCDDungTenBiaDo1());
+                tsbd.setDiaChiThuongTruDungTenBiaDo1(dto.getDiaChiThuongTruDungTenBiaDo1());
+
+                // Người đứng tên bìa đỏ 2
+                tsbd.setDungTenBiaDo2(dto.getDungTenBiaDo2());
+                tsbd.setGioiTinhDungTenBiaDo2(dto.getGioiTinhDungTenBiaDo2());
+                tsbd.setNamSinhDungTenBiaDo2(dto.getNamSinhDungTenBiaDo2());
+                tsbd.setCccdDungTenBiaDo2(dto.getCccdDungTenBiaDo2());
+                tsbd.setNgayCapCCCDDungTenBiaDo2(dto.getNgayCapCCCDDungTenBiaDo2());
+                tsbd.setNoiCapCCCDDungTenBiaDo2(dto.getNoiCapCCCDDungTenBiaDo2());
+                tsbd.setDiaChiThuongTruDungTenBiaDo2(dto.getDiaChiThuongTruDungTenBiaDo2());
+
+                // Các checkbox CMND/CCCD
+                tsbd.setCmndDungTenBiaDo1(dto.getCmndDungTenBiaDo1());
+                tsbd.setNgayCapCCCDTruocDayDungTenBiaDo1(dto.getNgayCapCCCDTruocDayDungTenBiaDo1());
+                tsbd.setCheckCMNDDungTenBiaDo1(dto.getCheckCMNDDungTenBiaDo1());
+                tsbd.setCheckNgayCapCCCDTruocDayDungTenBiaDo1(dto.getCheckNgayCapCCCDTruocDayDungTenBiaDo1());
+                tsbd.setCheckDiaChiThuongTruDungTenBiaDo1(dto.getCheckDiaChiThuongTruDungTenBiaDo1());
+                tsbd.setCheckChiMangTenNguoi1(dto.getCheckChiMangTenNguoi1());
+
+                tsbd.setCmndDungTenBiaDo2(dto.getCmndDungTenBiaDo2());
+                tsbd.setNgayCapCCCDTruocDayDungTenBiaDo2(dto.getNgayCapCCCDTruocDayDungTenBiaDo2());
+                tsbd.setCheckCMNDDungTenBiaDo2(dto.getCheckCMNDDungTenBiaDo2());
+                tsbd.setCheckNgayCapCCCDTruocDayDungTenBiaDo2(dto.getCheckNgayCapCCCDTruocDayDungTenBiaDo2());
+                tsbd.setCheckDiaChiThuongTruDungTenBiaDo2(dto.getCheckDiaChiThuongTruDungTenBiaDo2());
+                tsbd.setCheckChiMangTenNguoi2(dto.getCheckChiMangTenNguoi2());
+
+                // Thông tin khác
+                tsbd.setCheckNguoiMangTenBiaDo(dto.getCheckNguoiMangTenBiaDo());
+                tsbd.setNguoiMangTen(dto.getNguoiMangTen());
+                tsbd.setLandItems(dto.getLandItems());
+                tsbd.setTongTaiSanBD(dto.getTongTaiSanBD());
+                tsbd.setTongTaiSanBDChu(dto.getTongTaiSanBDChu());
+                tsbd.setDienTichTS(dto.getDienTichTS());
+                tsbd.setLoaiNha(dto.getLoaiNha());
+                tsbd.setKetCauXayDung(dto.getKetCauXayDung());
+                tsbd.setCheckTaiSanGanLienVoiDat(dto.getCheckTaiSanGanLienVoiDat());
+                tsbd.setCheckDongSoHuu(dto.getCheckDongSoHuu());
+                // Map các bảng table1, table2, table3
+                ObjectMapper mapper = new ObjectMapper();
+                List<CreditContractTableEntity> tables = new ArrayList<>();
+                if (dto.getTable1() != null) {
+                    CreditContractTableEntity t1 = new CreditContractTableEntity();
+                    t1.setTableName("table1");
+                    t1.setTableJson(mapper.writeValueAsString(dto.getTable1()));
+                    t1.setTsbd(tsbd);
+                    tables.add(t1);
+                }
+                if (dto.getTable2() != null) {
+                    CreditContractTableEntity t2 = new CreditContractTableEntity();
+                    t2.setTableName("table2");
+                    t2.setTableJson(mapper.writeValueAsString(dto.getTable2()));
+                    t2.setTsbd(tsbd);
+                    tables.add(t2);
+                }
+                if (dto.getTable3() != null) {
+                    CreditContractTableEntity t3 = new CreditContractTableEntity();
+                    t3.setTableName("table3");
+                    t3.setTableJson(mapper.writeValueAsString(dto.getTable3()));
+                    t3.setTsbd(tsbd);
+                    tables.add(t3);
+                }
+                tsbd.setTables(tables);
+
+                entity.getContractTSBDs().add(tsbd);
             }
-            // Người đứng tên bìa đỏ 1
-            tsbd.setCheckCMNDDungTenBiaDo1(dto.getCheckCMNDDungTenBiaDo1());
-            tsbd.setCmndDungTenBiaDo1(dto.getCmndDungTenBiaDo1());
-            tsbd.setCheckNgayCapCCCDTruocDayDungTenBiaDo1(dto.getCheckNgayCapCCCDTruocDayDungTenBiaDo1());
-            tsbd.setNgayCapCCCDTruocDayDungTenBiaDo1(dto.getNgayCapCCCDTruocDayDungTenBiaDo1());
-            tsbd.setCheckDiaChiThuongTruDungTenBiaDo1(dto.getCheckDiaChiThuongTruDungTenBiaDo1());
-            tsbd.setDiaChiThuongTruDungTenBiaDo1(dto.getDiaChiThuongTruDungTenBiaDo1());
-
-            // Người đứng tên bìa đỏ 2
-            tsbd.setCheckCMNDDungTenBiaDo2(dto.getCheckCMNDDungTenBiaDo2());
-            tsbd.setCmndDungTenBiaDo2(dto.getCmndDungTenBiaDo2());
-            tsbd.setCheckNgayCapCCCDTruocDayDungTenBiaDo2(dto.getCheckNgayCapCCCDTruocDayDungTenBiaDo2());
-            tsbd.setNgayCapCCCDTruocDayDungTenBiaDo2(dto.getNgayCapCCCDTruocDayDungTenBiaDo2());
-            tsbd.setCheckDiaChiThuongTruDungTenBiaDo2(dto.getCheckDiaChiThuongTruDungTenBiaDo2());
-            tsbd.setDiaChiThuongTruDungTenBiaDo2(dto.getDiaChiThuongTruDungTenBiaDo2());
-
-            tsbd.setCheckTaiSanGanLienVoiDat(dto.getCheckTaiSanGanLienVoiDat());
-            tsbd.setDienTichTS(dto.getDienTichTS());
-            tsbd.setKetCauXayDung(dto.getKetCauXayDung());
-            tsbd.setLoaiNha(dto.getLoaiNha());
-            tsbd.setSoHDTDCu(dto.getSoHDTDCu());
-            tsbd.setNgayHDTDCu(dto.getNgayHDTDCu());
-            tsbd.setCheckChiMangTenNguoi1(dto.getCheckChiMangTenNguoi1());
-            tsbd.setCheckChiMangTenNguoi2(dto.getCheckChiMangTenNguoi2());
-            entity.setContractTSBD(tsbd); // liên kết xuôi
         }
+
         if (request.getPavvRequest() != null) {
             CreditContractPAVVRequest dto = request.getPavvRequest();
             CreditContractPAVVEntity pavv = entity.getContractPAVV();
@@ -172,6 +198,12 @@ public class ContractMapper {
             pavv.setLoaiPhuongAn(dto.getLoaiPhuongAn());
             pavv.setDuNoTruoc(dto.getDuNoTruoc());
             pavv.setSoTienVayLanNay(dto.getSoTienVayLanNay());
+            pavv.setGiaiNganHM(dto.getGiaiNganHM());
+            pavv.setSoGiaiNgan(dto.getSoGiaiNgan());
+            pavv.setNgayGiaiNgan(dto.getNgayGiaiNgan());
+            pavv.setNgayHDTDCu(dto.getNgayHDTDCu());
+            pavv.setSoHDTDCu(dto.getSoHDTDCu());
+            pavv.setNgayThuLaiHM(dto.getNgayThuLaiHM());
             entity.setContractPAVV(pavv); // liên kết xuôi
         }
 
@@ -192,29 +224,6 @@ public class ContractMapper {
         entity.getTables().clear();
         ObjectMapper mapper = new ObjectMapper();
 // Thêm lại các bảng mới
-        if (request.getTable1() != null) {
-            CreditContractTableEntity t1 = new CreditContractTableEntity();
-            t1.setTableName("table1");
-            t1.setTableJson(mapper.writeValueAsString(request.getTable1()));
-            t1.setCreditContract(entity);
-            entity.getTables().add(t1);
-        }
-
-        if (request.getTable2() != null) {
-            CreditContractTableEntity t2 = new CreditContractTableEntity();
-            t2.setTableName("table2");
-            t2.setTableJson(mapper.writeValueAsString(request.getTable2()));
-            t2.setCreditContract(entity);
-            entity.getTables().add(t2);
-        }
-
-        if (request.getTable3() != null) {
-            CreditContractTableEntity t3 = new CreditContractTableEntity();
-            t3.setTableName("table3");
-            t3.setTableJson(mapper.writeValueAsString(request.getTable3()));
-            t3.setCreditContract(entity);
-            entity.getTables().add(t3);
-        }
         if (request.getHanMucTable() != null) {
             CreditContractTableEntity hm = new CreditContractTableEntity();
             hm.setTableName("hanMucTable");
@@ -260,31 +269,100 @@ public class ContractMapper {
             }
             request.setFileAvatarUrls(avatarDtos);
         }
-        if (entity.getContractTSBD() != null) {
-            CreditContractTSBDEntity tsbd = entity.getContractTSBD();
-            CreditContractTSBDRequest dto = new CreditContractTSBDRequest();
-            dto.setCheckTaiSanGanLienVoiDat(tsbd.getCheckTaiSanGanLienVoiDat());
-            dto.setDienTichTS(tsbd.getDienTichTS());
-            dto.setKetCauXayDung(tsbd.getKetCauXayDung());
-            dto.setLoaiNha(tsbd.getLoaiNha());
-            dto.setCheckCMNDDungTenBiaDo1(tsbd.getCheckCMNDDungTenBiaDo1());
-            dto.setCmndDungTenBiaDo1(tsbd.getCmndDungTenBiaDo1());
-            dto.setCheckNgayCapCCCDTruocDayDungTenBiaDo1(tsbd.getCheckNgayCapCCCDTruocDayDungTenBiaDo1());
-            dto.setNgayCapCCCDTruocDayDungTenBiaDo1(tsbd.getNgayCapCCCDTruocDayDungTenBiaDo1());
-            dto.setCheckCMNDDungTenBiaDo2(tsbd.getCheckCMNDDungTenBiaDo2());
-            dto.setCmndDungTenBiaDo2(tsbd.getCmndDungTenBiaDo2());
-            dto.setCheckNgayCapCCCDTruocDayDungTenBiaDo2(tsbd.getCheckNgayCapCCCDTruocDayDungTenBiaDo2());
-            dto.setNgayCapCCCDTruocDayDungTenBiaDo2(tsbd.getNgayCapCCCDTruocDayDungTenBiaDo2());
-            dto.setCheckDiaChiThuongTruDungTenBiaDo1(tsbd.getCheckDiaChiThuongTruDungTenBiaDo1());
-            dto.setDiaChiThuongTruDungTenBiaDo1(tsbd.getDiaChiThuongTruDungTenBiaDo1());
-            dto.setCheckDiaChiThuongTruDungTenBiaDo2(tsbd.getCheckDiaChiThuongTruDungTenBiaDo2());
-            dto.setDiaChiThuongTruDungTenBiaDo2(tsbd.getDiaChiThuongTruDungTenBiaDo2());
-            dto.setSoHDTDCu(tsbd.getSoHDTDCu());
-            dto.setNgayHDTDCu(tsbd.getNgayHDTDCu());
-            dto.setCheckChiMangTenNguoi1(tsbd.getCheckChiMangTenNguoi1());
-            dto.setCheckChiMangTenNguoi2(tsbd.getCheckChiMangTenNguoi2());
-            request.setTsbdRequest(dto);
+        // Thay vì if (entity.getContractTSBD() != null) { ... }
+        if (entity.getContractTSBDs() != null && !entity.getContractTSBDs().isEmpty()) {
+            List<CreditContractTSBDRequest> tsbdRequests = new ArrayList<>();
+            for (CreditContractTSBDEntity tsbd : entity.getContractTSBDs()) {
+                CreditContractTSBDRequest dto = new CreditContractTSBDRequest();
+
+                // Map các trường từ entity sang dto
+                dto.setSoHopDongTheChapQSDD(tsbd.getSoHopDongTheChapQSDD());
+                dto.setNgayTheChap(tsbd.getNgayTheChap());
+                dto.setSerial(tsbd.getSerial());
+                dto.setNoiCapSo(tsbd.getNoiCapSo());
+                dto.setNgayCapSo(tsbd.getNgayCapSo());
+                dto.setNoiDungVaoSo(tsbd.getNoiDungVaoSo());
+                dto.setSoThuaDat(tsbd.getSoThuaDat());
+                dto.setSoBanDo(tsbd.getSoBanDo());
+                dto.setDiaChiThuaDat(tsbd.getDiaChiThuaDat());
+                dto.setDienTichDatSo(tsbd.getDienTichDatSo());
+                dto.setDienTichDatChu(tsbd.getDienTichDatChu());
+                dto.setThoiHanSuDung(tsbd.getThoiHanSuDung());
+                dto.setHinhThucSuDung(tsbd.getHinhThucSuDung());
+                dto.setMuchDichSuDung(tsbd.getMuchDichSuDung());
+                dto.setLoaiDat(tsbd.getLoaiDat());
+                dto.setNoiDungThoaThuan(tsbd.getNoiDungThoaThuan());
+                dto.setNguonGocSuDung(tsbd.getNguonGocSuDung());
+                dto.setGhiChu(tsbd.getGhiChu());
+                dto.setCheckMucDich(tsbd.getCheckMucDich());
+                dto.setCheckLoaiDat(tsbd.getCheckLoaiDat());
+                dto.setCheckNguonGocSuDung(tsbd.getCheckNguonGocSuDung());
+                dto.setCheckGhiChu(tsbd.getCheckGhiChu());
+                dto.setCheckHopDongBaoLanh(tsbd.getCheckHopDongBaoLanh());
+
+                // Người đứng tên bìa đỏ 1
+                dto.setDungTenBiaDo1(tsbd.getDungTenBiaDo1());
+                dto.setGioiTinhDungTenBiaDo1(tsbd.getGioiTinhDungTenBiaDo1());
+                dto.setNamSinhDungTenBiaDo1(tsbd.getNamSinhDungTenBiaDo1());
+                dto.setCccdDungTenBiaDo1(tsbd.getCccdDungTenBiaDo1());
+                dto.setNgayCapCCCDDungTenBiaDo1(tsbd.getNgayCapCCCDDungTenBiaDo1());
+                dto.setNoiCapCCCDDungTenBiaDo1(tsbd.getNoiCapCCCDDungTenBiaDo1());
+                dto.setDiaChiThuongTruDungTenBiaDo1(tsbd.getDiaChiThuongTruDungTenBiaDo1());
+
+                // Người đứng tên bìa đỏ 2
+                dto.setDungTenBiaDo2(tsbd.getDungTenBiaDo2());
+                dto.setGioiTinhDungTenBiaDo2(tsbd.getGioiTinhDungTenBiaDo2());
+                dto.setNamSinhDungTenBiaDo2(tsbd.getNamSinhDungTenBiaDo2());
+                dto.setCccdDungTenBiaDo2(tsbd.getCccdDungTenBiaDo2());
+                dto.setNgayCapCCCDDungTenBiaDo2(tsbd.getNgayCapCCCDDungTenBiaDo2());
+                dto.setNoiCapCCCDDungTenBiaDo2(tsbd.getNoiCapCCCDDungTenBiaDo2());
+                dto.setDiaChiThuongTruDungTenBiaDo2(tsbd.getDiaChiThuongTruDungTenBiaDo2());
+
+                // Các checkbox CMND/CCCD
+                dto.setCmndDungTenBiaDo1(tsbd.getCmndDungTenBiaDo1());
+                dto.setNgayCapCCCDTruocDayDungTenBiaDo1(tsbd.getNgayCapCCCDTruocDayDungTenBiaDo1());
+                dto.setCheckCMNDDungTenBiaDo1(tsbd.getCheckCMNDDungTenBiaDo1());
+                dto.setCheckNgayCapCCCDTruocDayDungTenBiaDo1(tsbd.getCheckNgayCapCCCDTruocDayDungTenBiaDo1());
+                dto.setCheckDiaChiThuongTruDungTenBiaDo1(tsbd.getCheckDiaChiThuongTruDungTenBiaDo1());
+                dto.setCheckChiMangTenNguoi1(tsbd.getCheckChiMangTenNguoi1());
+
+                dto.setCmndDungTenBiaDo2(tsbd.getCmndDungTenBiaDo2());
+                dto.setNgayCapCCCDTruocDayDungTenBiaDo2(tsbd.getNgayCapCCCDTruocDayDungTenBiaDo2());
+                dto.setCheckCMNDDungTenBiaDo2(tsbd.getCheckCMNDDungTenBiaDo2());
+                dto.setCheckNgayCapCCCDTruocDayDungTenBiaDo2(tsbd.getCheckNgayCapCCCDTruocDayDungTenBiaDo2());
+                dto.setCheckDiaChiThuongTruDungTenBiaDo2(tsbd.getCheckDiaChiThuongTruDungTenBiaDo2());
+                dto.setCheckChiMangTenNguoi2(tsbd.getCheckChiMangTenNguoi2());
+
+                // Thông tin khác
+                dto.setCheckNguoiMangTenBiaDo(tsbd.getCheckNguoiMangTenBiaDo());
+                dto.setNguoiMangTen(tsbd.getNguoiMangTen());
+                dto.setLandItems(tsbd.getLandItems());
+                dto.setTongTaiSanBD(tsbd.getTongTaiSanBD());
+                dto.setTongTaiSanBDChu(tsbd.getTongTaiSanBDChu());
+                dto.setNoiDungNgoaiBia(tsbd.getNoiDungNgoaiBia());
+                dto.setDienTichTS(tsbd.getDienTichTS());
+                dto.setLoaiNha(tsbd.getLoaiNha());
+                dto.setKetCauXayDung(tsbd.getKetCauXayDung());
+                dto.setCheckTaiSanGanLienVoiDat(tsbd.getCheckTaiSanGanLienVoiDat());
+                dto.setCheckDongSoHuu(tsbd.getCheckDongSoHuu());
+                // Map các bảng table1, table2, table3
+                List<CreditContractTableEntity> tables = tsbd.getTables();
+                if (tables != null) {
+                    for (CreditContractTableEntity t : tables) {
+                        TableRequest tableReq = mapper.readValue(t.getTableJson(), TableRequest.class);
+                        switch (t.getTableName()) {
+                            case "table1": dto.setTable1(tableReq); break;
+                            case "table2": dto.setTable2(tableReq); break;
+                            case "table3": dto.setTable3(tableReq); break;
+                        }
+                    }
+                }
+
+                tsbdRequests.add(dto);
+            }
+            request.setTaiSanArray(tsbdRequests);
         }
+
         if (entity.getContractPAVV() != null) {
             CreditContractPAVVEntity pavv = entity.getContractPAVV();
             CreditContractPAVVRequest pavvDto = new CreditContractPAVVRequest();
@@ -303,6 +381,12 @@ public class ContractMapper {
             pavvDto.setLoaiPhuongAn(pavv.getLoaiPhuongAn());
             pavvDto.setDuNoTruoc(pavv.getDuNoTruoc());
             pavvDto.setSoTienVayLanNay(pavv.getSoTienVayLanNay());
+            pavvDto.setGiaiNganHM(pavv.getGiaiNganHM());
+            pavvDto.setSoGiaiNgan(pavv.getSoGiaiNgan());
+            pavvDto.setNgayGiaiNgan(pavv.getNgayGiaiNgan());
+            pavvDto.setNgayHDTDCu(pavv.getNgayHDTDCu());
+            pavvDto.setSoHDTDCu(pavv.getSoHDTDCu());
+            pavvDto.setNgayThuLaiHM(pavv.getNgayThuLaiHM());
             request.setPavvRequest(pavvDto);
         }
 
@@ -330,67 +414,21 @@ public class ContractMapper {
         request.setNoiCapCCCDNguoiThan(entity.getNoiCapCCCDNguoiThan());
         request.setDiaChiThuongTruNguoiThan(entity.getDiaChiThuongTruNguoiThan());
         request.setQuanHe(entity.getQuanHe());
-        request.setNoiDungNgoaiBia(entity.getNoiDungNgoaiBia());
         request.setTienSo(entity.getTienSo());
         request.setTienChu(entity.getTienChu());
         request.setMuchDichVay(entity.getMuchDichVay());
         request.setHanMuc(entity.getHanMuc());
         request.setLaiSuat(entity.getLaiSuat());
-        request.setSoHopDongTheChapQSDD(entity.getSoHopDongTheChapQSDD());
-
-        // Thông tin bìa đỏ
-        request.setSerial(entity.getSerial());
-        request.setNoiCapSo(entity.getNoiCapSo());
-        request.setNgayCapSo(entity.getNgayCapSo());
-        request.setNoiDungVaoSo(entity.getNoiDungVaoSo());
-        request.setSoThuaDat(entity.getSoThuaDat());
-        request.setSoBanDo(entity.getSoBanDo());
-        request.setDiaChiThuaDat(entity.getDiaChiThuaDat());
-        request.setDienTichDatSo(entity.getDienTichDatSo());
-        request.setDienTichDatChu(entity.getDienTichDatChu());
-        request.setHinhThucSuDung(entity.getHinhThucSuDung());
-        request.setMuchDichSuDung(entity.getMuchDichSuDung());
-        request.setThoiHanSuDung(entity.getThoiHanSuDung());
-        request.setSoBienBanDinhGia(entity.getSoBienBanDinhGia());
-        request.setNoiDungThoaThuan(entity.getNoiDungThoaThuan());
-        request.setNguonGocSuDung(entity.getNguonGocSuDung());
-        request.setGhiChu(entity.getGhiChu());
         request.setChoVay(entity.getChoVay());
         request.setLoaiVay(entity.getLoaiVay());
         request.setCheckOption(entity.getCheckOption());
-        request.setCheckGhiChu(entity.getCheckGhiChu());
-        request.setCheckNguonGocSuDung(entity.getCheckNguonGocSuDung());
         request.setSoHopDongTD(entity.getSoHopDongTD());
         request.setNgayKetThucKyHanVay(entity.getNgayKetThucKyHanVay());
-        request.setDungTenBiaDo1(entity.getDungTenBiaDo1());
-        request.setCheckNguoiDungTenBiaDo2(entity.getCheckNguoiDungTenBiaDo2());
-        request.setDungTenBiaDo2(entity.getDungTenBiaDo2());
-        request.setLandItems(entity.getLandItems());
         request.setThoiHanVay(entity.getThoiHanVay());
-        request.setCheckNhaCoDinh(entity.getCheckNhaCoDinh());
-        request.setNhaCoDinh(entity.getNhaCoDinh());
-        request.setTongTaiSanBD(entity.getTongTaiSanBD());
-        request.setTongTaiSanBDChu(entity.getTongTaiSanBDChu());
-        request.setCheckMucDich(entity.getCheckMucDichSuDung());
-        request.setCheckLoaiDat(entity.getCheckLoaiDat());
-        request.setLoaiDat(entity.getLoaiDat());
-        request.setGioiTinhDungTenBiaDo1(entity.getGioiTinhDungTenBiaDo1());
-        request.setNamSinhDungTenBiaDo1(entity.getNamSinhDungTenBiaDo1());
-        request.setPhoneDungTenBiaDo1(entity.getPhoneDungTenBiaDo1());
-        request.setCccdDungTenBiaDo1(entity.getCccdDungTenBiaDo1());
-        request.setNgayCapCCCDDungTenBiaDo1(entity.getNgayCapCCCDDungTenBiaDo1());
-        request.setNoiCapCCCDDungTenBiaDo1(entity.getNoiCapCCCDDungTenBiaDo1());
-        request.setDiaChiThuongTruDungTenBiaDo1(entity.getDiaChiThuongTruDungTenBiaDo1());
-        request.setGioiTinhDungTenBiaDo2(entity.getGioiTinhDungTenBiaDo2());
-        request.setNamSinhDungTenBiaDo2(entity.getNamSinhDungTenBiaDo2());
-        request.setCccdDungTenBiaDo2(entity.getCccdDungTenBiaDo2());
-        request.setNgayCapCCCDDungTenBiaDo2(entity.getNgayCapCCCDDungTenBiaDo2());
-        request.setNoiCapCCCDDungTenBiaDo2(entity.getNoiCapCCCDDungTenBiaDo2());
-        request.setDiaChiThuongTruDungTenBiaDo2(entity.getDiaChiThuongTruDungTenBiaDo2());
+//        request.setTongTaiSanBD(entity.getTongTaiSanBD());
+//        request.setTongTaiSanBDChu(entity.getTongTaiSanBDChu());
         request.setPhongGiaoDich(entity.getPhongGiaoDich());
         request.setDiaChiPhongGiaoDich(entity.getDiaChiPhongGiaoDich());
-        request.setCheckNguoiMangTenBiaDo(entity.getCheckNguoiMangTenBiaDo());
-        request.setNguoiMangTen(entity.getNguoiMangTen());
         request.setCheckHopDongBaoLanh(entity.getCheckHopDongBaoLanh());
         request.setSoBBXetDuyetChoVay(entity.getSoBBXetDuyetChoVay());
         if (entity.getTableJson() != null) {
@@ -417,15 +455,6 @@ public class ContractMapper {
             for (CreditContractTableEntity t : entity.getTables()) {
                 TableRequest tableReq = mapper.readValue(t.getTableJson(), TableRequest.class);
                 switch (t.getTableName()) {
-                    case "table1":
-                        request.setTable1(tableReq);
-                        break;
-                    case "table2":
-                        request.setTable2(tableReq);
-                        break;
-                    case "table3":
-                        request.setTable3(tableReq);
-                        break;
                     case "hanMucTable":
                         request.setHanMucTable(tableReq);
                         break;

@@ -11,4 +11,5 @@ public class TableRequest {
     private List<List<String>> rows;
     private List<MergeInfoRequest> merges;   // thêm field này
     private String tableType;
+    private Long giaTriQuyenSuDungDat;
 }

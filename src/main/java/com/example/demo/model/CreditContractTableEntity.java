@@ -21,4 +21,7 @@ public class CreditContractTableEntity {
     @ManyToOne
     @JoinColumn(name = "contract_id")
     private CreditContractEntity creditContract;
+    @ManyToOne
+    @JoinColumn(name = "tsbd_id")
+    private CreditContractTSBDEntity tsbd;
 }

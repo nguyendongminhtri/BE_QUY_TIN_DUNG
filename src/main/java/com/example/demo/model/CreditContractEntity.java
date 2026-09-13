@@ -41,8 +41,8 @@ public class CreditContractEntity {
     @Column(columnDefinition = "TEXT")
     private String noiCapCCCDNguoiThan;
     private String diaChiThuongTruNguoiThan;
-    @Column(name = "noi_dung_ngoai_bia")
-    private String noiDungNgoaiBia;
+//    @Column(name = "noi_dung_ngoai_bia")
+//    private String noiDungNgoaiBia;
     private String quanHe;
     private String tienSo;
     private String tienChu;
@@ -51,24 +51,24 @@ public class CreditContractEntity {
     private String laiSuat;
     private String soHopDongTheChapQSDD;
 
-    //thong tin bia do
-    private String serial;
-    private String noiCapSo;
-    private String ngayCapSo;
-    private String noiDungVaoSo;
-    private String soThuaDat;
-    private String soBanDo;
-    private String diaChiThuaDat;
-    private String dienTichDatSo;
-    private String dienTichDatChu;
-    private String hinhThucSuDung;
-    private Boolean checkMucDichSuDung;
-    private String muchDichSuDung;
-    private String thoiHanSuDung;
-    private String soBienBanDinhGia;
-    private String noiDungThoaThuan;
-    private String nguonGocSuDung;
-    private String ghiChu;
+//    //thong tin bia do
+//    private String serial;
+//    private String noiCapSo;
+//    private String ngayCapSo;
+//    private String noiDungVaoSo;
+//    private String soThuaDat;
+//    private String soBanDo;
+//    private String diaChiThuaDat;
+//    private String dienTichDatSo;
+//    private String dienTichDatChu;
+//    private String hinhThucSuDung;
+//    private Boolean checkMucDichSuDung;
+//    private String muchDichSuDung;
+//    private String thoiHanSuDung;
+//    private String soBienBanDinhGia;
+//    private String noiDungThoaThuan;
+//    private String nguonGocSuDung;
+//    private String ghiChu;
 
     private String choVay;
     private String loaiVay;
@@ -76,7 +76,7 @@ public class CreditContractEntity {
     private Boolean checkOption;
     private Boolean checkGhiChu;
     private Boolean checkNguonGocSuDung;
-    private String loaiDat;
+//    private String loaiDat;
     private Boolean checkLoaiDat;
     @Column(columnDefinition = "TEXT")
     private String tableJson;
@@ -139,8 +139,8 @@ public class CreditContractEntity {
     private List<AvatarEntity> avatars = new ArrayList();
     @OneToMany(mappedBy = "creditContract", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CreditContractTableEntity> tables = new ArrayList<>();
-    @OneToOne(mappedBy = "creditContract", cascade = CascadeType.ALL, orphanRemoval = true)
-    private CreditContractTSBDEntity contractTSBD;
+    @OneToMany(mappedBy = "creditContract", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CreditContractTSBDEntity> contractTSBDs = new ArrayList<>();
     @OneToOne(mappedBy = "creditContract", cascade = CascadeType.ALL, orphanRemoval = true)
     private CreditContractPAVVEntity contractPAVV;
 }

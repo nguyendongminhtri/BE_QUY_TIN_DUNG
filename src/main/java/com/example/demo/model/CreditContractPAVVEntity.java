@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "credit_contract_pavv")
@@ -29,9 +30,15 @@ public class CreditContractPAVVEntity {
     private String vonKhac;
     private Integer reLoanSequence;
     private Boolean vayLai;
+    private Boolean giaiNganHM;
     private Double heSoVonKhac;
     private String nguoiChuyenKhoan;
     private String loaiPhuongAn;
     private String  duNoTruoc;
     private String  soTienVayLanNay;
+    private String soGiaiNgan;
+    private LocalDate ngayGiaiNgan;
+    private String ngayHDTDCu;
+    private String soHDTDCu;
+    private String ngayThuLaiHM;
 }
