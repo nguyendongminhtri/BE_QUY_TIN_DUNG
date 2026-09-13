@@ -450,13 +450,12 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         // xử lý taiSanBlock như cũ
         if (request.getTaiSanArray() != null && !request.getTaiSanArray().isEmpty()) {
             CreditContractTSBDRequest tsFirst = request.getTaiSanArray().get(0);
-            safePutReplacement("{{khbd}}", Optional.ofNullable(tsFirst.getDungTenBiaDo1()).orElse(""));
+            String nguoiNhanThongBao = Optional.ofNullable(tsFirst.getDungTenBiaDo1()).orElse("");
             if (Boolean.TRUE.equals(tsFirst.getCheckDongSoHuu())) {
-                safePutReplacement("{{ntbdTB}}", Optional.ofNullable(tsFirst.getDungTenBiaDo2()).orElse(""));
-            } else {
-                safePutReplacement("{{ntbdTB}}", "");
+                nguoiNhanThongBao += " và ";
+                nguoiNhanThongBao += Optional.ofNullable(tsFirst.getDungTenBiaDo2()).orElse("");
             }
-
+            safePutReplacement("{{nguoiNTB}}", nguoiNhanThongBao);
             StringBuilder giayChungNhanBuilder = new StringBuilder();
 
             for (int i = 0; i < request.getTaiSanArray().size(); i++) {
@@ -469,6 +468,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
                 giayChungNhanBuilder.append(Optional.ofNullable(tsbd.getNoiDungNgoaiBia()).orElse(""))
                         .append(" số: ")
                         .append(Optional.ofNullable(tsbd.getSerial()).orElse(""))
+                        .append(". ")
                         .append(Optional.ofNullable(tsbd.getNoiDungVaoSo()).orElse(""))
                         .append(" do ")
                         .append(Optional.ofNullable(tsbd.getNoiCapSo()).orElse(""))
@@ -1229,7 +1229,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
                 .append(Optional.ofNullable(ts.getNoiCapSo()).orElse(""))
                 .append("\n");
         sb.append("- Thuộc quyền sở hữu của Ông (Bà): ")
-                .append(Optional.ofNullable(resolveNguoiSoHuu(ts)))
+                .append(resolveNguoiSoHuu(ts))
                 .append("\n");
         sb.append("- Địa chỉ thửa đất:  ")
                 .append(Optional.ofNullable(ts.getDiaChiThuaDat()).orElse(""))
