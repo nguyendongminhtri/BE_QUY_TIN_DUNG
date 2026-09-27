@@ -1,0 +1,51 @@
+package com.example.demo.model;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import javax.persistence.*;
+import java.time.LocalDate;
+
+@Entity
+@Table(name = "credit_contract_pavv")
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class CreditContractPAVVEntity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id; // Khóa ngoại liên kết về CreditContractEntity
+    @OneToOne
+    @JoinColumn(name = "credit_contract_id")
+    private CreditContractEntity creditContract;
+    private String name;
+    private String address;
+    @Column(columnDefinition = "TEXT")
+    private String reason;
+    private Boolean checkAddress;
+    private String tongVon;
+    private String tongVonLuuDong;
+    private String vonTuCo;
+    private String vonKhac;
+    private Integer reLoanSequence;
+    private Boolean vayLai;
+    private Boolean giaiNganHM;
+    private Double heSoVonKhac;
+    private String nguoiChuyenKhoan;
+    private String loaiPhuongAn;
+    private String  duNoTruoc;
+    private String  soTienVayLanNay;
+    private String soGiaiNgan;
+    private LocalDate ngayGiaiNgan;
+    private String ngayHDTDCu;
+    private String soHDTDCu;
+    private String ngayThuLaiHM;
+    private String tienNoQTDNDTH;
+    private String tienVayTCTDK;
+    private Boolean khongLienQuan;
+    private Boolean tienMat;
+    private Boolean chuyenKhoan;
+    private String tongChiPhiTHTD;
+    private String tienLuongKH;
+}

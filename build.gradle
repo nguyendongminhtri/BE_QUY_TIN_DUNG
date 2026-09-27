@@ -62,7 +62,20 @@ dependencies {
     implementation 'org.apache.commons:commons-lang3:3.12.0'
 }
 
+springBoot {
+    mainClass = 'com.example.demo.Demo2Application'
+}
 
 bootWar {
     archiveFileName = "quy_tin_dung.war"
+}
+sourceSets {
+    main {
+        java {
+            srcDirs = ['generated-contracts/src/main/java']
+        }
+        resources {
+            srcDirs = ['generated-contracts/src/main/resources']
+        }
+    }
 }
