@@ -49,7 +49,7 @@ public class CarouselController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteCarousel(@PathVariable Long id) {
         Optional<CarouselEntity> carouselEntity = carouselService.findById(id);
-        if(!carouselEntity.isPresent()) {
+        if(carouselEntity.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         carouselService.deleteById(id);
@@ -58,7 +58,7 @@ public class CarouselController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getCarouselById(@PathVariable Long id) {
         Optional<CarouselEntity> carouselEntity = carouselService.findById(id);
-        if(!carouselEntity.isPresent()) {
+        if(carouselEntity.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(carouselEntity.get(), HttpStatus.OK);
@@ -66,7 +66,7 @@ public class CarouselController {
     @PutMapping("/{id}")
     public ResponseEntity<?> updateCarousel(@PathVariable Long id, @RequestBody CarouselEntity updatedData) {
         Optional<CarouselEntity> optionalCarousel = carouselService.findById(id);
-        if (!optionalCarousel.isPresent()) {
+        if (optionalCarousel.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new ResponMessage("carousel_not_found"));
         }
@@ -81,5 +81,4 @@ public class CarouselController {
         carouselService.save(existing);
         return ResponseEntity.ok(new ResponMessage("update_success"));
     }
-
 }

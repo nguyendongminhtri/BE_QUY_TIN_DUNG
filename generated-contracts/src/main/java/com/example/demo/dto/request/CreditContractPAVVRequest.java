@@ -35,4 +35,7 @@ public class CreditContractPAVVRequest {
     private Boolean chuyenKhoan;
     private String tongChiPhiTHTD;
     private String tienLuongKH;
+    private String noiDungNguonThuKhac;
+    private String tienNguonThuNhapKhac;
+    private String noiDungTuLuong;
 }

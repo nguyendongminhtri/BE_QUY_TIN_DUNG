@@ -34,15 +34,20 @@ public class CreditContractTSBDEntity {
     private Boolean checkNgayCapCCCDTruocDayDungTenBiaDo1;
     private String ngayCapCCCDTruocDayDungTenBiaDo1;
     private Boolean checkDiaChiThuongTruDungTenBiaDo1;
+    private String diaChiThuongTruDungTenBiaDo1Cu;
     private String diaChiThuongTruDungTenBiaDo1;
+    private Boolean checkHinhThucSuDung;
 
     // Người đứng tên bìa đỏ 2
     private Boolean checkCMNDDungTenBiaDo2;
     private String cmndDungTenBiaDo2;
     private Boolean checkNgayCapCCCDTruocDayDungTenBiaDo2;
+    private String diaChiThuongTruDungTenBiaDo2Cu;
     private String ngayCapCCCDTruocDayDungTenBiaDo2;
     private Boolean checkDiaChiThuongTruDungTenBiaDo2;
     private String diaChiThuongTruDungTenBiaDo2;
+    private Boolean checkKhacPhuong2;
+    private Boolean checkKhacPhuong1;
 
     //Xử lý HĐ HM Vay lại
     private String soHDTDCu;

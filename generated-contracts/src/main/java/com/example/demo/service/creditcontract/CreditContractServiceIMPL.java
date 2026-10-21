@@ -2,11 +2,13 @@ package com.example.demo.service.creditcontract;
 
 import com.example.demo.dto.request.*;
 import com.example.demo.mapper.ContractMapper;
+import com.example.demo.model.AvatarEntity;
 import com.example.demo.model.CreditContractEntity;
 
 import java.math.BigInteger;
 import java.text.DecimalFormat;
 
+import com.example.demo.model.RoleName;
 import com.example.demo.repository.ICreditContractPAVVRepository;
 import org.apache.commons.lang3.StringUtils;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTHMerge;
@@ -24,8 +26,11 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.lang.Nullable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 
@@ -90,7 +95,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         LocalDate date = LocalDate.parse(request.getContractDate());
         LocalDate dateTC = LocalDate.parse(request.getNgayTheChap());
         List<String> fileUrls = new ArrayList<>();
-        fileUrls.add(generateContractFile(request, date, dateTC, user, "HopDongTinDung.docx"));
+        fileUrls.add(generateContractFile(request, date, dateTC, user, "01HopDongTinDung.docx"));
         fileUrls.add(generateContractFile(request, date, dateTC, user, "HopDongTheChap.docx"));
         fileUrls.add(generateContractFile(request, date, dateTC, user, "PhieuBaoDamQSDD.docx"));
         fileUrls.add(generateContractFile(request, date, dateTC, user, "GiayDeNghiVayVon.docx"));
@@ -128,99 +133,38 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             fileUrls.add(generateContractFileExport(request, date, null, user, "DanhMucBoSungHoSoChoVayHanMuc.docx", null));
             fileUrls.add(generateContractFileExport(request, date, null, user, "PhuLucHopDong.docx", null));
             fileUrls.add(generateContractFileExport(request, date, null, user, "ToTrinhGiaiNganVayHanMuc.docx", null));
-            fileUrls.add(generateContractFileExport(request, date, null, user, "BaoCaoDeNghiGiaiNganKiemGiayNhanNo.docx", null));
+            fileUrls.add(generateContractFileExport(request, date, null, user, "02BaoCaoDeNghiGiaiNganKiemGiayNhanNo.docx", null));
+            fileUrls.add(generateContractFileExport(request, date, null, user, "19BaoCaoSuDungVonVay.docx", null));
         } else {
-            fileUrls.add(generateContractFileExport(request, date, null, user, "HopDongTinDung.docx", null));
-            fileUrls.add(generateContractFileExport(request, date, null, user, "GiayDeNghiVayVon.docx", null));
-            fileUrls.add(generateContractFileExport(request, date, null, user, "DanhMucHoSoChoVay.docx", null));
-            fileUrls.add(generateContractFileExport(request, date, null, user, "BienBanKiemTraSauKhiChoVay.docx", null));
-            fileUrls.add(generateContractFileExport(request, date, null, user, "BienBanXetDuyetChoVay.docx", null));
-            if (request.getLoaiVay().equalsIgnoreCase("trung_han") && request.getPavvRequest().getLoaiPhuongAn().equalsIgnoreCase("sanXuat")) {
-                fileUrls.add(generateContractFileExport(request, date, null, user, "PhuongAnVayVonTrungHanSanXuat.docx", null));
-            } else if(request.getLoaiVay().equalsIgnoreCase("trung_han") && request.getPavvRequest().getLoaiPhuongAn().equalsIgnoreCase("tieuDung")){
-                fileUrls.add(generateContractFileExport(request, date, null, user, "PhuongAnVayVonTrungHanTieuDung.docx", null));
-            } else {
-                fileUrls.add(generateContractFileExport(request, date, null, user, "PhuongAnVayVon.docx", null));
-            }
-            if (!request.getLoaiVay().equalsIgnoreCase("han_muc")) {
-                fileUrls.add(generateContractFileExport(request, date, null, user, "BaoCaoDeNghiGiaiNganKiemGiayNhanNo.docx", null));
-            }
-            fileUrls.add(generateContractFileExport(request, date, null, user, "BaoCaoThongTinVeNguoiCoLienQuan.docx", null));
-            fileUrls.add(generateContractFileExport(request, date, null, user, "BaoCaoThamDinhVaDeXuatChoVay.docx", null));
-            fileUrls.add(generateContractFileExport(request, date, null, user, "BaoCaoSuDungVonVay.docx", null));
-            fileUrls.add(generateContractFileExport(request, date, null, user, "BaoCaoThucTrangTaiChinh.docx", null));
-            if (Boolean.TRUE.equals(request.getPavvRequest().getVayLai()) && request.getLoaiVay().equalsIgnoreCase("han_muc")) {
-                fileUrls.add(generateContractFileExport(request, date, null, user, "PhuLucHanMuc.docx", null));
-            }
-            fileUrls.add(generateContractFileExport(request, date, null, user, "GiayGioiThieu.docx", null));
-            for (CreditContractTSBDRequest ts : request.getTaiSanArray()) {
-                LocalDate ngayTheChapStr = ts.getNgayTheChap();
-                System.err.println("ngayTheChapStr -->" + ngayTheChapStr);
-                // Export các giấy tờ liên quan tới tài sản này
-                fileUrls.add(generateContractFileExport(request, date, ngayTheChapStr, user, "HopDongTheChap.docx", ts));
-                fileUrls.add(generateContractFileExport(request, date, ngayTheChapStr, user, "PhieuBaoDamQSDD.docx", ts));
-                fileUrls.add(generateContractFileExport(request, date, ngayTheChapStr, user, "BienBanXacDinhGiaTriTaiSanBaoDam.docx", ts));
-                fileUrls.add(generateContractFileExport(request, date, ngayTheChapStr, user, "ThongBao.docx", ts));
-            }
-        }
-
-        CreditContractEntity entity = new CreditContractEntity();
-        contractMapper.mapRequestToEntity(request, entity, user, date, null);
-        contractMapper.processAvatars(request, entity, tempDir, uploadDir, fileMetadataRepository);
-        creditContractRepository.save(entity);
-        return fileUrls;
-    }
-
-    @Transactional
-    public List<String> updateContractFilesExport(Long id, ContractRequest request) throws IOException {
-        User user = userDetailService.getCurrentUser();
-        LocalDate date = LocalDate.parse(request.getContractDate());
-
-        // Lấy entity theo id
-        CreditContractEntity entity = creditContractRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy hợp đồng"));
-
-        // Map lại dữ liệu hợp đồng + toàn bộ tài sản
-        contractMapper.mapRequestToEntity(request, entity, user, date, null);
-        contractMapper.processAvatars(request, entity, tempDir, uploadDir, fileMetadataRepository);
-
-        List<String> fileUrls = new ArrayList<>();
-        if (Boolean.TRUE.equals(request.getPavvRequest().getGiaiNganHM()) && request.getLoaiVay().equalsIgnoreCase("han_muc")) {
-            fileUrls.add(generateContractFileExport(request, date, null, user, "DanhMucBoSungHoSoChoVayHanMuc.docx", null));
-            fileUrls.add(generateContractFileExport(request, date, null, user, "PhuLucHopDong.docx", null));
-            fileUrls.add(generateContractFileExport(request, date, null, user, "ToTrinhGiaiNganVayHanMuc.docx", null));
-            fileUrls.add(generateContractFileExport(request, date, null, user, "BaoCaoDeNghiGiaiNganKiemGiayNhanNo.docx", null));
-            fileUrls.add(generateContractFileExport(request, date, null, user, "BaoCaoSuDungVonVay.docx", null));
-        } else {
-            fileUrls.add(generateContractFileExport(request, date, null, user, "HopDongTinDung.docx", null));
-            fileUrls.add(generateContractFileExport(request, date, null, user, "GiayDeNghiVayVon.docx", null));
-            fileUrls.add(generateContractFileExport(request, date, null, user, "DanhMucHoSoChoVay.docx", null));
-            fileUrls.add(generateContractFileExport(request, date, null, user, "BienBanKiemTraSauKhiChoVay.docx", null));
-            fileUrls.add(generateContractFileExport(request, date, null, user, "BienBanXetDuyetChoVay.docx", null));
-//            fileUrls.add(generateContractFileExport(request, date, null, user, "PhuongAnVayVon.docx", null));
-            if (!request.getLoaiVay().equalsIgnoreCase("han_muc")) {
-                fileUrls.add(generateContractFileExport(request, date, null, user, "BaoCaoDeNghiGiaiNganKiemGiayNhanNo.docx", null));
-            }
+            fileUrls.add(generateContractFileExport(request, date, null, user, "00DanhMucHoSoChoVay.docx", null));
+            fileUrls.add(generateContractFileExport(request, date, null, user, "01HopDongTinDung.docx", null));
+            fileUrls.add(generateContractFileExport(request, date, null, user, "08GiayDeNghiVayVon.docx", null));
+            fileUrls.add(generateContractFileExport(request, date, null, user, "21BienBanKiemTraSauKhiChoVay.docx", null));
+            fileUrls.add(generateContractFileExport(request, date, null, user, "15BienBanXetDuyetChoVay.docx", null));
+            fileUrls.add(generateContractFileExport(request, date, null, user, "11BaoCaoThucTrangTaiChinh.docx", null));
             System.err.println("loai vay: "+request.getLoaiVay());
             System.err.println("loai phuong an: "+request.getPavvRequest().getLoaiPhuongAn());
             if (request.getLoaiVay().equalsIgnoreCase("trung_han") && request.getPavvRequest().getLoaiPhuongAn().equalsIgnoreCase("sanXuat")) {
-                fileUrls.add(generateContractFileExport(request, date, null, user, "PhuongAnVayVonTrungHanSanXuat.docx", null));
+                fileUrls.add(generateContractFileExport(request, date, null, user, "10PhuongAnVayVonTrungHanSanXuat.docx", null));
             } else if(request.getLoaiVay().equalsIgnoreCase("trung_han") && request.getPavvRequest().getLoaiPhuongAn().equalsIgnoreCase("tieuDung")){
-                fileUrls.add(generateContractFileExport(request, date, null, user, "PhuongAnVayVonTrungHanTieuDung.docx", null));
+                fileUrls.add(generateContractFileExport(request, date, null, user, "10PhuongAnVayVonTrungHanTieuDung.docx", null));
+                fileUrls.add(generateContractFileExport(request, date, null, user, "02BaoCaoDeNghiGiaiNganKiemGiayNhanNoTHTieuDung.docx", null));
+                fileUrls.add(generateContractFileExport(request, date, null, user, "14BaoCaoThamDinhVaDeXuatChoVayTHTieuDung.docx", null));
+                fileUrls.add(generateContractFileExport(request, date, null, user, "11BaoCaoThuNhapKH_THTieuDung.docx", null));
             } else {
-                fileUrls.add(generateContractFileExport(request, date, null, user, "PhuongAnVayVon.docx", null));
+                fileUrls.add(generateContractFileExport(request, date, null, user, "10PhuongAnVayVon.docx", null));
+                fileUrls.add(generateContractFileExport(request, date, null, user, "03BaoCaoDeNghiGiaiNganKiemGiayNhanNo.docx", null));
+                fileUrls.add(generateContractFileExport(request, date, null, user, "14BaoCaoThamDinhVaDeXuatChoVay.docx", null));
             }
-            fileUrls.add(generateContractFileExport(request, date, null, user, "BaoCaoThongTinVeNguoiCoLienQuan.docx", null));
-            fileUrls.add(generateContractFileExport(request, date, null, user, "BaoCaoThamDinhVaDeXuatChoVay.docx", null));
-            fileUrls.add(generateContractFileExport(request, date, null, user, "BaoCaoSuDungVonVay.docx", null));
-            fileUrls.add(generateContractFileExport(request, date, null, user, "BaoCaoThucTrangTaiChinh.docx", null));
+            fileUrls.add(generateContractFileExport(request, date, null, user, "17BaoCaoThongTinVeNguoiCoLienQuan.docx", null));
+            fileUrls.add(generateContractFileExport(request, date, null, user, "19BaoCaoSuDungVonVay.docx", null));
             // Giấy tờ theo từng tài sản (nhiều file)
             for (CreditContractTSBDRequest ts : request.getTaiSanArray()) {
                 LocalDate dateTC = ts.getNgayTheChap();
-                fileUrls.add(generateContractFileExport(request, date, dateTC, user, "HopDongTheChap.docx", ts));
-                fileUrls.add(generateContractFileExport(request, date, dateTC, user, "PhieuBaoDamQSDD.docx", ts));
-                fileUrls.add(generateContractFileExport(request, date, dateTC, user, "BienBanXacDinhGiaTriTaiSanBaoDam.docx", ts));
-                fileUrls.add(generateContractFileExport(request, date, dateTC, user, "ThongBao.docx", ts));
+                fileUrls.add(generateContractFileExport(request, date, dateTC, user, "03PhieuBaoDamQSDD.docx", ts));
+                fileUrls.add(generateContractFileExport(request, date, dateTC, user, "04HopDongTheChap.docx", ts));
+                fileUrls.add(generateContractFileExport(request, date, dateTC, user, "05BienBanXacDinhGiaTriTaiSanBaoDam.docx", ts));
+                fileUrls.add(generateContractFileExport(request, date, dateTC, user, "07ThongBao.docx", ts));
             }
 
             // Các giấy tờ khác theo điều kiện
@@ -229,13 +173,103 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             }
 
         }
-        // Giấy tờ chung (1 file)
-
-
+        CreditContractEntity entity = new CreditContractEntity();
+        contractMapper.mapRequestToEntity(request, entity, user, date, null);
+        contractMapper.processAvatars(request, entity, tempDir, uploadDir, fileMetadataRepository);
         creditContractRepository.save(entity);
         return fileUrls;
     }
+    @Transactional
+    public List<String> updateContractFilesExport(Long id, ContractRequest request) throws IOException {
+        User user = userDetailService.getCurrentUser();
+        LocalDate date = LocalDate.parse(request.getContractDate());
 
+        // Hợp đồng gốc phải tồn tại (kể cả khi vay lại)
+        CreditContractEntity oldEntity = creditContractRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy hợp đồng"));
+
+        CreditContractPAVVRequest pavv = request.getPavvRequest();
+
+        boolean isHanMuc = "han_muc".equalsIgnoreCase(request.getLoaiVay());
+        boolean vayLaiFlag = pavv != null && Boolean.TRUE.equals(pavv.getVayLai());
+
+        int oldSeq = oldEntity.getContractPAVV() != null && oldEntity.getContractPAVV().getReLoanSequence() != null
+                ? oldEntity.getContractPAVV().getReLoanSequence() : 0;
+        int newSeq = pavv != null && pavv.getReLoanSequence() != null
+                ? pavv.getReLoanSequence() : 0;
+
+// Số hợp đồng tín dụng mới khác số hợp đồng đang lưu (đổi getter cho đúng entity của bạn)
+        String oldSoHD = StringUtils.trimToEmpty(oldEntity.getSoHopDongTD());
+        String newSoHD = StringUtils.trimToEmpty(request.getSoHopDongTD());
+        boolean soHopDongChanged = !newSoHD.isEmpty() && !newSoHD.equalsIgnoreCase(oldSoHD);
+
+// Tạo mới khi: hạn mức + tích vay lại + (số lần vay lại tăng HOẶC số hợp đồng đổi)
+        boolean isVayLai = isHanMuc && vayLaiFlag && (newSeq > oldSeq || soHopDongChanged);
+        CreditContractEntity entity = isVayLai ? new CreditContractEntity() : oldEntity;
+
+        System.err.println("update id=" + id
+                + ", isVayLai=" + isVayLai
+                + ", loaiVay=" + request.getLoaiVay()
+                + ", vayLaiFlag=" + vayLaiFlag
+                + ", oldSeq=" + oldSeq
+                + ", newSeq=" + newSeq);
+
+        // Map dữ liệu hợp đồng + toàn bộ tài sản vào entity đã chọn
+        contractMapper.mapRequestToEntity(request, entity, user, date, null);
+        contractMapper.processAvatars(request, entity, tempDir, uploadDir, fileMetadataRepository);
+
+        List<String> fileUrls = new ArrayList<>();
+        if (Boolean.TRUE.equals(pavv.getGiaiNganHM()) && isHanMuc) {
+            fileUrls.add(generateContractFileExport(request, date, null, user, "DanhMucBoSungHoSoChoVayHanMuc.docx", null));
+            fileUrls.add(generateContractFileExport(request, date, null, user, "01PhuLucHopDong.docx", null));
+            fileUrls.add(generateContractFileExport(request, date, null, user, "ToTrinhGiaiNganVayHanMuc.docx", null));
+            fileUrls.add(generateContractFileExport(request, date, null, user, "02BaoCaoDeNghiGiaiNganKiemGiayNhanNo.docx", null));
+            fileUrls.add(generateContractFileExport(request, date, null, user, "19BaoCaoSuDungVonVay.docx", null));
+        } else {
+            fileUrls.add(generateContractFileExport(request, date, null, user, "01HopDongTinDung.docx", null));
+            fileUrls.add(generateContractFileExport(request, date, null, user, "08GiayDeNghiVayVon.docx", null));
+            fileUrls.add(generateContractFileExport(request, date, null, user, "00DanhMucHoSoChoVay.docx", null));
+            fileUrls.add(generateContractFileExport(request, date, null, user, "21BienBanKiemTraSauKhiChoVay.docx", null));
+            fileUrls.add(generateContractFileExport(request, date, null, user, "15BienBanXetDuyetChoVay.docx", null));
+            fileUrls.add(generateContractFileExport(request, date, null, user, "11BaoCaoThucTrangTaiChinh.docx", null));
+            System.err.println("loai vay: " + request.getLoaiVay());
+            System.err.println("loai phuong an: " + pavv.getLoaiPhuongAn());
+
+            if (request.getLoaiVay().equalsIgnoreCase("trung_han") && pavv.getLoaiPhuongAn().equalsIgnoreCase("sanXuat")) {
+                fileUrls.add(generateContractFileExport(request, date, null, user, "10PhuongAnVayVonTrungHanSanXuat.docx", null));
+                fileUrls.add(generateContractFileExport(request, date, null, user, "14BaoCaoThamDinhVaDeXuatChoVay.docx", null));
+                fileUrls.add(generateContractFileExport(request, date, null, user, "02BaoCaoDeNghiGiaiNganKiemGiayNhanNo.docx", null));
+            } else if (request.getLoaiVay().equalsIgnoreCase("trung_han") && pavv.getLoaiPhuongAn().equalsIgnoreCase("tieuDung")) {
+                fileUrls.add(generateContractFileExport(request, date, null, user, "10PhuongAnVayVonTrungHanTieuDung.docx", null));
+                fileUrls.add(generateContractFileExport(request, date, null, user, "02BaoCaoDeNghiGiaiNganKiemGiayNhanNoTHTieuDung.docx", null));
+                fileUrls.add(generateContractFileExport(request, date, null, user, "14BaoCaoThamDinhVaDeXuatChoVayTHTieuDung.docx", null));
+                fileUrls.add(generateContractFileExport(request, date, null, user, "11BaoCaoThuNhapKH_THTieuDung.docx", null));
+            } else {
+                fileUrls.add(generateContractFileExport(request, date, null, user, "10PhuongAnVayVon.docx", null));
+                fileUrls.add(generateContractFileExport(request, date, null, user, "02BaoCaoDeNghiGiaiNganKiemGiayNhanNo.docx", null));
+                fileUrls.add(generateContractFileExport(request, date, null, user, "14BaoCaoThamDinhVaDeXuatChoVay.docx", null));
+            }
+            fileUrls.add(generateContractFileExport(request, date, null, user, "17BaoCaoThongTinVeNguoiCoLienQuan.docx", null));
+            fileUrls.add(generateContractFileExport(request, date, null, user, "19BaoCaoSuDungVonVay.docx", null));
+
+            // Giấy tờ theo từng tài sản (nhiều file)
+            for (CreditContractTSBDRequest ts : request.getTaiSanArray()) {
+                LocalDate dateTC = ts.getNgayTheChap();
+                fileUrls.add(generateContractFileExport(request, date, dateTC, user, "03PhieuBaoDamQSDD.docx", ts));
+                fileUrls.add(generateContractFileExport(request, date, dateTC, user, "04HopDongTheChap.docx", ts));
+                fileUrls.add(generateContractFileExport(request, date, dateTC, user, "05BienBanXacDinhGiaTriTaiSanBaoDam.docx", ts));
+                fileUrls.add(generateContractFileExport(request, date, dateTC, user, "07ThongBao.docx", ts));
+            }
+            // Các giấy tờ khác theo điều kiện
+            if (vayLaiFlag && isHanMuc) {
+                fileUrls.add(generateContractFileExport(request, date, null, user, "PhuLucHanMuc.docx", null));
+            }
+        }
+
+        // isVayLai: insert bản ghi mới; còn lại: update bản ghi cũ
+        creditContractRepository.save(entity);
+        return fileUrls;
+    }
 
     // 👉 Hàm generate file (preview)
     private String generateContractFile(ContractRequest request, LocalDate date, LocalDate dateTC, User user, String templateName) throws IOException {
@@ -317,20 +351,27 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         }
         String ngayKetThuc = dateKT.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
         //TẠO END DATE
-//        String thv = request.getThoiHanVay();
-        LocalDate endDate = date; // mặc định là ngày bắt đầu
-
+        // Ngày kết thúc theo số năm (ngắn hạn, trung hạn, và thời hạn duy trì hạn mức)
+        LocalDate ngayHetHanTheoNam = date;
         if (thv != null && !thv.isBlank()) {
             try {
-                int years = Integer.parseInt(thv.trim()); // parse số năm
-                endDate = date.plusYears(years);
+                int years = Integer.parseInt(thv.trim());
+                ngayHetHanTheoNam = date.plusYears(years);
             } catch (NumberFormatException e) {
                 System.err.println("Không parse được thv: " + thv);
             }
         }
-        // Khởi tạo biến tiền số
+
+// endDate: hạn mức = ngày giải ngân + 10 tháng, còn lại = theo năm
+        LocalDate endDate = ngayHetHanTheoNam;
+        CreditContractPAVVRequest pavvEnd = request.getPavvRequest();
+        if ("han_muc".equalsIgnoreCase(request.getLoaiVay())
+                && pavvEnd != null
+                && pavvEnd.getNgayGiaiNgan() != null) {
+            endDate = pavvEnd.getNgayGiaiNgan().plusMonths(10);
+        }
+// Khởi tạo biến tiền số
         long tienSo = parseLongSafe(request.getTienSo());
-// Thêm placeholder mới
         safePutReplacement("{{endDate}}", endDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
         if (Boolean.TRUE.equals(request.getPavvRequest().getGiaiNganHM()) && request.getLoaiVay().equalsIgnoreCase("han_muc")) {
             System.err.println("Số Giải Ngân -->" + Optional.ofNullable(request.getPavvRequest().getSoGiaiNgan()).orElse("01"));
@@ -355,6 +396,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         safePutReplacement("{{gtkh}}", Optional.ofNullable(request.getGtkh()).orElse(""));
         safePutReplacement("{{gtkht}}", Optional.of(request.getGtkh().toLowerCase()).orElse(""));
         safePutReplacement("{{kh}}", Optional.ofNullable(request.getTenKhachHang()).orElse(""));
+        safePutReplacement("{{kht}}", Optional.of(capitalizeWords(request.getTenKhachHang())).orElse(""));
         safePutReplacement("{{nskh}}", Optional.ofNullable(request.getNamSinhKhachHang()).orElse(""));
         safePutReplacement("{{sdtkh}}", Optional.ofNullable(request.getPhoneKhachHang()).orElse(""));
         safePutReplacement("{{sttv}}", Optional.ofNullable(request.getSoTheThanhVienKhachHang()).orElse(""));
@@ -380,9 +422,11 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         safePutReplacement("{{ls}}", Optional.ofNullable(request.getLaiSuat()).orElse(""));
         safePutReplacement("{{nkt}}", Optional.of(ngayKetThuc).orElse(""));
         safePutReplacement("{{chv}}", Optional.ofNullable(request.getChoVay()).orElse(""));
-        safePutReplacement("{{tienVayTCTDK}}", Optional.of(request.getPavvRequest().getTienVayTCTDK() + "      đồng").orElse("0"));
+        safePutReplacement("{{tienVayTCTDK}}", Optional.of(request.getPavvRequest().getTienVayTCTDK() + "         đồng").orElse("0"));
         safePutReplacement("{{tienNoQTDTH}}", Optional.ofNullable(request.getPavvRequest().getTienNoQTDNDTH()).orElse("0"));
         safePutReplacement("{{tienLuongKH}}", Optional.ofNullable(request.getPavvRequest().getTienLuongKH()).orElse("0"));
+        safePutReplacement("{{noiDungNguonThuKhac}}", Optional.ofNullable(request.getPavvRequest().getNoiDungNguonThuKhac()).orElse(""));
+        safePutReplacement("{{tienNguonThuNhapKhac}}", Optional.ofNullable(request.getPavvRequest().getTienNguonThuNhapKhac()).orElse("0"));
         String tienMatChuyenKhoan = "";
         if (Boolean.TRUE.equals(request.getPavvRequest().getTienMat())) {
             tienMatChuyenKhoan = "Tiền mặt.";
@@ -404,14 +448,11 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             }
             safePutReplacement("{{nguoiNTB}}", nguoiNhanThongBao);
             StringBuilder giayChungNhanBuilder = new StringBuilder();
-
             for (int i = 0; i < request.getTaiSanArray().size(); i++) {
                 CreditContractTSBDRequest tsbd = request.getTaiSanArray().get(i);
-
                 if (i > 0) {
                     giayChungNhanBuilder.append("; Và ");
                 }
-
                 giayChungNhanBuilder.append(Optional.ofNullable(tsbd.getNoiDungNgoaiBia()).orElse(""))
                         .append(" số: ")
                         .append(Optional.ofNullable(tsbd.getSerial()).orElse(""))
@@ -426,16 +467,12 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             safePutReplacement("{{giayChungNhanBlock}}", giayChungNhanBuilder.toString());
             StringBuilder sb = new StringBuilder();
             long tongTatCaTaiSan = 0;
-
             for (int i = 0; i < request.getTaiSanArray().size(); i++) {
                 CreditContractTSBDRequest tsbd = request.getTaiSanArray().get(i);
-
                 sb.append(buildTaiSanBlock(tsbd)).append("\n");
-
                 if (i < request.getTaiSanArray().size() - 1) {
                     sb.append("Và\n\n");
                 }
-
                 try {
                     String tongStr = tsbd.getTongTaiSanBD();
                     if (tongStr != null && !tongStr.isEmpty()) {
@@ -450,7 +487,6 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             safePutReplacement("{{tongTsbdc}}", numberToVietnameseWordsMoney(tongTatCaTaiSan));
             safePutReplacement("{{phanTramTyLe}}", String.valueOf(phanTramTyLe));
         }
-
         safePutReplacement("{{tgvv}}", Optional.ofNullable(request.getThoiHanVay()).orElse(""));
         safePutReplacement("{{nguoiChuyenKhoan}}", Optional.ofNullable(request.getPavvRequest().getNguoiChuyenKhoan()).orElse(""));
         if (Boolean.TRUE.equals(request.getPavvRequest().getVayLai()) && request.getLoaiVay().equals("han_muc")) {
@@ -471,76 +507,137 @@ public class CreditContractServiceIMPL implements ICreditContractService {
                     : "");
             System.err.println("noi Dung:::" + "Biên bản xác định lại giá trị tài sản bổ sung cho HĐTC số: " + ts.getSoHopDongTheChapQSDD()
                     + " Ngày " + String.format("%02d", ts.getNgayTheChap().getDayOfMonth()) + " tháng " + String.format("%02d", ts.getNgayTheChap().getMonthValue()) + " năm " + String.valueOf(ts.getNgayTheChap().getYear()));
-            safePutReplacement("{{noiDung}}", "Biên bản xác định lại giá trị tài sản bổ sung cho HĐTC số: " + ts.getSoHopDongTheChapQSDD()
-                    + " Ngày " + String.format("%02d", ts.getNgayTheChap().getDayOfMonth()) + " tháng " + String.format("%02d", ts.getNgayTheChap().getMonthValue()) + " năm " + String.valueOf(ts.getNgayTheChap().getYear()));
+            if(Boolean.TRUE.equals(request.getPavvRequest().getVayLai())){
+                safePutReplacement("{{noiDung}}", "Biên bản xác định lại giá trị tài sản bổ sung cho HĐTC số: " + ts.getSoHopDongTheChapQSDD()
+                        + " Ngày " + String.format("%02d", ts.getNgayTheChap().getDayOfMonth()) + " tháng " + String.format("%02d", ts.getNgayTheChap().getMonthValue()) + " năm " + String.valueOf(ts.getNgayTheChap().getYear()));
+            } else {
+                safePutReplacement("{{noiDung}}", "");
+            }
             if (Boolean.TRUE.equals(ts.getCheckDongSoHuu())) {
-//                safePutReplacement("{{gtkhbdt}}", Optional.of(ts.getGioiTinhDungTenBiaDo1().toLowerCase()).orElse(""));
+                safePutReplacement("{{gtkhbdt}}", Optional.ofNullable(ts.getGioiTinhDungTenBiaDo1()).map(String::toLowerCase).orElse(""));
                 safePutReplacement("{{gtkhbd}}", Optional.ofNullable(ts.getGioiTinhDungTenBiaDo1()).orElse(""));
                 safePutReplacement("{{khbd}}", Optional.ofNullable(ts.getDungTenBiaDo1()).orElse(""));
                 safePutReplacement("{{nskhbd}}", Optional.ofNullable(ts.getNamSinhDungTenBiaDo1()).orElse(""));
                 safePutReplacement("{{sdtkhbd}}", Optional.ofNullable(ts.getPhoneDungTenBiaDo1()).orElse(""));
+                safePutReplacement("{{cccdkhbd}}", Optional.of("CC/CCCD Số: "+ts.getCccdDungTenBiaDo1()).orElse(""));
+                safePutReplacement("{{cccdntbd}}", Optional.of("CC/CCCD Số: "+ts.getCccdDungTenBiaDo2()).orElse(""));
+                String  naySuDung = "";
+                String hienTai1 = "";
                 if (Boolean.TRUE.equals(ts.getCheckCMNDDungTenBiaDo1())) {
                     safePutReplacement("{{cmnd1}}", ts.getCmndDungTenBiaDo1());
+                    naySuDung = "Nay sử dụng ";
                 } else {
                     safePutReplacement("{{cmnd1}}", "");
+                    naySuDung = "";
+                }
+                if (Boolean.TRUE.equals(ts.getCheckDiaChiThuongTruDungTenBiaDo1())){
+                    if(Boolean.TRUE.equals(ts.getCheckKhacPhuong1())){
+//                        safePutReplacement("{{dccu1}}", "Địa chỉ thường trú cũ: "+ts.getDiaChiThuongTruDungTenBiaDo1Cu() +".");
+                        hienTai1 = "Địa chỉ thường trú cũ: "+ts.getDiaChiThuongTruDungTenBiaDo1Cu() +"."+" Địa chỉ thường trú (hiện tại): " + ts.getDiaChiThuongTruDungTenBiaDo1() + ".";
+                    } else {
+                        hienTai1 = "Địa chỉ thường trú: "+ts.getDiaChiThuongTruDungTenBiaDo1Cu() +". (Nay là: "+ts.getDiaChiThuongTruDungTenBiaDo1()+")";
+                    }
+                } else {
+                    hienTai1 = "Địa chỉ thường trú: " + ts.getDiaChiThuongTruDungTenBiaDo1() + ".";
+                }
+                safePutReplacement("{{dcdtbd1}}", hienTai1);
+                String diaChi2 = "";
+                String diaChiHienTai2 = "";
+                if (Boolean.TRUE.equals(ts.getCheckDiaChiThuongTruDungTenBiaDo2())){
+                    if(Boolean.TRUE.equals(ts.getCheckKhacPhuong2())){
+                        diaChi2 = "Địa chỉ thường trú cũ: " + ts.getDiaChiThuongTruDungTenBiaDo2Cu() + "." +  " Địa chỉ thường trú (hiện tại): " + ts.getDiaChiThuongTruDungTenBiaDo2();
+                    } else {
+                        diaChi2 = "Địa chỉ thường trú: "+ts.getDiaChiThuongTruDungTenBiaDo2Cu() +". (Nay là: "+ts.getDiaChiThuongTruDungTenBiaDo1()+")";
+                    }
+                    diaChiHienTai2 = "";
+                    safePutReplacement("{{dccu2}}", diaChi2);
+                } else {
+                    safePutReplacement("{{dccu2}}", "");
+                    diaChiHienTai2 =  "Địa chỉ thường trú: " + ts.getDiaChiThuongTruDungTenBiaDo2();
+                    diaChi2 = "Địa chỉ thường trú: " + ts.getDiaChiThuongTruDungTenBiaDo2();
                 }
                 if (Boolean.TRUE.equals(ts.getCheckNgayCapCCCDTruocDayDungTenBiaDo1())) {
-                    safePutReplacement("{{ncbd1}}", "CC/CCCD Số: " + ts.getCccdDungTenBiaDo1() + ";" +
-                            " Ngày cấp: " + ts.getNgayCapCCCDTruocDayDungTenBiaDo1() + ";" +
+                    safePutReplacement("{{ncbd1}}", naySuDung+"CC/CCCD Số: " + ts.getCccdDungTenBiaDo1() + ";" +
+                            " Ngày cấp: " + ts.getNgayCapCCCDTruocDayDungTenBiaDo1() + 
                             "(Cấp lại ngày: " + ts.getNgayCapCCCDDungTenBiaDo1() + ")");
                 } else {
-                    safePutReplacement("{{ncbd1}}", "CC/CCCD Số: " + ts.getCccdDungTenBiaDo1() + ";" +
+                    safePutReplacement("{{ncbd1}}", naySuDung+ "CC/CCCD Số: " + ts.getCccdDungTenBiaDo1() + ";" +
                             " Ngày cấp: " + ts.getNgayCapCCCDDungTenBiaDo1() + ";");
                 }
                 safePutReplacement("{{noiCapbd1}}", "Nơi cấp: " + ts.getNoiCapCCCDDungTenBiaDo1());
-                safePutReplacement("{{dcdtbd1}}", "Địa chỉ thường trú: " + ts.getDiaChiThuongTruDungTenBiaDo1() + ".");
                 //Người đứng tên BD2
                 safePutReplacement("{{ntbdd1}}", "Và " + ts.getGioiTinhDungTenBiaDo2().toLowerCase() + ": " + ts.getDungTenBiaDo2() + "; Sinh ngày: " + ts.getNamSinhDungTenBiaDo2() + ".");
-                safePutReplacement("{{ntbdd3}}", ts.getDiaChiThuongTruDungTenBiaDo2() + ".");
+                safePutReplacement("{{ntbdd1s}}", "Và " + ts.getGioiTinhDungTenBiaDo2().toLowerCase() + ": " + ts.getDungTenBiaDo2());
+                String cmndCCCD2 = "";
                 if (Boolean.TRUE.equals(ts.getCheckCMNDDungTenBiaDo2())) {
+                    naySuDung = "Nay sử dụng ";
                     safePutReplacement("{{cmnd2}}", ts.getCmndDungTenBiaDo2());
+                    cmndCCCD2 += ts.getCmndDungTenBiaDo2();
+                    cmndCCCD2 += " ";
                 } else {
                     safePutReplacement("{{cmnd2}}", "");
+                    naySuDung = "";
                 }
                 if (Boolean.TRUE.equals(ts.getCheckNgayCapCCCDTruocDayDungTenBiaDo2())) {
-                    safePutReplacement("{{ncbd2}}", "CC/CCCD Số: " + ts.getCccdDungTenBiaDo2() + ";" + " Ngày cấp: " + ts.getNgayCapCCCDTruocDayDungTenBiaDo2() + ";" + "(Cấp lại ngày: " + ts.getNgayCapCCCDDungTenBiaDo2() + ")");
+                    safePutReplacement("{{ncbd2}}", naySuDung+"CC/CCCD Số: " + ts.getCccdDungTenBiaDo2() + ";" + " Ngày cấp: " + ts.getNgayCapCCCDTruocDayDungTenBiaDo2() + ";" + "(Cấp lại ngày: " + ts.getNgayCapCCCDDungTenBiaDo2() + ")");
+                    cmndCCCD2 += naySuDung+"CC/CCCD Số: " + ts.getCccdDungTenBiaDo2() + ";" + " Ngày cấp: " + ts.getNgayCapCCCDTruocDayDungTenBiaDo2() + ";" + "(Cấp lại ngày: " + ts.getNgayCapCCCDDungTenBiaDo2() + "); "+ " Nơi cấp: "+ts.getNoiCapCCCDDungTenBiaDo2();
                 } else {
-                    safePutReplacement("{{ncbd2}}", "CC/CCCD Số: " + ts.getCccdDungTenBiaDo2() + ";" + " Ngày cấp: " + ts.getNgayCapCCCDDungTenBiaDo2() + ";");
+                    safePutReplacement("{{ncbd2}}", naySuDung+"CC/CCCD Số: " + ts.getCccdDungTenBiaDo2() + ";" + " Ngày cấp: " + ts.getNgayCapCCCDDungTenBiaDo2() + ";");
+                    cmndCCCD2 += naySuDung+"CC/CCCD Số: " + ts.getCccdDungTenBiaDo2() + ";" + " Ngày cấp: " + ts.getNgayCapCCCDDungTenBiaDo2() + ";" + " Nơi cấp: "+ts.getNoiCapCCCDDungTenBiaDo2();
                 }
                 safePutReplacement("{{noiCapbd2}}", "Nơi cấp: " + ts.getNoiCapCCCDDungTenBiaDo2());
-                safePutReplacement("{{ntbdd3}}", "Địa chỉ thường trú: " + ts.getDiaChiThuongTruDungTenBiaDo2());
+                safePutReplacement("{{ntbdd3}}", diaChiHienTai2);
                 //NGUOI 2 PBD
                 safePutReplacement("{{ntbdd4}}", "3.6. Họ và tên đầy đủ đối với cá nhân/tên đầy đủ đối với tổ chức: (viết chữ IN HOA)");
                 safePutReplacement("{{ntbd}}", ts.getDungTenBiaDo2());
                 safePutReplacement("{{ntbdd5}}", "Sinh ngày: " + ts.getNamSinhDungTenBiaDo2());
-                safePutReplacement("{{ntbdd6}}", "3.7. Địa chỉ thường trú:  " + ts.getDiaChiThuongTruDungTenBiaDo2());
+                safePutReplacement("{{ntbdd6}}", "3.7. "+diaChi2);
                 safePutReplacement("{{ntbdd7}}", "3.8. Giấy tờ xác định tư cách pháp lý: ");
                 safePutReplacement("{{ntbdd8}}", "☑ Chứng minh nhân dân/Căn cước công dân/Chứng minh quân đội");
                 safePutReplacement("{{ntbdd9}}", "□ Hộ chiếu        □ Thẻ thường trú        □ Mã số thuế");
-                safePutReplacement("{{ntbdd10}}", "CC/CCCD Số: " + ts.getCccdDungTenBiaDo2() + "; Ngày cấp: " + ts.getNgayCapCCCDDungTenBiaDo2() + ";");
-                safePutReplacement("{{ntbdd10s}}", "Nơi cấp: " + ts.getNoiCapCCCDDungTenBiaDo2() + ";");
+                safePutReplacement("{{ntbdd10}}", cmndCCCD2);
+//                safePutReplacement("{{ntbdd10s}}", "Nơi cấp: " + ts.getNoiCapCCCDDungTenBiaDo2() + ";");
                 safePutReplacement("{{ntbdd11}}", "3.9. Thuộc đối tượng không phải nộp phí đăng ký □");
                 safePutReplacement("{{ntbdd12}}", "3.10. Số điện thoại (nếu có):…..Fax (nếu có):……Thư điện tử (nếu có):………………..");
             } else if (Boolean.TRUE.equals(ts.getCheckChiMangTenNguoi1()) && Boolean.FALSE.equals(ts.getCheckChiMangTenNguoi2())) {
                 safePutReplacement("{{gtkhbd}}", Optional.ofNullable(ts.getGioiTinhDungTenBiaDo1()).orElse(""));
+                safePutReplacement("{{gtkhbdt}}", Optional.ofNullable(ts.getGioiTinhDungTenBiaDo1()).map(String::toLowerCase).orElse(""));
                 safePutReplacement("{{khbd}}", Optional.ofNullable(ts.getDungTenBiaDo1()).orElse(""));
                 safePutReplacement("{{nskhbd}}", Optional.ofNullable(ts.getNamSinhDungTenBiaDo1()).orElse(""));
                 safePutReplacement("{{sdtkhbd}}", Optional.ofNullable(ts.getPhoneDungTenBiaDo1()).orElse(""));
+                safePutReplacement("{{cccdkhbd}}", Optional.of("CC/CCCD Số: "+ts.getCccdDungTenBiaDo1()).orElse(""));
+                safePutReplacement("{{cccdntbd}}", "");
+                safePutReplacement("{{ntbdd1s}}", "");
+                String naySuDung = "";
+                String hienTai = "";
                 if (Boolean.TRUE.equals(ts.getCheckCMNDDungTenBiaDo1())) {
                     safePutReplacement("{{cmnd1}}", ts.getCmndDungTenBiaDo1());
+                    naySuDung = "Nay sử dụng ";
                 } else {
                     safePutReplacement("{{cmnd1}}", "");
+                    naySuDung = "";
                 }
+                String hienTai1 = "";
+                if (Boolean.TRUE.equals(ts.getCheckDiaChiThuongTruDungTenBiaDo1())){
+                    if(Boolean.TRUE.equals(ts.getCheckKhacPhuong1())){
+//                        safePutReplacement("{{dccu1}}", "Địa chỉ thường trú cũ: "+ts.getDiaChiThuongTruDungTenBiaDo1Cu() +".");
+                        hienTai1 = "Địa chỉ thường trú cũ: "+ts.getDiaChiThuongTruDungTenBiaDo1Cu() +"."+" Địa chỉ thường trú (hiện tại): " + ts.getDiaChiThuongTruDungTenBiaDo1() + ".";
+                    } else {
+                        hienTai1 = "Địa chỉ thường trú: "+ts.getDiaChiThuongTruDungTenBiaDo1Cu() +". (Nay là: "+ts.getDiaChiThuongTruDungTenBiaDo1()+")";
+                    }
+                } else {
+                    hienTai1 = "Địa chỉ thường trú: " + ts.getDiaChiThuongTruDungTenBiaDo1() + ".";
+                }
+                safePutReplacement("{{dcdtbd1}}", hienTai1);
                 if (Boolean.TRUE.equals(ts.getCheckNgayCapCCCDTruocDayDungTenBiaDo1())) {
-                    safePutReplacement("{{ncbd1}}", "CC/CCCD Số: " + ts.getCccdDungTenBiaDo1() + ";" +
+                    safePutReplacement("{{ncbd1}}", naySuDung+"CC/CCCD Số: " + ts.getCccdDungTenBiaDo1() + ";" +
                             " Ngày cấp: " + ts.getNgayCapCCCDTruocDayDungTenBiaDo1() + ";" +
                             "(Cấp lại ngày: " + ts.getNgayCapCCCDDungTenBiaDo1() + ")");
                 } else {
-                    safePutReplacement("{{ncbd1}}", "CC/CCCD Số: " + ts.getCccdDungTenBiaDo1() + ";" +
+                    safePutReplacement("{{ncbd1}}", naySuDung+"CC/CCCD Số: " + ts.getCccdDungTenBiaDo1() + ";" +
                             " Ngày cấp: " + ts.getNgayCapCCCDDungTenBiaDo1() + ";");
                 }
                 safePutReplacement("{{noiCapbd1}}", "Nơi cấp: " + ts.getNoiCapCCCDDungTenBiaDo1());
-                safePutReplacement("{{dcdtbd1}}", "Địa chỉ thường trú: " + ts.getDiaChiThuongTruDungTenBiaDo1() + ".");
                 //Người đứng tên BD2
                 safePutReplacement("{{ntbdd1}}", "");
                 safePutReplacement("{{ntbdd3}}", "");
@@ -553,21 +650,39 @@ public class CreditContractServiceIMPL implements ICreditContractService {
                 safePutReplacement("{{gtkhbd}}", Optional.ofNullable(ts.getGioiTinhDungTenBiaDo2()).orElse(""));
                 safePutReplacement("{{khbd}}", Optional.ofNullable(ts.getDungTenBiaDo2()).orElse(""));
                 safePutReplacement("{{nskhbd}}", Optional.ofNullable(ts.getNamSinhDungTenBiaDo2()).orElse(""));
+                safePutReplacement("{{cccdkhbd}}", Optional.of("CC/CCCD Số: "+ts.getCccdDungTenBiaDo2()).orElse(""));
+                safePutReplacement("{{gtkhbdt}}", Optional.ofNullable(ts.getGioiTinhDungTenBiaDo2()).map(String::toLowerCase).orElse(""));
+                safePutReplacement("{{cccdntbd}}", "");
+                safePutReplacement("{{ntbdd1s}}", "");
+                String naySuDung = "";
                 if (Boolean.TRUE.equals(ts.getCheckCMNDDungTenBiaDo2())) {
                     safePutReplacement("{{cmnd1}}", ts.getCmndDungTenBiaDo2());
+                    naySuDung = "Nay sử dụng ";
                 } else {
                     safePutReplacement("{{cmnd1}}", "");
+                    naySuDung = "";
                 }
+                String hienTai2 = "";
+                if (Boolean.TRUE.equals(ts.getCheckDiaChiThuongTruDungTenBiaDo2())){
+                    if(Boolean.TRUE.equals(ts.getCheckKhacPhuong2())){
+//                        safePutReplacement("{{dccu1}}", "Địa chỉ thường trú cũ: "+ts.getDiaChiThuongTruDungTenBiaDo1Cu() +".");
+                        hienTai2 = "Địa chỉ thường trú cũ: "+ts.getDiaChiThuongTruDungTenBiaDo2Cu() +"."+" Địa chỉ thường trú (hiện tại): " + ts.getDiaChiThuongTruDungTenBiaDo2() + ".";
+                    } else {
+                        hienTai2 = "Địa chỉ thường trú: "+ts.getDiaChiThuongTruDungTenBiaDo2Cu() +". (Nay là: "+ts.getDiaChiThuongTruDungTenBiaDo2()+")";
+                    }
+                } else {
+                    hienTai2 = "Địa chỉ thường trú: " + ts.getDiaChiThuongTruDungTenBiaDo2() + ".";
+                }
+                safePutReplacement("{{dcdtbd1}}", hienTai2);
                 if (Boolean.TRUE.equals(ts.getCheckNgayCapCCCDTruocDayDungTenBiaDo2())) {
-                    safePutReplacement("{{ncbd1}}", "CC/CCCD Số: " + ts.getCccdDungTenBiaDo1() + ";" +
+                    safePutReplacement("{{ncbd1}}", naySuDung+"CC/CCCD Số: " + ts.getCccdDungTenBiaDo1() + ";" +
                             " Ngày cấp: " + ts.getNgayCapCCCDTruocDayDungTenBiaDo1() + ";" +
                             "(Cấp lại ngày: " + ts.getNgayCapCCCDDungTenBiaDo1() + ")");
                 } else {
-                    safePutReplacement("{{ncbd1}}", "CC/CCCD Số: " + ts.getCccdDungTenBiaDo2() + ";" +
+                    safePutReplacement("{{ncbd1}}", naySuDung+"CC/CCCD Số: " + ts.getCccdDungTenBiaDo2() + ";" +
                             " Ngày cấp: " + ts.getNgayCapCCCDDungTenBiaDo1() + ";");
                 }
                 safePutReplacement("{{noiCapbd1}}", "Nơi cấp: " + ts.getNoiCapCCCDDungTenBiaDo2());
-                safePutReplacement("{{dcdtbd1}}", "Địa chỉ thường trú: " + ts.getDiaChiThuongTruDungTenBiaDo2() + ".");
                 //Người đứng tên BD2
                 safePutReplacement("{{ntbdd1}}", "");
                 safePutReplacement("{{ntbdd3}}", "");
@@ -585,9 +700,14 @@ public class CreditContractServiceIMPL implements ICreditContractService {
                 safePutReplacement("{{ngsd}}", "");
             }
             if (Boolean.TRUE.equals(ts.getCheckGhiChu())) {
-                safePutReplacement("{{gc}}", Optional.ofNullable(ts.getGhiChu()).orElse(""));
+                safePutReplacement("{{gc}}", Optional.of("Ghi chú: "+ts.getGhiChu()).orElse(""));
             } else {
                 safePutReplacement("{{gc}}", "");
+            }
+            if (Boolean.TRUE.equals(ts.getCheckLoaiDat())) {
+                safePutReplacement("{{loaiDat}}", Optional.of("Loại đất: "+ts.getLoaiDat()).orElse(""));
+            } else {
+                safePutReplacement("{{loaiDat}}", "");
             }
             if (Boolean.TRUE.equals(ts.getCheckTaiSanGanLienVoiDat())) {
                 safePutReplacement("{{dienTichTS}}", Optional.ofNullable(ts.getDienTichTS()).orElse(""));
@@ -598,13 +718,10 @@ public class CreditContractServiceIMPL implements ICreditContractService {
                 safePutReplacement("{{ketCauXayDung}}", "Không");
             }
             safePutReplacement("{{ndnb}}", Optional.ofNullable(ts.getNoiDungNgoaiBia()).orElse(""));
-            safePutReplacement("{{gtkhbdt}}", Optional.ofNullable(ts.getGioiTinhDungTenBiaDo1()).map(String::toLowerCase).orElse(""));
-            safePutReplacement("{{cccdkhbd}}", Optional.ofNullable(ts.getCccdDungTenBiaDo1()).orElse(""));
             safePutReplacement("{{ngckhbd}}", Optional.ofNullable(ts.getNgayCapCCCDDungTenBiaDo1()).orElse(""));
             safePutReplacement("{{nccccdkhbd}}", Optional.ofNullable(ts.getNoiCapCCCDDungTenBiaDo1()).orElse(""));
             safePutReplacement("{{dckhbd}}", Optional.ofNullable(ts.getDiaChiThuongTruDungTenBiaDo1()).orElse(""));
-            safePutReplacement("{{gtntbdt}}", Optional.ofNullable(ts.getGioiTinhDungTenBiaDo2()).map(String::toLowerCase).orElse(""));
-            safePutReplacement("{{cccdntbd}}", Optional.ofNullable(ts.getCccdDungTenBiaDo2()).orElse(""));
+//            safePutReplacement("{{gtntbdt}}", Optional.ofNullable(ts.getGioiTinhDungTenBiaDo2()).map(String::toLowerCase).orElse(""));
             safePutReplacement("{{ngcntbd}}", Optional.ofNullable(ts.getNgayCapCCCDDungTenBiaDo2()).orElse(""));
             safePutReplacement("{{nccccdntbd}}", Optional.ofNullable(ts.getNoiCapCCCDDungTenBiaDo2()).orElse(""));
             safePutReplacement("{{dcntbd}}", Optional.ofNullable(ts.getDiaChiThuongTruDungTenBiaDo2()).orElse(""));
@@ -639,13 +756,16 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             safePutReplacement("{{dctd}}", Optional.ofNullable(ts.getDiaChiThuaDat()).orElse(""));
             safePutReplacement("{{dt}}", Optional.ofNullable(ts.getDienTichDatSo()).orElse(""));
             safePutReplacement("{{dtc}}", Optional.ofNullable(ts.getDienTichDatChu()).orElse(""));
-            safePutReplacement("{{htsd}}", Optional.ofNullable(ts.getHinhThucSuDung()).orElse(""));
+            if (ts.getCheckHinhThucSuDung()){
+                safePutReplacement("{{htsd}}", Optional.of("Hình thức sử dụng: "+ts.getHinhThucSuDung()).orElse(""));
+            } else {
+                safePutReplacement("{{htsd}}","");
+            }
             if (ts.getCheckMucDich()) {
                 safePutReplacement("{{mdsd}}", Optional.of("Mục đích sử dụng: " + ts.getMuchDichSuDung()).orElse(""));
             } else {
                 safePutReplacement("{{mdsd}}", "");
             }
-
             safePutReplacement("{{thsd}}", Optional.ofNullable(ts.getThoiHanSuDung()).orElse(""));
             long gtqsdd = 0L;
             if (ts.getTable3() != null && ts.getTable3().getGiaTriQuyenSuDungDat() != null) {
@@ -657,10 +777,11 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             safePutReplacement("{{tsbdc}}", Optional.ofNullable(ts.getTongTaiSanBDChu()).orElse(""));
         }
         if (request.getLoaiVay().equalsIgnoreCase("han_muc")) {
-            safePutReplacement("{{lvt}}", Optional.of("Ngắn hạn (Thỏa thuận)").orElse(""));
+            safePutReplacement("{{lvt}}", "Hạn mức");
             safePutReplacement("{{slv}}", "Hạn mức");
             safePutReplacement("{{slvt}}", "hạn mức");
-            safePutReplacement("{{thvGNN}}", "Thời hạn duy trì hạn mức: " + request.getThoiHanVay() + " năm (kể từ ngày " + String.format("%02d", date.getDayOfMonth()) + "/" + String.format("%02d", date.getMonthValue()) + "/" + date.getYear() + " đến hết ngày " + endDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) + ")");
+            safePutReplacement("{{thvGNN}}", "Thời hạn duy trì hạn mức: " + request.getThoiHanVay() + " năm (kể từ ngày " + String.format("%02d", date.getDayOfMonth()) + "/" + String.format("%02d", date.getMonthValue()) + "/" + date.getYear() + " đến hết ngày " + ngayHetHanTheoNam.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) + ")");
+            safePutReplacement("{{tgvGNN}}", "Thời hạn vay 10 tháng ngày trả nợ cuối cùng " + endDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
             safePutReplacement("{{tienGNN}}", "Tổng hạn mức tín dụng được cấp:  " + request.getTienSo() + " đồng.");
             safePutReplacement("{{vongQuayGNN}}", "- Vòng quay vốn lưu động dự kiến một năm:  1,2 Vòng/năm.");
             System.err.println("get::" + replacements.get("{{slv}}"));
@@ -747,7 +868,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             }
             if (Boolean.FALSE.equals(request.getPavvRequest().getKhongLienQuan())) {
                 safePutReplacement("{{phuongAnTCK}}", "- Vốn vay tại tổ chức tín dụng khác: ");
-                safePutReplacement("{{tienVayTCTDK1}}", Optional.of(request.getPavvRequest().getTienVayTCTDK() + "      đồng").orElse("0"));
+                safePutReplacement("{{tienVayTCTDK1}}", Optional.of(request.getPavvRequest().getTienVayTCTDK() + "               đồng").orElse("0"));
             } else {
                 safePutReplacement("{{phuongAnTCK}}", "");
                 safePutReplacement("{{tienVayTCTDK1}}", "");
@@ -756,8 +877,11 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         } else {
             if (request.getLoaiVay().equalsIgnoreCase("ngan_han")) {
                 safePutReplacement("{{lvt}}", Optional.of("Ngắn hạn").orElse(""));
+                safePutReplacement("{{tgvGNN}}", "Thời hạn vay 12 tháng ngày trả nợ cuối cùng " + ngayHetHanTheoNam.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
             } else {
                 safePutReplacement("{{lvt}}", Optional.of("Trung hạn").orElse(""));
+                safePutReplacement("{{tgvGNN}}", "Thời hạn vay " +request.getThoiHanVay()+ " ngày trả nợ cuối cùng " + ngayHetHanTheoNam.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+                safePutReplacement("{{noiDungTuLuong}}", Optional.ofNullable(request.getPavvRequest().getNoiDungTuLuong()).orElse(""));
             }
             safePutReplacement("{{slv}}", "Từng lần");
             safePutReplacement("{{ms1t}}", "Số tiền cho vay:");
@@ -783,7 +907,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             safePutReplacement("{{tgpa}}", "sử dụng vốn vay");
             safePutReplacement("{{soHDTDcu}}", "");
             safePutReplacement("{{ngayHDTDcu}}", "");
-            safePutReplacement("{{thvGNN}}", "Thời hạn vay " + request.getThoiHanVay() + " năm.");
+            safePutReplacement("{{thvGNN}}", "Thời hạn vay " + request.getHanMuc() + " tháng.");
             safePutReplacement("{{tienGNN}}", "Tổng số tiền vay:  " + request.getTienSo() + " đồng.");
             safePutReplacement("{{vongQuayGNN}}", "");
             safePutReplacement("{{dieu5}}", "- Bên B được trả nợ gốc, lãi tiền vay nhiều lần trước hạn hoặc theo đúng định kỳ trả nợ và hạn trả nợ cuối cùng là ngày " + ngayKetThuc + ". Trường hợp ngày đến hạn trùng với ngày nghỉ, lễ, tết hoặc thứ 7, chủ nhật hàng tuần thì ngày đến hạn được chuyển sang ngày làm việc tiếp theo.");
@@ -800,6 +924,8 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             safePutReplacement("{{slvt}}", "từng lần");
             safePutReplacement("{{phuongAnHM}}", "");
             safePutReplacement("{{phuongAnTCK}}", "");
+            safePutReplacement("{{tienVayTCTDK1}}", "");
+            safePutReplacement("{{tinDungHM}}", "");
         }
         CreditContractPAVVRequest pavvDto = request.getPavvRequest();
         if (pavvDto != null && Boolean.TRUE.equals(pavvDto.getCheckAddress())) {
@@ -834,7 +960,6 @@ public class CreditContractServiceIMPL implements ICreditContractService {
                 safePutReplacement("{{pavv6}}", "");
             }
         }
-
         safePutReplacement("{{thv}}", Optional.ofNullable(request.getThoiHanVay()).orElse(""));
 //        safePutReplacement("{{ncd}}", Optional.ofNullable(request.getNhaCoDinh()).orElse(""));
 //        safePutReplacement("{{tsbds}}", Optional.ofNullable(request.getTongTaiSanBD()).orElse(""));
@@ -859,7 +984,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             safePutReplacement("{{dsHopDongTheChap}}", ketQua);
         }
         safePutReplacement("{{canBoTD}}", "VŨ XUÂN LONG");
-        safePutReplacement("{{sdtCanBoTD}}", "0343304666");
+        safePutReplacement("{{sdtCanBoTD}}", "0987858237");
         safePutReplacement("{{canBoTDVT}}", capitalizeWords("VŨ XUÂN LONG"));
         String regex = "\\d+(,\\d+)?";
         java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(regex);
@@ -962,15 +1087,15 @@ public class CreditContractServiceIMPL implements ICreditContractService {
                             .append(capitalizeWords(request.getTenKhachHang())).append(" ")
                             .append(request.getGtnt().toLowerCase()).append(" ")
                             .append(capitalizeWords(request.getTenNguoiThan()))
-                            .append(" hoặc các hợp đồng cho vay khác có tham chiếu từ hợp đồng thế chấp này.\n");
+                            .append(" hoặc các hợp đồng cho vay khác có tham chiếu từ hợp đồng thế chấp này.");
 
                     doanVanBan2.append("Theo hợp đồng cho vay số: ")
                             .append(request.getSoHopDongTD())
-                            .append(" và hợp đồng cho vay khác (nếu có) mà tài sản thế chấp này làm bảo đảm.\n");
+                            .append(" và hợp đồng cho vay khác (nếu có) mà tài sản thế chấp này làm bảo đảm.");
                 } else {
                     // Nếu tài sản này không checkHopDongBaoLanh
                     doanVanBan.append("Để đảm bảo việc thanh toán được kịp thời, đầy đủ và thực hiện một cách trọn vẹn khi đến hạn các nghĩa vụ trả nợ đang ")
-                            .append("tồn tại hoặc sẽ phát sinh trong tương lai của Bên B cho Bên A theo các Hợp đồng cho vay và/hoặc các Hợp đồng khác có tham chiếu từ Hợp đồng này.\n");
+                            .append("tồn tại hoặc sẽ phát sinh trong tương lai của Bên B cho Bên A theo các Hợp đồng cho vay và/hoặc các Hợp đồng khác có tham chiếu từ Hợp đồng này");
 
                     doanVanBan2.append("của Bên B\n");
                 }
@@ -1031,7 +1156,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
                 if (paraPos >= 0) doc.removeBodyElement(paraPos);
             }
             if (text.contains("{{TABLE3_PLACEHOLDER}}") && ts != null && ts.getTable2() != null) {
-                insertTableAtPlaceholder(doc, para, ts.getTable2(), false, replacements, request);
+                insertTableAtPlaceholder(doc, para, ts.getTable3(), false, replacements, request);
                 int paraPos = doc.getPosOfParagraph(para);
                 if (paraPos >= 0) doc.removeBodyElement(paraPos);
             }
@@ -1285,7 +1410,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         if (request.getLoaiVay().equalsIgnoreCase("trung_han")) {
             safePutReplacement("{{thamDinhVaGiaiNgan}}", "Từ lương: 0 đồng");
         } else {
-            safePutReplacement("{{thamDinhVaGiaiNgan}}", "Thu hồi vốn đầu tư phương án: " + formatCurrency(thuHoiVon));
+            safePutReplacement("{{thamDinhVaGiaiNgan}}", "Thu hồi vốn đầu tư phương án:                     " + formatCurrency(thuHoiVon));
         }
 
 
@@ -2338,6 +2463,8 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         }
         safePutReplacement("{{vonTuCo}}", formatCurrency(vonTuCo));
         safePutReplacement("{{vonKhac}}", formatCurrency(vonKhac));
+        long vonTuCoVaVonKhac = vonTuCo + vonKhac;
+        safePutReplacement("{{vonTuCoVaVonKhac}}", formatCurrency(vonTuCoVaVonKhac));
         safePutReplacement("{{phanTramVTC}}", String.format("%.1f", phanTramVonTuCo) + "%");
         safePutReplacement("{{phanTramVV}}", String.format("%.1f", phanTramVV) + "%");
         safePutReplacement("{{phanTramVonKhac}}", String.format("%.1f", phanTramVonKhac) + "%");
@@ -2681,36 +2808,44 @@ public class CreditContractServiceIMPL implements ICreditContractService {
     public void deleteById(Long id) {
         CreditContractEntity entity = creditContractRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy hợp đồng với id: " + id));
+// Kiểm tra quyền (bỏ nếu chưa cần)
+        // 1. Chỉ ADMIN được xóa
+        User current = userDetailService.getCurrentUser();
+        boolean isAdmin = current.getRoles().stream()
+                .anyMatch(role -> role.getName() == RoleName.ADMIN);
+        if (!isAdmin) {
+            throw new AccessDeniedException("Chỉ ADMIN mới có quyền xóa hợp đồng");
+        }
+        // 1. Thu thập đường dẫn file avatar TRƯỚC khi xóa DB
+        Path uploadRoot = Paths.get(uploadDir).toAbsolutePath().normalize();
+        List<Path> filesToDelete = new ArrayList<>();
+        if (entity.getAvatars() != null) {
+            for (AvatarEntity avatar : entity.getAvatars()) {
+                if (avatar.getFilePath() == null) continue;
+                Path p = Paths.get(avatar.getFilePath()).toAbsolutePath().normalize();
+                // Chỉ xóa file nằm trong thư mục upload
+                if (p.startsWith(uploadRoot)) {
+                    filesToDelete.add(p);
+                }
+            }
+        }
 
-//        // Xóa file vật lý của avatars
-//        if (entity.getAvatars() != null) {
-//            entity.getAvatars().forEach(avatar -> {
-//                try {
-//                    Path path = Paths.get(avatar.getFilePath());
-//                    Files.deleteIfExists(path);
-//                } catch (IOException e) {
-//                    System.err.println("Không thể xóa avatar file: " + avatar.getFilePath() + " - " + e.getMessage());
-//                }
-//            });
-//        }
-//
-//        // Nếu có metadata file liên quan thì xóa luôn
-//        List<FileMetadataEntity> metadataList = fileMetadataRepository.findAll();
-//        metadataList.stream()
-//                .filter(meta -> meta.getFilePath() != null && meta.getFilePath().contains(String.valueOf(entity.getId())))
-//                .forEach(meta -> {
-//                    try {
-//                        Path path = Paths.get(meta.getFilePath());
-//                        System.err.println("path --> "+path);
-//                        Files.deleteIfExists(path);
-//                    } catch (IOException e) {
-//                        System.err.println("Không thể xóa file metadata: " + meta.getFilePath());
-//                    }
-//                    fileMetadataRepository.delete(meta);
-//                });
-
-        // Xóa entity trong DB
+        // 2. Xóa DB (cascade xóa avatars, tables, tài sản, PAVV)
         creditContractRepository.delete(entity);
+
+        // 3. Xóa file vật lý sau khi transaction commit thành công
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                for (Path path : filesToDelete) {
+                    try {
+                        Files.deleteIfExists(path);
+                    } catch (IOException e) {
+                        System.err.println("Không thể xóa file: " + path + " - " + e.getMessage());
+                    }
+                }
+            }
+        });
     }
 
     private void expandTablesFullWidth(XWPFDocument doc) {
@@ -2734,7 +2869,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         List<String> keysToClear = List.of(
                 "{{ntbd}}", "{{ntbdd1}}", "{{ntbdd3}}", "{{cmnd2}}", "{{ncbd2}}", "{{noiCapbd2}}",
                 "{{ntbdd4}}", "{{ntbdd5}}", "{{ntbdd6}}", "{{ntbdd7}}", "{{ntbdd8}}",
-                "{{ntbdd9}}", "{{ntbdd10}}", "{{ntbdd10s}}", "{{ntbdd11}}", "{{ntbdd12}}"
+                "{{ntbdd9}}", "{{ntbdd10}}", "{{ntbdd10s}}", "{{ntbdd11}}", "{{ntbdd12}}", "{{dccu2}}"
         );
         keysToClear.forEach(key -> safePutReplacement(key, ""));
     }

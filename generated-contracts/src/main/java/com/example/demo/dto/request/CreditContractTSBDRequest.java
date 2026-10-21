@@ -23,6 +23,7 @@ public class CreditContractTSBDRequest {
     private String dienTichDatSo;
     private String dienTichDatChu;
     private String thoiHanSuDung;
+    private Boolean checkHinhThucSuDung;
     private String hinhThucSuDung;
 
     // Nội dung khác
@@ -69,12 +70,14 @@ public class CreditContractTSBDRequest {
     private Boolean checkCMNDDungTenBiaDo1;
     private Boolean checkNgayCapCCCDTruocDayDungTenBiaDo1;
     private Boolean checkDiaChiThuongTruDungTenBiaDo1;
+    private String diaChiThuongTruDungTenBiaDo1Cu;
     private Boolean checkChiMangTenNguoi1;
 
     private String cmndDungTenBiaDo2;
     private String ngayCapCCCDTruocDayDungTenBiaDo2;
     private Boolean checkCMNDDungTenBiaDo2;
     private Boolean checkNgayCapCCCDTruocDayDungTenBiaDo2;
+    private String diaChiThuongTruDungTenBiaDo2Cu;
     private Boolean checkDiaChiThuongTruDungTenBiaDo2;
     private Boolean checkChiMangTenNguoi2;
     private Boolean checkDongSoHuu;
@@ -85,6 +88,9 @@ public class CreditContractTSBDRequest {
     private String landItems;
     private String tongTaiSanBD;
     private String tongTaiSanBDChu;
+    private Boolean checkKhacPhuong2;
+    private Boolean checkKhacPhuong1;
+
 
     // Các bảng riêng cho từng tài sản
     private TableRequest table1;

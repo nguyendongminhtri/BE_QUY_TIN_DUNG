@@ -31,8 +31,6 @@ public class ContractMapper {
                                    ) throws JsonProcessingException {
         entity.setUser(user);
         entity.setContractDate(date);
-        entity.setNgayTheChap(dateTC);
-//        entity.setNgayBaoDam(dateBD);
         entity.setNguoiDaiDien(request.getNguoiDaiDien());
         entity.setGtkh(request.getGtkh());
         entity.setTenKhachHang(request.getTenKhachHang());
@@ -42,7 +40,7 @@ public class ContractMapper {
         entity.setCccdKhachHang(request.getCccdKhachHang());
         entity.setNgayCapCCCDKhachHang(request.getNgayCapCCCDKhachHang());
         entity.setDiaChiThuongTruKhachHang(request.getDiaChiThuongTruKhachHang());
-
+        entity.setTatToan(request.getTatToan());
         entity.setGtnt(request.getGtnt());
         entity.setTenNguoiThan(request.getTenNguoiThan());
         entity.setNamSinhNguoiThan(request.getNamSinhNguoiThan());
@@ -67,7 +65,6 @@ public class ContractMapper {
         entity.setDiaChiPhongGiaoDich(request.getDiaChiPhongGiaoDich());
         entity.setNoiCapCCCDKhachHang(request.getNoiCapCCCDKhachHang());
         entity.setNoiCapCCCDNguoiThan(request.getNoiCapCCCDNguoiThan());
-        entity.setCheckHopDongBaoLanh(request.getCheckHopDongBaoLanh());
         entity.setSoBBXetDuyetChoVay(request.getSoBBXetDuyetChoVay());
         entity.getContractTSBDs().clear();
         if (request.getTaiSanArray() != null) {
@@ -125,14 +122,18 @@ public class ContractMapper {
                 tsbd.setCheckCMNDDungTenBiaDo1(dto.getCheckCMNDDungTenBiaDo1());
                 tsbd.setCheckNgayCapCCCDTruocDayDungTenBiaDo1(dto.getCheckNgayCapCCCDTruocDayDungTenBiaDo1());
                 tsbd.setCheckDiaChiThuongTruDungTenBiaDo1(dto.getCheckDiaChiThuongTruDungTenBiaDo1());
+                tsbd.setDiaChiThuongTruDungTenBiaDo1Cu(dto.getDiaChiThuongTruDungTenBiaDo1Cu());
                 tsbd.setCheckChiMangTenNguoi1(dto.getCheckChiMangTenNguoi1());
 
                 tsbd.setCmndDungTenBiaDo2(dto.getCmndDungTenBiaDo2());
                 tsbd.setNgayCapCCCDTruocDayDungTenBiaDo2(dto.getNgayCapCCCDTruocDayDungTenBiaDo2());
                 tsbd.setCheckCMNDDungTenBiaDo2(dto.getCheckCMNDDungTenBiaDo2());
                 tsbd.setCheckNgayCapCCCDTruocDayDungTenBiaDo2(dto.getCheckNgayCapCCCDTruocDayDungTenBiaDo2());
+                tsbd.setDiaChiThuongTruDungTenBiaDo2Cu(dto.getDiaChiThuongTruDungTenBiaDo2Cu());
                 tsbd.setCheckDiaChiThuongTruDungTenBiaDo2(dto.getCheckDiaChiThuongTruDungTenBiaDo2());
                 tsbd.setCheckChiMangTenNguoi2(dto.getCheckChiMangTenNguoi2());
+                tsbd.setCheckKhacPhuong1(dto.getCheckKhacPhuong1());
+                tsbd.setCheckKhacPhuong2(dto.getCheckKhacPhuong2());
 
                 // Thông tin khác
                 tsbd.setCheckNguoiMangTenBiaDo(dto.getCheckNguoiMangTenBiaDo());
@@ -146,6 +147,7 @@ public class ContractMapper {
                 tsbd.setCheckTaiSanGanLienVoiDat(dto.getCheckTaiSanGanLienVoiDat());
                 tsbd.setCheckDongSoHuu(dto.getCheckDongSoHuu());
                 tsbd.setPhoneDungTenBiaDo1(dto.getPhoneDungTenBiaDo1());
+                tsbd.setCheckHinhThucSuDung(dto.getCheckHinhThucSuDung());
                 // Map các bảng table1, table2, table3
                 ObjectMapper mapper = new ObjectMapper();
                 List<CreditContractTableEntity> tables = new ArrayList<>();
@@ -212,6 +214,9 @@ public class ContractMapper {
             pavv.setChuyenKhoan(dto.getChuyenKhoan());
             pavv.setTongChiPhiTHTD(dto.getTongChiPhiTHTD());
             pavv.setTienLuongKH(dto.getTienLuongKH());
+            pavv.setNoiDungNguonThuKhac(dto.getNoiDungNguonThuKhac());
+            pavv.setTienNguonThuNhapKhac(dto.getTienNguonThuNhapKhac());
+            pavv.setNoiDungTuLuong(dto.getNoiDungTuLuong());
             entity.setContractPAVV(pavv); // liên kết xuôi
         }
 
@@ -307,7 +312,7 @@ public class ContractMapper {
                 dto.setCheckNguonGocSuDung(tsbd.getCheckNguonGocSuDung());
                 dto.setCheckGhiChu(tsbd.getCheckGhiChu());
                 dto.setCheckHopDongBaoLanh(tsbd.getCheckHopDongBaoLanh());
-
+                dto.setCheckHinhThucSuDung(tsbd.getCheckHinhThucSuDung());
                 // Người đứng tên bìa đỏ 1
                 dto.setDungTenBiaDo1(tsbd.getDungTenBiaDo1());
                 dto.setGioiTinhDungTenBiaDo1(tsbd.getGioiTinhDungTenBiaDo1());
@@ -334,6 +339,10 @@ public class ContractMapper {
                 dto.setCheckNgayCapCCCDTruocDayDungTenBiaDo1(tsbd.getCheckNgayCapCCCDTruocDayDungTenBiaDo1());
                 dto.setCheckDiaChiThuongTruDungTenBiaDo1(tsbd.getCheckDiaChiThuongTruDungTenBiaDo1());
                 dto.setCheckChiMangTenNguoi1(tsbd.getCheckChiMangTenNguoi1());
+                dto.setCheckDiaChiThuongTruDungTenBiaDo1(tsbd.getCheckDiaChiThuongTruDungTenBiaDo1());
+                dto.setDiaChiThuongTruDungTenBiaDo1Cu(tsbd.getDiaChiThuongTruDungTenBiaDo1Cu());
+                dto.setCheckDiaChiThuongTruDungTenBiaDo2(tsbd.getCheckDiaChiThuongTruDungTenBiaDo2());
+                dto.setDiaChiThuongTruDungTenBiaDo2Cu(tsbd.getDiaChiThuongTruDungTenBiaDo2Cu());
 
                 dto.setCmndDungTenBiaDo2(tsbd.getCmndDungTenBiaDo2());
                 dto.setNgayCapCCCDTruocDayDungTenBiaDo2(tsbd.getNgayCapCCCDTruocDayDungTenBiaDo2());
@@ -354,6 +363,8 @@ public class ContractMapper {
                 dto.setKetCauXayDung(tsbd.getKetCauXayDung());
                 dto.setCheckTaiSanGanLienVoiDat(tsbd.getCheckTaiSanGanLienVoiDat());
                 dto.setCheckDongSoHuu(tsbd.getCheckDongSoHuu());
+                dto.setCheckKhacPhuong1(tsbd.getCheckKhacPhuong1());
+                dto.setCheckKhacPhuong2(tsbd.getCheckKhacPhuong2());
                 // Map các bảng table1, table2, table3
                 List<CreditContractTableEntity> tables = tsbd.getTables();
                 if (tables != null) {
@@ -403,12 +414,14 @@ public class ContractMapper {
             pavvDto.setChuyenKhoan(pavv.getChuyenKhoan());
             pavvDto.setTongChiPhiTHTD(pavv.getTongChiPhiTHTD());
             pavvDto.setTienLuongKH(pavv.getTienLuongKH());
+            pavvDto.setNoiDungNguonThuKhac(pavv.getNoiDungNguonThuKhac());
+            pavvDto.setTienNguonThuNhapKhac(pavv.getTienNguonThuNhapKhac());
+            pavvDto.setNoiDungTuLuong(pavv.getNoiDungTuLuong());
             request.setPavvRequest(pavvDto);
         }
         // map các field cơ bản
         request.setId(entity.getId());
         request.setContractDate(entity.getContractDate() != null ? entity.getContractDate().toString() : null);
-        request.setNgayTheChap(entity.getNgayTheChap() != null ? entity.getNgayTheChap().toString() : null);
         request.setNguoiDaiDien(entity.getNguoiDaiDien());
         request.setGtkh(entity.getGtkh());
         request.setTenKhachHang(entity.getTenKhachHang());
@@ -439,11 +452,9 @@ public class ContractMapper {
         request.setSoHopDongTD(entity.getSoHopDongTD());
         request.setNgayKetThucKyHanVay(entity.getNgayKetThucKyHanVay());
         request.setThoiHanVay(entity.getThoiHanVay());
-//        request.setTongTaiSanBD(entity.getTongTaiSanBD());
-//        request.setTongTaiSanBDChu(entity.getTongTaiSanBDChu());
+        request.setTatToan(entity.getTatToan());
         request.setPhongGiaoDich(entity.getPhongGiaoDich());
         request.setDiaChiPhongGiaoDich(entity.getDiaChiPhongGiaoDich());
-        request.setCheckHopDongBaoLanh(entity.getCheckHopDongBaoLanh());
         request.setSoBBXetDuyetChoVay(entity.getSoBBXetDuyetChoVay());
         if (entity.getTableJson() != null) {
             TableRequest tableReq = mapper.readValue(entity.getTableJson(), TableRequest.class);

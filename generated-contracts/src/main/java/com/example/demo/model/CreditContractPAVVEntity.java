@@ -32,6 +32,7 @@ public class CreditContractPAVVEntity {
     private Boolean vayLai;
     private Boolean giaiNganHM;
     private Double heSoVonKhac;
+    @Column(name = "nguoi_chuyen_khoan", columnDefinition = "TEXT")
     private String nguoiChuyenKhoan;
     private String loaiPhuongAn;
     private String  duNoTruoc;
@@ -48,4 +49,7 @@ public class CreditContractPAVVEntity {
     private Boolean chuyenKhoan;
     private String tongChiPhiTHTD;
     private String tienLuongKH;
+    private String noiDungNguonThuKhac;
+    private String tienNguonThuNhapKhac;
+    private String noiDungTuLuong;
 }

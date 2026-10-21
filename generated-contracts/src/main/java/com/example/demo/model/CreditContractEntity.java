@@ -21,8 +21,6 @@ public class CreditContractEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private LocalDate contractDate;
-    private LocalDate ngayTheChap;
-//    private LocalDate ngayBaoDam;
     private String nguoiDaiDien;
     private String gtkh;
     private String tenKhachHang;
@@ -41,80 +39,28 @@ public class CreditContractEntity {
     @Column(columnDefinition = "TEXT")
     private String noiCapCCCDNguoiThan;
     private String diaChiThuongTruNguoiThan;
-//    @Column(name = "noi_dung_ngoai_bia")
-//    private String noiDungNgoaiBia;
     private String quanHe;
     private String tienSo;
     private String tienChu;
     private String muchDichVay;
     private String hanMuc;
     private String laiSuat;
-    private String soHopDongTheChapQSDD;
-
-//    //thong tin bia do
-//    private String serial;
-//    private String noiCapSo;
-//    private String ngayCapSo;
-//    private String noiDungVaoSo;
-//    private String soThuaDat;
-//    private String soBanDo;
-//    private String diaChiThuaDat;
-//    private String dienTichDatSo;
-//    private String dienTichDatChu;
-//    private String hinhThucSuDung;
-//    private Boolean checkMucDichSuDung;
-//    private String muchDichSuDung;
-//    private String thoiHanSuDung;
-//    private String soBienBanDinhGia;
-//    private String noiDungThoaThuan;
-//    private String nguonGocSuDung;
-//    private String ghiChu;
+    private Boolean tatToan;
 
     private String choVay;
     private String loaiVay;
-    // 👉 Thêm trường checkOption
     private Boolean checkOption;
-    private Boolean checkGhiChu;
-    private Boolean checkNguonGocSuDung;
-//    private String loaiDat;
-    private Boolean checkLoaiDat;
     @Column(columnDefinition = "TEXT")
     private String tableJson;
     private String soHopDongTD;
     private String ngayKetThucKyHanVay;
-    //Người đứng tên bìa ỏ 1
-    private String dungTenBiaDo1;
-    private String gioiTinhDungTenBiaDo1;
-    private String namSinhDungTenBiaDo1;
-    private String phoneDungTenBiaDo1;
-    private String cccdDungTenBiaDo1;
-    private String ngayCapCCCDDungTenBiaDo1;
-    @Column(columnDefinition = "TEXT")
-    private String noiCapCCCDDungTenBiaDo1;
-    private String diaChiThuongTruDungTenBiaDo1;
 
     private Boolean checkNguoiDungTenBiaDo2;
-    private String dungTenBiaDo2;
-    private String gioiTinhDungTenBiaDo2;
-    private String namSinhDungTenBiaDo2;
-    private String cccdDungTenBiaDo2;
-    @Column(columnDefinition = "TEXT")
-    private String noiCapCCCDDungTenBiaDo2;
-    private String ngayCapCCCDDungTenBiaDo2;
-    private String diaChiThuongTruDungTenBiaDo2;
-    @Column(columnDefinition = "TEXT")
-    private String landItems;
     private String thoiHanVay;
     private Boolean checkNhaCoDinh;
     private String nhaCoDinh;
-    private String tongTaiSanBD;
-    private String tongTaiSanBDChu;
     private String phongGiaoDich;
     private String diaChiPhongGiaoDich;
-    private Boolean checkHopDongBaoLanh;
-    private Boolean checkNguoiMangTenBiaDo;
-    @Column(columnDefinition = "TEXT")
-    private String nguoiMangTen;
     @Column(columnDefinition = "TEXT")
     private String soBBXetDuyetChoVay;
 
@@ -136,7 +82,7 @@ public class CreditContractEntity {
     User user;
     @OneToMany(mappedBy = "creditContract", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
-    private List<AvatarEntity> avatars = new ArrayList();
+    private List<AvatarEntity> avatars = new ArrayList<>();
     @OneToMany(mappedBy = "creditContract", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CreditContractTableEntity> tables = new ArrayList<>();
     @OneToMany(mappedBy = "creditContract", cascade = CascadeType.ALL, orphanRemoval = true)

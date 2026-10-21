@@ -20,6 +20,7 @@ public class ContractRequest {
     private String noiCapCCCDKhachHang;
     private String diaChiThuongTruKhachHang;
     private String choVay;
+    private Boolean tatToan;
     // Người thân
     private String gtnt;
     private String tenNguoiThan;

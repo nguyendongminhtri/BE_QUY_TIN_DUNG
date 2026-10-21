@@ -119,14 +119,9 @@ public class CreditContractController {
 
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteCarousel(@PathVariable Long id) {
-        System.err.println("------------xóa id ---- "+id);
-        Optional<CreditContractEntity> carouselEntity = creditContractService.findById(id);
-        if(!carouselEntity.isPresent()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+    public ResponseEntity<ResponMessage> deleteContract(@PathVariable Long id) {
         creditContractService.deleteById(id);
-        return new ResponseEntity<>(new ResponMessage("delete_success"), HttpStatus.OK);
+        return ResponseEntity.ok(new ResponMessage("delete_success"));
     }
 
 }
