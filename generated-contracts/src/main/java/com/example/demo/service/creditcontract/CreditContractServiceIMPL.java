@@ -646,6 +646,45 @@ public class CreditContractServiceIMPL implements ICreditContractService {
                 safePutReplacement("{{noiCapbd2}}", "");
                 safePutReplacement("{{ntbdd3}}", "");
                 clearNguoiThu2Placeholders();
+//                if (request.getTaiSanArray() != null && !request.getTaiSanArray().isEmpty()) {
+                    StringBuilder doanVanBan = new StringBuilder();
+                    StringBuilder doanVanBan2 = new StringBuilder();
+                    StringBuilder doanVanBan3 = new StringBuilder();
+
+//                    for (CreditContractTSBDRequest tstc : request.getTaiSanArray()) {
+                        if (Boolean.TRUE.equals(ts.getCheckHopDongBaoLanh())) {
+                            // Nếu tài sản này có checkHopDongBaoLanh
+                            doanVanBan.append("Bên B dùng tài sản này để đảm bảo việc thanh toán được kịp thời, đầy đủ và thực hiện một cách trọn vẹn ")
+                                    .append("khi đến hạn các nghĩa vụ trả nợ đối với hợp đồng tín dụng số: ")
+                                    .append(request.getSoHopDongTD())
+                                    .append("/HDTD của ")
+                                    .append(request.getGtkh().toLowerCase()).append(" ")
+                                    .append(capitalizeWords(request.getTenKhachHang())).append(" ")
+                                    .append(request.getGtnt().toLowerCase()).append(" ")
+                                    .append(capitalizeWords(request.getTenNguoiThan()))
+                                    .append(" hoặc các hợp đồng cho vay khác có tham chiếu từ hợp đồng thế chấp này.");
+
+                            doanVanBan2.append("Theo hợp đồng cho vay số: ")
+                                    .append(request.getSoHopDongTD())
+                                    .append(" và hợp đồng cho vay khác (nếu có) mà tài sản thế chấp này làm bảo đảm.");
+                            doanVanBan3.append(request.getGtkh().toLowerCase()).append(" ")
+                                    .append(capitalizeWords(request.getTenKhachHang())).append(" và ")
+                                    .append(request.getGtnt().toLowerCase()).append(" ")
+                                    .append(capitalizeWords(request.getTenNguoiThan()));
+                        } else {
+                            // Nếu tài sản này không checkHopDongBaoLanh
+                            doanVanBan.append("Để đảm bảo việc thanh toán được kịp thời, đầy đủ và thực hiện một cách trọn vẹn khi đến hạn các nghĩa vụ trả nợ đang ")
+                                    .append("tồn tại hoặc sẽ phát sinh trong tương lai của Bên B cho Bên A theo các Hợp đồng cho vay và/hoặc các Hợp đồng khác có tham chiếu từ Hợp đồng này");
+
+                            doanVanBan2.append("của Bên B\n");
+                            doanVanBan3.append("Bên B");
+                        }
+//                    }
+
+                    safePutReplacement("{{tstc}}", doanVanBan.toString());
+                    safePutReplacement("{{dvb}}", doanVanBan2.toString());
+                    safePutReplacement("{{dvb3}}", doanVanBan3.toString());
+//                }
             } else if (Boolean.TRUE.equals(ts.getCheckChiMangTenNguoi2()) && Boolean.FALSE.equals(ts.getCheckChiMangTenNguoi1())) {
                 safePutReplacement("{{gtkhbd}}", Optional.ofNullable(ts.getGioiTinhDungTenBiaDo2()).orElse(""));
                 safePutReplacement("{{khbd}}", Optional.ofNullable(ts.getDungTenBiaDo2()).orElse(""));
@@ -1072,38 +1111,38 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             safePutReplacement("{{nddpl}}", "Giám Đốc PGD");
             safePutReplacement("{{gdpgd}}", "Dương Quang Tuấn");
         }
-        if (request.getTaiSanArray() != null && !request.getTaiSanArray().isEmpty()) {
-            StringBuilder doanVanBan = new StringBuilder();
-            StringBuilder doanVanBan2 = new StringBuilder();
-
-            for (CreditContractTSBDRequest tstc : request.getTaiSanArray()) {
-                if (Boolean.TRUE.equals(tstc.getCheckHopDongBaoLanh())) {
-                    // Nếu tài sản này có checkHopDongBaoLanh
-                    doanVanBan.append("Bên B dùng tài sản này để đảm bảo việc thanh toán được kịp thời, đầy đủ và thực hiện một cách trọn vẹn ")
-                            .append("khi đến hạn các nghĩa vụ trả nợ đối với hợp đồng cho vay số: ")
-                            .append(request.getSoHopDongTD())
-                            .append(" của ")
-                            .append(request.getGtkh().toLowerCase()).append(" ")
-                            .append(capitalizeWords(request.getTenKhachHang())).append(" ")
-                            .append(request.getGtnt().toLowerCase()).append(" ")
-                            .append(capitalizeWords(request.getTenNguoiThan()))
-                            .append(" hoặc các hợp đồng cho vay khác có tham chiếu từ hợp đồng thế chấp này.");
-
-                    doanVanBan2.append("Theo hợp đồng cho vay số: ")
-                            .append(request.getSoHopDongTD())
-                            .append(" và hợp đồng cho vay khác (nếu có) mà tài sản thế chấp này làm bảo đảm.");
-                } else {
-                    // Nếu tài sản này không checkHopDongBaoLanh
-                    doanVanBan.append("Để đảm bảo việc thanh toán được kịp thời, đầy đủ và thực hiện một cách trọn vẹn khi đến hạn các nghĩa vụ trả nợ đang ")
-                            .append("tồn tại hoặc sẽ phát sinh trong tương lai của Bên B cho Bên A theo các Hợp đồng cho vay và/hoặc các Hợp đồng khác có tham chiếu từ Hợp đồng này");
-
-                    doanVanBan2.append("của Bên B\n");
-                }
-            }
-
-            safePutReplacement("{{tstc}}", doanVanBan.toString());
-            safePutReplacement("{{dvb}}", doanVanBan2.toString());
-        }
+//        if (request.getTaiSanArray() != null && !request.getTaiSanArray().isEmpty()) {
+//            StringBuilder doanVanBan = new StringBuilder();
+//            StringBuilder doanVanBan2 = new StringBuilder();
+//
+//            for (CreditContractTSBDRequest tstc : request.getTaiSanArray()) {
+//                if (Boolean.TRUE.equals(tstc.getCheckHopDongBaoLanh())) {
+//                    // Nếu tài sản này có checkHopDongBaoLanh
+//                    doanVanBan.append("Bên B dùng tài sản này để đảm bảo việc thanh toán được kịp thời, đầy đủ và thực hiện một cách trọn vẹn ")
+//                            .append("khi đến hạn các nghĩa vụ trả nợ đối với hợp đồng cho vay số: ")
+//                            .append(request.getSoHopDongTD())
+//                            .append(" của ")
+//                            .append(request.getGtkh().toLowerCase()).append(" ")
+//                            .append(capitalizeWords(request.getTenKhachHang())).append(" ")
+//                            .append(request.getGtnt().toLowerCase()).append(" ")
+//                            .append(capitalizeWords(request.getTenNguoiThan()))
+//                            .append(" hoặc các hợp đồng cho vay khác có tham chiếu từ hợp đồng thế chấp này.");
+//
+//                    doanVanBan2.append("Theo hợp đồng cho vay số: ")
+//                            .append(request.getSoHopDongTD())
+//                            .append(" và hợp đồng cho vay khác (nếu có) mà tài sản thế chấp này làm bảo đảm.");
+//                } else {
+//                    // Nếu tài sản này không checkHopDongBaoLanh
+//                    doanVanBan.append("Để đảm bảo việc thanh toán được kịp thời, đầy đủ và thực hiện một cách trọn vẹn khi đến hạn các nghĩa vụ trả nợ đang ")
+//                            .append("tồn tại hoặc sẽ phát sinh trong tương lai của Bên B cho Bên A theo các Hợp đồng cho vay và/hoặc các Hợp đồng khác có tham chiếu từ Hợp đồng này");
+//
+//                    doanVanBan2.append("của Bên B\n");
+//                }
+//            }
+//
+//            safePutReplacement("{{tstc}}", doanVanBan.toString());
+//            safePutReplacement("{{dvb}}", doanVanBan2.toString());
+//        }
 
         // Bước 1: tìm tất cả paragraph chứa placeholder
         List<XWPFParagraph> targets = new ArrayList<>();
