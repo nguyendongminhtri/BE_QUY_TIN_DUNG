@@ -38,4 +38,6 @@ public class CreditContractPAVVRequest {
     private String noiDungNguonThuKhac;
     private String tienNguonThuNhapKhac;
     private String noiDungTuLuong;
+    private String noiDungCIC;
+    private String nhanXetCIC;
 }

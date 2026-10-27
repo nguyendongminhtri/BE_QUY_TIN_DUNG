@@ -217,6 +217,8 @@ public class ContractMapper {
             pavv.setNoiDungNguonThuKhac(dto.getNoiDungNguonThuKhac());
             pavv.setTienNguonThuNhapKhac(dto.getTienNguonThuNhapKhac());
             pavv.setNoiDungTuLuong(dto.getNoiDungTuLuong());
+            pavv.setNoiDungCIC(dto.getNoiDungCIC());
+            pavv.setNhanXetCIC(dto.getNhanXetCIC());
             entity.setContractPAVV(pavv); // liên kết xuôi
         }
 
@@ -417,6 +419,8 @@ public class ContractMapper {
             pavvDto.setNoiDungNguonThuKhac(pavv.getNoiDungNguonThuKhac());
             pavvDto.setTienNguonThuNhapKhac(pavv.getTienNguonThuNhapKhac());
             pavvDto.setNoiDungTuLuong(pavv.getNoiDungTuLuong());
+            pavvDto.setNoiDungCIC(pavv.getNoiDungCIC());
+            pavvDto.setNhanXetCIC(pavv.getNhanXetCIC());
             request.setPavvRequest(pavvDto);
         }
         // map các field cơ bản
