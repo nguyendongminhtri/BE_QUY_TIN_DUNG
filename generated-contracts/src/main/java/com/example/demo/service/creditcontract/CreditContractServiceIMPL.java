@@ -130,6 +130,16 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         User user = userDetailService.getCurrentUser();
         LocalDate date = LocalDate.parse(request.getContractDate());
         List<String> fileUrls = new ArrayList<>();
+        if(request.getPavvRequest().getLoaiPhuongAn().equalsIgnoreCase("kd_tapHoa")){
+            fileUrls.add(generateContractFileExport(request, date, null, user, "14BaoCaoThamDinhVaDeXuatChoVay_KD_TapHoa.docx", null));
+        } else if (request.getPavvRequest().getLoaiPhuongAn().equalsIgnoreCase("chanNuoiDuoi")) {
+                fileUrls.add(generateContractFileExport(request, date, null, user, "14BaoCaoThamDinhVaDeXuatChoVayNH_DuoiNuoc.docx", null));
+        } else if (request.getPavvRequest().getLoaiPhuongAn().equalsIgnoreCase("chanNuoiTren")) {
+                fileUrls.add(generateContractFileExport(request, date, null, user, "14BaoCaoThamDinhVaDeXuatChoVayNH_TrenBo.docx", null));
+        } else {
+            fileUrls.add(generateContractFileExport(request, date, null, user, "14BaoCaoThamDinhVaDeXuatChoVayNH_DuoiNuoc.docx", null));
+        }
+
         if (Boolean.TRUE.equals(request.getPavvRequest().getGiaiNganHM()) && request.getLoaiVay().equalsIgnoreCase("han_muc")) {
             fileUrls.add(generateContractFileExport(request, date, null, user, "DanhMucBoSungHoSoChoVayHanMuc.docx", null));
             fileUrls.add(generateContractFileExport(request, date, null, user, "PhuLucHopDong.docx", null));
@@ -152,17 +162,9 @@ public class CreditContractServiceIMPL implements ICreditContractService {
                 fileUrls.add(generateContractFileExport(request, date, null, user, "02BaoCaoDeNghiGiaiNganKiemGiayNhanNoTHTieuDung.docx", null));
                 fileUrls.add(generateContractFileExport(request, date, null, user, "14BaoCaoThamDinhVaDeXuatChoVayTHTieuDung.docx", null));
                 fileUrls.add(generateContractFileExport(request, date, null, user, "11BaoCaoThuNhapKH_THTieuDung.docx", null));
-            } else if (request.getLoaiVay().equalsIgnoreCase("ngan_han")) {
-                System.err.println("loai phuong an: " + request.getPavvRequest().getLoaiPhuongAn().equalsIgnoreCase("chanNuoiTren"));
-                if (request.getPavvRequest().getLoaiPhuongAn().equalsIgnoreCase("chanNuoiDuoi")) {
-                    fileUrls.add(generateContractFileExport(request, date, null, user, "14BaoCaoThamDinhVaDeXuatChoVayNH_DuoiNuoc.docx", null));
-                } else if (request.getPavvRequest().getLoaiPhuongAn().equalsIgnoreCase("chanNuoiTren")) {
-                    fileUrls.add(generateContractFileExport(request, date, null, user, "14BaoCaoThamDinhVaDeXuatChoVayNH_TrenBo.docx", null));
-                }
             } else {
                 fileUrls.add(generateContractFileExport(request, date, null, user, "10PhuongAnVayVon.docx", null));
                 fileUrls.add(generateContractFileExport(request, date, null, user, "02BaoCaoDeNghiGiaiNganKiemGiayNhanNo.docx", null));
-                fileUrls.add(generateContractFileExport(request, date, null, user, "14BaoCaoThamDinhVaDeXuatChoVayNH_DuoiNuoc.docx", null));
             }
             fileUrls.add(generateContractFileExport(request, date, null, user, "17BaoCaoThongTinVeNguoiCoLienQuan.docx", null));
             fileUrls.add(generateContractFileExport(request, date, null, user, "19BaoCaoSuDungVonVay.docx", null));
@@ -228,6 +230,16 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         contractMapper.processAvatars(request, entity, tempDir, uploadDir, fileMetadataRepository);
 
         List<String> fileUrls = new ArrayList<>();
+        if(request.getPavvRequest().getLoaiPhuongAn().equalsIgnoreCase("kd_tapHoa")){
+            fileUrls.add(generateContractFileExport(request, date, null, user, "14BaoCaoThamDinhVaDeXuatChoVay_KD_TapHoa.docx", null));
+        } else if (request.getPavvRequest().getLoaiPhuongAn().equalsIgnoreCase("chanNuoiDuoi")) {
+            fileUrls.add(generateContractFileExport(request, date, null, user, "14BaoCaoThamDinhVaDeXuatChoVayNH_DuoiNuoc.docx", null));
+        } else if (request.getPavvRequest().getLoaiPhuongAn().equalsIgnoreCase("chanNuoiTren")) {
+            fileUrls.add(generateContractFileExport(request, date, null, user, "14BaoCaoThamDinhVaDeXuatChoVayNH_TrenBo.docx", null));
+        } else {
+            fileUrls.add(generateContractFileExport(request, date, null, user, "14BaoCaoThamDinhVaDeXuatChoVayNH_DuoiNuoc.docx", null));
+        }
+
         if (Boolean.TRUE.equals(pavv.getGiaiNganHM()) && isHanMuc) {
             fileUrls.add(generateContractFileExport(request, date, null, user, "DanhMucBoSungHoSoChoVayHanMuc.docx", null));
             fileUrls.add(generateContractFileExport(request, date, null, user, "PhuLucHopDong.docx", null));
@@ -844,7 +856,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             safePutReplacement("{{tsbdc}}", Optional.ofNullable(ts.getTongTaiSanBDChu()).orElse(""));
         }
         if (request.getLoaiVay().equalsIgnoreCase("han_muc")) {
-            safePutReplacement("{{lvt}}", "Hạn mức");
+            safePutReplacement("{{lvt}}", "Ngắn hạn");
             safePutReplacement("{{slv}}", "Hạn mức");
             safePutReplacement("{{slvt}}", "hạn mức");
             safePutReplacement("{{thvGNN}}", "Thời hạn duy trì hạn mức: " + request.getThoiHanVay() + " năm (kể từ ngày " + String.format("%02d", date.getDayOfMonth()) + "/" + String.format("%02d", date.getMonthValue()) + "/" + date.getYear() + " đến hết ngày " + ngayHetHanTheoNam.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) + ")");
