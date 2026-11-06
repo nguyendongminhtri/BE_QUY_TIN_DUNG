@@ -102,8 +102,9 @@ public class CreditContractTSBDEntity {
 
     // Thông tin khác
     private Boolean checkNguoiMangTenBiaDo;
+    @Column(name = "nguoi_mang_ten", columnDefinition = "TEXT")
     private String nguoiMangTen;
-    @Lob
+    @Column(name="land_items",columnDefinition = "TEXT")
     private String landItems;
     private String tongTaiSanBD;
     private String tongTaiSanBDChu;

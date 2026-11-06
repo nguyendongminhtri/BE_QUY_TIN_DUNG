@@ -1,6 +1,8 @@
 package com.example.demo.dto.request;
 import lombok.Data;
 import lombok.ToString;
+
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -54,6 +56,7 @@ public class ContractRequest {
     private TableRequest chiPhiTable;
     private TableRequest thuNhapDuKienTable;
     private TableRequest phuLucHanMucTable;
+    private TableRequest nguonTraNoTable;
 
     // Thông tin phòng giao dịch
     private String phongGiaoDich;
@@ -71,4 +74,7 @@ public class ContractRequest {
 
     // Phương án vay vốn
     private CreditContractPAVVRequest pavvRequest;
+    // Chỉ dùng để trả về frontend, KHÔNG map ngược vào entity
+    private String createdByUsername;
+    private LocalDateTime createdAt;
 }

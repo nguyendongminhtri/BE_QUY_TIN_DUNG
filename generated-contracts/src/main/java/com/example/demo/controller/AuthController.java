@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.dto.request.ChangeAvatar;
+import com.example.demo.dto.request.ChangePasswordRequest;
 import com.example.demo.dto.request.SignInForm;
 import com.example.demo.dto.request.SignUpForm;
 import com.example.demo.dto.response.JwtResponse;
@@ -17,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -27,7 +29,9 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @RequestMapping("/api/auth")
 @RestController
@@ -96,13 +100,18 @@ public class AuthController {
     }
 
     @PostMapping("/signin")
-    public ResponseEntity<?> login(@Valid @RequestBody SignInForm signInForm){
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(signInForm.getUsername(), signInForm.getPassword()));
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        String token = jwtProvider.createToken(authentication);
-        UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
-        return ResponseEntity.ok(new JwtResponse(token, userPrinciple.getName(), userPrinciple.getAvatar(), userPrinciple.getAuthorities()));
+    public ResponseEntity<?> login(@Valid @RequestBody SignInForm signInForm) {
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(signInForm.getUsername(), signInForm.getPassword()));
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            String token = jwtProvider.createToken(authentication);
+            UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
+            return ResponseEntity.ok(new JwtResponse(token, userPrinciple.getName(),
+                    userPrinciple.getAvatar(), userPrinciple.getAuthorities()));
+        } catch (LockedException e) {
+            return new ResponseEntity<>(new ResponMessage("locked"), HttpStatus.FORBIDDEN);
+        }
     }
     @PutMapping("/change-avatar")
     public ResponseEntity<?> changeAvatar(HttpServletRequest request, @Valid @RequestBody ChangeAvatar changeAvatar){
@@ -116,5 +125,27 @@ public class AuthController {
             userService.save(user);
             return new ResponseEntity<>(new ResponMessage("yes"), HttpStatus.OK);
         }
+    }
+    @PutMapping("/change-password")
+    public ResponseEntity<?> changePassword(HttpServletRequest request,
+                                            @Valid @RequestBody ChangePasswordRequest form) {
+        String token = jwtTokenFilter.getJwt(request);
+        String username = jwtProvider.getUerNameFromToken(token);
+        User user = userService.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("username not found"));
+
+        // Mật khẩu cũ không đúng
+        if (!passwordEncoder.matches(form.getOldPassword(), user.getPassword())) {
+            return new ResponseEntity<>(new ResponMessage("wrong_old_password"), HttpStatus.OK);
+        }
+
+        // Mật khẩu mới trùng mật khẩu cũ
+        if (passwordEncoder.matches(form.getNewPassword(), user.getPassword())) {
+            return new ResponseEntity<>(new ResponMessage("same_password"), HttpStatus.OK);
+        }
+
+        user.setPassword(passwordEncoder.encode(form.getNewPassword()));
+        userService.save(user);
+        return new ResponseEntity<>(new ResponMessage("yes"), HttpStatus.OK);
     }
 }

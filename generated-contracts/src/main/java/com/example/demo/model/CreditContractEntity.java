@@ -1,9 +1,7 @@
 package com.example.demo.model;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDate;
@@ -80,13 +78,23 @@ public class CreditContractEntity {
 
     @ManyToOne
     User user;
-    @OneToMany(mappedBy = "creditContract", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
-    private List<AvatarEntity> avatars = new ArrayList<>();
-    @OneToMany(mappedBy = "creditContract", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CreditContractTableEntity> tables = new ArrayList<>();
-    @OneToMany(mappedBy = "creditContract", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CreditContractTSBDEntity> contractTSBDs = new ArrayList<>();
     @OneToOne(mappedBy = "creditContract", cascade = CascadeType.ALL, orphanRemoval = true)
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     private CreditContractPAVVEntity contractPAVV;
+
+    @OneToMany(mappedBy = "creditContract", cascade = CascadeType.ALL, orphanRemoval = true)
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    private List<CreditContractTSBDEntity> contractTSBDs = new ArrayList<>();
+
+    @OneToMany(mappedBy = "creditContract", cascade = CascadeType.ALL, orphanRemoval = true)
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    private List<CreditContractTableEntity> tables = new ArrayList<>();
+
+    @OneToMany(mappedBy = "creditContract", cascade = CascadeType.ALL, orphanRemoval = true)
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    private List<AvatarEntity> avatars = new ArrayList<>();
 }

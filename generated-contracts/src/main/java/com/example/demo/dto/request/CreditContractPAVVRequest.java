@@ -1,7 +1,5 @@
 package com.example.demo.dto.request;
-
 import lombok.Data;
-
 import java.time.LocalDate;
 
 @Data
@@ -37,6 +35,7 @@ public class CreditContractPAVVRequest {
     private String tienLuongKH;
     private String noiDungNguonThuKhac;
     private String tienNguonThuNhapKhac;
+    private String chiPhiHangThangTHTD;
     private String noiDungTuLuong;
     private String noiDungCIC;
     private String nhanXetCIC;

@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.dto.request.ContractRequest;
+import com.example.demo.dto.response.CreditContractListItemDto;
 import com.example.demo.dto.response.ResponMessage;
 import com.example.demo.mapper.ContractMapper;
 import com.example.demo.model.CreditContractEntity;
@@ -10,7 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.data.domain.Page;
 import org.springframework.http.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -19,7 +22,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.Optional;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -117,11 +119,19 @@ public class CreditContractController {
         return ResponseEntity.ok(dto);
     }
 
-
+    @PreAuthorize("hasAuthority('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<ResponMessage> deleteContract(@PathVariable Long id) {
         creditContractService.deleteById(id);
         return ResponseEntity.ok(new ResponMessage("delete_success"));
+    }
+    // Controller
+    @GetMapping("/search")
+    public Page<CreditContractListItemDto> search(
+            @RequestParam(defaultValue = "") String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "50") int size) {
+        return creditContractService.search(keyword, page, size);
     }
 
 }

@@ -38,6 +38,8 @@ public class User {
     @NotBlank
     @Size(min = 6, max = 100)
     private String password;
+    @Column(nullable = false)
+    private boolean locked = false;
     @Lob
     private String avatar = "https://firebasestorage.googleapis.com/v0/b/tathuha-2045b.appspot.com/o/8f20c28b-cc56-49ed-b93e-1f66d559d5af.jpg?alt=media&token=e4e7e80f-75a1-460f-a53a-5fbd147cf204";
     @ManyToMany(fetch = FetchType.EAGER)
@@ -123,4 +125,6 @@ public class User {
     public void setRoles(Set<Role> roles) {
         this.roles = roles;
     }
+    public boolean isLocked() { return locked; }
+    public void setLocked(boolean locked) { this.locked = locked; }
 }

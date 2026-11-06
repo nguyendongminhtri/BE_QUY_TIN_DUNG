@@ -51,6 +51,7 @@ public class CreditContractPAVVEntity {
     private String tienLuongKH;
     private String noiDungNguonThuKhac;
     private String tienNguonThuNhapKhac;
+    private String chiPhiHangThangTHTD;
     private String noiDungTuLuong;
     @Column(name = "noi_dung_cic", columnDefinition = "TEXT")
     private String noiDungCIC;

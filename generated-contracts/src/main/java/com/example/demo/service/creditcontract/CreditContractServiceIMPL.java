@@ -1,20 +1,19 @@
 package com.example.demo.service.creditcontract;
 
 import com.example.demo.dto.request.*;
+import com.example.demo.dto.response.CreditContractListItemDto;
 import com.example.demo.mapper.ContractMapper;
-import com.example.demo.model.AvatarEntity;
-import com.example.demo.model.CreditContractEntity;
+import com.example.demo.model.*;
 
 import java.math.BigInteger;
 import java.text.DecimalFormat;
 
-import com.example.demo.model.RoleName;
 import com.example.demo.repository.ICreditContractPAVVRepository;
+import com.example.demo.service.auditcreditcontract.AuditService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.xmlbeans.impl.xb.xmlschema.SpaceAttribute;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTHMerge;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.STMerge;
-import com.example.demo.model.User;
 import com.example.demo.repository.ICreditContractRepository;
 import com.example.demo.repository.IFileMetadataRepository;
 import com.example.demo.security.userprincal.UserDetailService;
@@ -25,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.lang.Nullable;
 import org.springframework.security.access.AccessDeniedException;
@@ -60,6 +60,8 @@ public class CreditContractServiceIMPL implements ICreditContractService {
     private ICreditContractPAVVRepository creditContractPAVVRepository;
     @Autowired
     private ContractMapper contractMapper;
+    @Autowired
+    private AuditService auditService;
 
     @Override
     public List<CreditContractEntity> findAll() {
@@ -88,6 +90,14 @@ public class CreditContractServiceIMPL implements ICreditContractService {
 
     @Value("${contract.uploads.dir}")
     private String uploadDir;
+
+    private User requireCurrentUser() {
+        User u = userDetailService.getCurrentUser();
+        if (u == null || u.getId() == null) {
+            throw new AccessDeniedException("Chưa đăng nhập hoặc không xác định được người dùng");
+        }
+        return u;
+    }
 
     // 👉 Preview: chỉ sinh file, không lưu DB
     @Override
@@ -127,15 +137,15 @@ public class CreditContractServiceIMPL implements ICreditContractService {
     @Transactional
     public List<String> generateContractFilesExport(ContractRequest request) throws IOException {
         System.err.println("generateContractFilesExport");
-        User user = userDetailService.getCurrentUser();
+        User user = requireCurrentUser();
         LocalDate date = LocalDate.parse(request.getContractDate());
         List<String> fileUrls = new ArrayList<>();
-        if(request.getPavvRequest().getLoaiPhuongAn().equalsIgnoreCase("kd_tapHoa")){
+        if (request.getPavvRequest().getLoaiPhuongAn().equalsIgnoreCase("kd_tapHoa")) {
             fileUrls.add(generateContractFileExport(request, date, null, user, "14BaoCaoThamDinhVaDeXuatChoVay_KD_TapHoa.docx", null));
         } else if (request.getPavvRequest().getLoaiPhuongAn().equalsIgnoreCase("chanNuoiDuoi")) {
-                fileUrls.add(generateContractFileExport(request, date, null, user, "14BaoCaoThamDinhVaDeXuatChoVayNH_DuoiNuoc.docx", null));
+            fileUrls.add(generateContractFileExport(request, date, null, user, "14BaoCaoThamDinhVaDeXuatChoVayNH_DuoiNuoc.docx", null));
         } else if (request.getPavvRequest().getLoaiPhuongAn().equalsIgnoreCase("chanNuoiTren")) {
-                fileUrls.add(generateContractFileExport(request, date, null, user, "14BaoCaoThamDinhVaDeXuatChoVayNH_TrenBo.docx", null));
+            fileUrls.add(generateContractFileExport(request, date, null, user, "14BaoCaoThamDinhVaDeXuatChoVayNH_TrenBo.docx", null));
         } else {
             fileUrls.add(generateContractFileExport(request, date, null, user, "14BaoCaoThamDinhVaDeXuatChoVayNH_DuoiNuoc.docx", null));
         }
@@ -186,42 +196,43 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         CreditContractEntity entity = new CreditContractEntity();
         contractMapper.mapRequestToEntity(request, entity, user, date, null);
         contractMapper.processAvatars(request, entity, tempDir, uploadDir, fileMetadataRepository);
-        creditContractRepository.save(entity);
+        entity = creditContractRepository.save(entity);                  // gán lại để lấy id
+        auditService.log(entity.getId(), user, AuditAction.CREATE);      // thêm dòng này
         return fileUrls;
     }
 
     @Transactional
     public List<String> updateContractFilesExport(Long id, ContractRequest request) throws IOException {
-        User user = userDetailService.getCurrentUser();
+        User user = requireCurrentUser();
         LocalDate date = LocalDate.parse(request.getContractDate());
 
-        // Hợp đồng gốc phải tồn tại (kể cả khi vay lại)
+        // Hợp đồng đang mở phải tồn tại
         CreditContractEntity oldEntity = creditContractRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy hợp đồng"));
 
         CreditContractPAVVRequest pavv = request.getPavvRequest();
 
-        boolean isHanMuc = "han_muc".equalsIgnoreCase(request.getLoaiVay());
-        boolean vayLaiFlag = pavv != null && Boolean.TRUE.equals(pavv.getVayLai());
-
         int oldSeq = oldEntity.getContractPAVV() != null && oldEntity.getContractPAVV().getReLoanSequence() != null
                 ? oldEntity.getContractPAVV().getReLoanSequence() : 0;
         int newSeq = pavv != null && pavv.getReLoanSequence() != null
                 ? pavv.getReLoanSequence() : 0;
-
-// Số hợp đồng tín dụng mới khác số hợp đồng đang lưu (đổi getter cho đúng entity của bạn)
-        String oldSoHD = StringUtils.trimToEmpty(oldEntity.getSoHopDongTD());
         String newSoHD = StringUtils.trimToEmpty(request.getSoHopDongTD());
-        boolean soHopDongChanged = !newSoHD.isEmpty() && !newSoHD.equalsIgnoreCase(oldSoHD);
 
-// Tạo mới khi: hạn mức + tích vay lại + (số lần vay lại tăng HOẶC số hợp đồng đổi)
-        boolean isVayLai = isHanMuc && vayLaiFlag && (newSeq > oldSeq || soHopDongChanged);
-        CreditContractEntity entity = isVayLai ? new CreditContractEntity() : oldEntity;
+        // Mặc định: sửa bản ghi đang mở
+        CreditContractEntity entity = oldEntity;
 
+        // CHỈ CẦN KHÁC SỐ LẦN VAY LẠI (newSeq != oldSeq):
+        // Đã có bản ghi với (số HĐ, số lần vay lại mới này) -> tìm và sửa bản đó; Chưa có -> tạo mới (INSERT)
+        if (newSeq != oldSeq) {
+            entity = creditContractRepository
+                    .findFirstBySoHopDongTDAndContractPAVV_ReLoanSequence(newSoHD, newSeq)
+                    .orElseGet(CreditContractEntity::new);
+        }
+
+        boolean isVayLai = entity.getId() == null; // true = sắp INSERT bản ghi mới
+        User originalCreator = entity.getUser();
         System.err.println("update id=" + id
                 + ", isVayLai=" + isVayLai
-                + ", loaiVay=" + request.getLoaiVay()
-                + ", vayLaiFlag=" + vayLaiFlag
                 + ", oldSeq=" + oldSeq
                 + ", newSeq=" + newSeq);
 
@@ -229,18 +240,41 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         contractMapper.mapRequestToEntity(request, entity, user, date, null);
         contractMapper.processAvatars(request, entity, tempDir, uploadDir, fileMetadataRepository);
 
+        // Lưu NGAY để lỗi DB lộ ra trước
+        entity.setUser(isVayLai ? user : originalCreator);
+        entity = creditContractRepository.saveAndFlush(entity);
+        auditService.log(entity.getId(), user, isVayLai ? AuditAction.CREATE : AuditAction.UPDATE);
+        System.err.println("savedId=" + entity.getId());
         List<String> fileUrls = new ArrayList<>();
-        if(request.getPavvRequest().getLoaiPhuongAn().equalsIgnoreCase("kd_tapHoa")){
-            fileUrls.add(generateContractFileExport(request, date, null, user, "14BaoCaoThamDinhVaDeXuatChoVay_KD_TapHoa.docx", null));
-        } else if (request.getPavvRequest().getLoaiPhuongAn().equalsIgnoreCase("chanNuoiDuoi")) {
-            fileUrls.add(generateContractFileExport(request, date, null, user, "14BaoCaoThamDinhVaDeXuatChoVayNH_DuoiNuoc.docx", null));
-        } else if (request.getPavvRequest().getLoaiPhuongAn().equalsIgnoreCase("chanNuoiTren")) {
-            fileUrls.add(generateContractFileExport(request, date, null, user, "14BaoCaoThamDinhVaDeXuatChoVayNH_TrenBo.docx", null));
-        } else {
-            fileUrls.add(generateContractFileExport(request, date, null, user, "14BaoCaoThamDinhVaDeXuatChoVayNH_DuoiNuoc.docx", null));
+        String loaiPhuongAn = pavv.getLoaiPhuongAn();
+        String templateName;
+        switch (loaiPhuongAn == null ? "" : loaiPhuongAn.toLowerCase()) {
+            case "kd_taphoa":
+                templateName = "14BaoCaoThamDinhVaDeXuatChoVay_KD_TapHoa.docx";
+                break;
+            case "kd_vantai":
+                templateName = "14BaoCaoThamDinhVaDeXuatChoVay_KD_VanTai.docx";
+                break;
+            case "kd_kimkhi":
+                templateName = "14BaoCaoThamDinhVaDeXuatChoVay_KD_KimKhi.docx";
+                break;
+            case "channuoitren":
+                templateName = "14BaoCaoThamDinhVaDeXuatChoVayNH_TrenBo.docx";
+                break;
+            case "channuoiduoi":
+                templateName = "14BaoCaoThamDinhVaDeXuatChoVayNH_DuoiNuoc.docx";
+                break;
+            case "sanxuat":
+            case "tieudung":
+                templateName = "14BaoCaoThamDinhVaDeXuatChoVayTHTieuDung.docx";
+                break;
+            default:
+                templateName = "14BaoCaoThamDinhVaDeXuatChoVay_KD_Chung.docx";
+                break;
         }
+        fileUrls.add(generateContractFileExport(request, date, null, user, templateName, null));
 
-        if (Boolean.TRUE.equals(pavv.getGiaiNganHM()) && isHanMuc) {
+        if (Boolean.TRUE.equals(pavv.getGiaiNganHM())) {
             fileUrls.add(generateContractFileExport(request, date, null, user, "DanhMucBoSungHoSoChoVayHanMuc.docx", null));
             fileUrls.add(generateContractFileExport(request, date, null, user, "PhuLucHopDong.docx", null));
             fileUrls.add(generateContractFileExport(request, date, null, user, "ToTrinhGiaiNganVayHanMuc.docx", null));
@@ -258,24 +292,14 @@ public class CreditContractServiceIMPL implements ICreditContractService {
 
             if (request.getLoaiVay().equalsIgnoreCase("trung_han") && pavv.getLoaiPhuongAn().equalsIgnoreCase("sanXuat")) {
                 fileUrls.add(generateContractFileExport(request, date, null, user, "10PhuongAnVayVonTrungHanSanXuat.docx", null));
-                fileUrls.add(generateContractFileExport(request, date, null, user, "14BaoCaoThamDinhVaDeXuatChoVayNH_DuoiNuoc.docx", null));
                 fileUrls.add(generateContractFileExport(request, date, null, user, "02BaoCaoDeNghiGiaiNganKiemGiayNhanNo.docx", null));
             } else if (request.getLoaiVay().equalsIgnoreCase("trung_han") && pavv.getLoaiPhuongAn().equalsIgnoreCase("tieuDung")) {
                 fileUrls.add(generateContractFileExport(request, date, null, user, "10PhuongAnVayVonTrungHanTieuDung.docx", null));
                 fileUrls.add(generateContractFileExport(request, date, null, user, "02BaoCaoDeNghiGiaiNganKiemGiayNhanNoTHTieuDung.docx", null));
-                fileUrls.add(generateContractFileExport(request, date, null, user, "14BaoCaoThamDinhVaDeXuatChoVayTHTieuDung.docx", null));
                 fileUrls.add(generateContractFileExport(request, date, null, user, "11BaoCaoThuNhapKH_THTieuDung.docx", null));
-            } else if (request.getLoaiVay().equalsIgnoreCase("ngan_han")) {
-                System.err.println("loai phuong an: " + request.getPavvRequest().getLoaiPhuongAn().equalsIgnoreCase("chanNuoiTren"));
-                if (request.getPavvRequest().getLoaiPhuongAn().equalsIgnoreCase("chanNuoiDuoi")) {
-                    fileUrls.add(generateContractFileExport(request, date, null, user, "14BaoCaoThamDinhVaDeXuatChoVayNH_DuoiNuoc.docx", null));
-                } else if (request.getPavvRequest().getLoaiPhuongAn().equalsIgnoreCase("chanNuoiTren")) {
-                    fileUrls.add(generateContractFileExport(request, date, null, user, "14BaoCaoThamDinhVaDeXuatChoVayNH_TrenBo.docx", null));
-                }
             } else {
                 fileUrls.add(generateContractFileExport(request, date, null, user, "10PhuongAnVayVon.docx", null));
                 fileUrls.add(generateContractFileExport(request, date, null, user, "02BaoCaoDeNghiGiaiNganKiemGiayNhanNo.docx", null));
-                fileUrls.add(generateContractFileExport(request, date, null, user, "14BaoCaoThamDinhVaDeXuatChoVayNH_DuoiNuoc.docx", null));
             }
             fileUrls.add(generateContractFileExport(request, date, null, user, "17BaoCaoThongTinVeNguoiCoLienQuan.docx", null));
             fileUrls.add(generateContractFileExport(request, date, null, user, "19BaoCaoSuDungVonVay.docx", null));
@@ -289,13 +313,12 @@ public class CreditContractServiceIMPL implements ICreditContractService {
                 fileUrls.add(generateContractFileExport(request, date, dateTC, user, "07ThongBao.docx", ts));
             }
             // Các giấy tờ khác theo điều kiện
-            if (vayLaiFlag && isHanMuc) {
+            if (request.getLoaiVay().equalsIgnoreCase("han_muc")) {
                 fileUrls.add(generateContractFileExport(request, date, null, user, "PhuLucHanMuc.docx", null));
             }
         }
 
-        // isVayLai: insert bản ghi mới; còn lại: update bản ghi cũ
-        creditContractRepository.save(entity);
+        // Bản ghi đã được lưu ở trên bằng saveAndFlush, nên không cần save lại ở cuối
         return fileUrls;
     }
 
@@ -400,6 +423,15 @@ public class CreditContractServiceIMPL implements ICreditContractService {
 //        }
 // Khởi tạo biến tiền số
         long tienSo = parseLongSafe(request.getTienSo());
+        long tienLuongKH = parseLongSafe(request.getPavvRequest().getTienLuongKH());
+        long tienSXKD = parseLongSafe(request.getPavvRequest().getTienNguonThuNhapKhac());
+        long tongThuNhapTHTDNam = tienLuongKH + tienSXKD;
+        long tongThuNhapTHTDThang = tongThuNhapTHTDNam / 12;
+        long chiPhiHangNamTHTD = parseLongSafe(request.getPavvRequest().getChiPhiHangThangTHTD()) * 12;
+        safePutReplacement("{{tongThuNhapTHTDNam}}", formatCurrency(tongThuNhapTHTDNam));
+        safePutReplacement("{{tongThuNhapTHTDThang}}", formatCurrency(tongThuNhapTHTDThang));
+        safePutReplacement("{{chiPhiTHTDNam}}", formatCurrency(chiPhiHangNamTHTD));
+        safePutReplacement("{{chiPhiTHTDThang}}", Optional.ofNullable(request.getPavvRequest().getChiPhiHangThangTHTD()).orElse("0"));
         safePutReplacement("{{endDate}}", endDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
         if (Boolean.TRUE.equals(request.getPavvRequest().getGiaiNganHM()) && request.getLoaiVay().equalsIgnoreCase("han_muc")) {
             System.err.println("Số Giải Ngân -->" + Optional.ofNullable(request.getPavvRequest().getSoGiaiNgan()).orElse("01"));
@@ -450,7 +482,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         safePutReplacement("{{ls}}", Optional.ofNullable(request.getLaiSuat()).orElse(""));
         safePutReplacement("{{nkt}}", Optional.of(ngayKetThuc).orElse(""));
         safePutReplacement("{{chv}}", Optional.ofNullable(request.getChoVay()).orElse(""));
-        safePutReplacement("{{tienVayTCTDK}}", Optional.of(request.getPavvRequest().getTienVayTCTDK() + "         đồng").orElse("0"));
+        safePutReplacement("{{tienVayTCTDK}}", Optional.of(request.getPavvRequest().getTienVayTCTDK() + " đồng").orElse("0"));
         safePutReplacement("{{tienNoQTDTH}}", Optional.ofNullable(request.getPavvRequest().getTienNoQTDNDTH()).orElse("0"));
         safePutReplacement("{{tienLuongKH}}", Optional.ofNullable(request.getPavvRequest().getTienLuongKH()).orElse("0"));
         safePutReplacement("{{noiDungNguonThuKhac}}", Optional.ofNullable(request.getPavvRequest().getNoiDungNguonThuKhac()).orElse(""));
@@ -919,7 +951,6 @@ public class CreditContractServiceIMPL implements ICreditContractService {
                         }
                     }
                 }
-
                 String soHopDongTheChap = String.join(" và ", dsSoHopDong);
 
                 safePutReplacement(
@@ -941,7 +972,6 @@ public class CreditContractServiceIMPL implements ICreditContractService {
                                 + " năm "
                                 + date.getYear()
                 );
-
             } else {
                 safePutReplacement("{{tinDungHM}}", "");
             }
@@ -1018,32 +1048,8 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         if (pavvDto != null) {
             safePutReplacement("{{tenpavv}}", Optional.ofNullable(pavvDto.getName()).orElse(""));
             safePutReplacement("{{ldpavv}}", Optional.ofNullable(pavvDto.getReason()).orElse(""));
-//            if (pavvDto.getLoaiPhuongAn().equals("chanNuoi")) {
-//                safePutReplacement("{{loaiPhuongAn}}", "chăn nuôi");
-//                safePutReplacement("{{sanPhamSX}}", "Sản phẩm của khách hàng là nguồn lương thực thực phẩm cẩn thiết được chế biến và cung cấp trên thị trường, phù hợp với nhu cầu của người tiêu dùng. Việc mở rộng quy mô: " + pavvDto.getName() + " mang lại kinh tế cho khách hàng, nâng cao năng suất, hiệu quả và sức cạnh tranh trong cơ chế thị trường.");
-//                safePutReplacement("{{thiTruongDV}}", "Nguồn cung ứng nguyên vật liệu, thiết bị và dịch vụ phục vụ sản xuất – kinh doanh hiện nay rất đa dạng, phong phú và có chất lượng ổn định. Doanh nghiệp có nhiều lựa chọn từ các nhà cung cấp uy tín, đảm bảo tiêu chuẩn kỹ thuật và giá cả cạnh tranh. Hệ thống giao thông thuận tiện giúp việc vận chuyển nguyên liệu, hàng hóa nhanh chóng, tiết kiệm thời gian và chi phí. Bên cạnh đó, nhiều chương trình hỗ trợ từ phía nhà sản xuất, nhà phân phối và chính quyền địa phương giúp doanh nghiệp giảm thiểu chi phí đầu vào, tạo điều kiện thuận lợi để tối ưu hóa hiệu quả sản xuất – kinh doanh.");
-//                safePutReplacement("{{pavv1}}", "- Vị trí xây dựng ao chuồng phù hợp về phát triển chăn nuôi ở địa phương.");
-//                safePutReplacement("{{pavv2}}", "- Có nguồn nước đảm bảo chất lượng, khu tập kết và xử lý chất thải.");
-//                safePutReplacement("{{pavv3}}", "- Các biện pháp về bảo vệ môi trường được đảm bảo theo quy định.");
-//                safePutReplacement("{{pavv4}}", "- Có diện tích ao chuồng khoảng 1000 m², mang thiết bị đảm bảo cho việc chăn nuôi.");
-//                safePutReplacement("{{pavv5}}", "- Có nhật ký ghi chép trong quá trình hoạt động chăn nuôi.");
-//                safePutReplacement("{{pavv6}}", "- Có khoảng cách an toàn từ khu vực chăn nuôi đến các Tổ Dân Phố.");
-//            } else {
-//                safePutReplacement("{{loaiPhuongAn}}", "sản xuất, kinh doanh");
-//                safePutReplacement("{{sanPhamSX}}", "Sản phẩm dịch vụ sản xuất, kinh doanh của khách hàng đang có nhu cầu lớn trên thị trường, đồng thời phù hợp với nhu cầu của người sử dụng. Việc mở rộng quy mô sản xuất và nâng cao chất lượng sản phẩm, thu hút được khách hàng và sản phẩm có tính cạnh tranh cao hơn trên thị trường.");
-//                safePutReplacement("{{thiTruongDV}}", "Có nhiều nhà cung cấp chất lượng để lựa chọn, giao thông thuận tiện để vận chuyển. Nhà sản xuất có nhiều chương trình hỗ trợ người: " + pavvDto.getName() + " nên giá đầu vào thấp hơn, giảm thiểu chi phí đầu vào tối đa.");
-//                safePutReplacement("{{pavv1}}", "- Khả năng thực hiện phương án là khả thi.");
-//                safePutReplacement("{{pavv2}}", "- Điều kiện về môi trường được đảm bảo, thực hiện đúng quy định địa phương về vệ sinh môi trường, không để ảnh hưởng đến hộ dân xung quanh, nguồn nước. Tuân thủ phòng chống cháy nổ theo quy định của pháp luật.");
-//                safePutReplacement("{{pavv3}}", "");
-//                safePutReplacement("{{pavv4}}", "");
-//                safePutReplacement("{{pavv5}}", "");
-//                safePutReplacement("{{pavv6}}", "");
-//            }
         }
         safePutReplacement("{{thv}}", Optional.ofNullable(request.getThoiHanVay()).orElse(""));
-//        safePutReplacement("{{ncd}}", Optional.ofNullable(request.getNhaCoDinh()).orElse(""));
-//        safePutReplacement("{{tsbds}}", Optional.ofNullable(request.getTongTaiSanBD()).orElse(""));
-//        safePutReplacement("{{tsbdc}}", Optional.ofNullable(request.getTongTaiSanBDChu()).orElse(""));
         safePutReplacement("{{day}}", String.format("%02d", date.getDayOfMonth()));
         safePutReplacement("{{month}}", String.format("%02d", date.getMonthValue()));
         safePutReplacement("{{year}}", String.valueOf(date.getYear()));
@@ -1084,25 +1090,22 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         CreditContractPAVVRequest pavvDtoVayLai = request.getPavvRequest();
         if (pavvDto != null && pavvDtoVayLai.getReLoanSequence() != null && pavvDtoVayLai.getReLoanSequence() != 0) {
             System.err.println("so hop dong vay lai: " + pavvDtoVayLai.getReLoanSequence());
-            // Nội dung vay lại, bạn có thể tùy chỉnh câu văn
-//            safePutReplacement("{{noiDung}}", "Biên bản xác định lại giá trị tài sản bổ sung cho HĐTC số: " + request.getSoHopDongTheChapQSDD()
-//                    + " Ngày " + String.format("%02d", dateTC.getDayOfMonth()) + " tháng " + String.format("%02d", dateTC.getMonthValue()) + " năm " + String.valueOf(dateTC.getYear()));
             // Số hợp đồng vay lại
             safePutReplacement("{{shdvl}}", "" + pavvDtoVayLai.getReLoanSequence());
             safePutReplacement("{{shdvlts}}", "." + pavvDtoVayLai.getReLoanSequence());
             safePutReplacement("{{xdlai}}", "LẠI");
             safePutReplacement("{{xdlait}}", "lại");
         } else {
-//            safePutReplacement("{{noiDung}}", "");
             safePutReplacement("{{shdvl}}", "");
             safePutReplacement("{{shdvlts}}", "");
             safePutReplacement("{{xdlai}}", "");
             safePutReplacement("{{xdlait}}", "");
         }
-        if (Boolean.TRUE.equals(request.getPavvRequest().getGiaiNganHM())) {
-            duNoTruoc = parseLongSafe(pavvDtoVayLai.getDuNoTruoc());
+        if (request.getLoaiVay().equalsIgnoreCase("han_muc")) {
+            // Dư nợ trước = tổng số dư gốc của bảng phụ lục hạn mức
+            duNoTruoc = tinhTongPhuLucHanMuc(request.getPhuLucHanMucTable());
+            System.err.println("duNoTruoc: "+duNoTruoc);
             soTienVayLaiLanNay = parseLongSafe(pavvDtoVayLai.getSoTienVayLanNay());
-//            if(soTienVayLaiLanNay)
             System.err.println("soTienVayLaiLanNay --> " + soTienVayLaiLanNay);
             if (soTienVayLaiLanNay == 0) {
                 soTienVayLaiLanNay = tienSo;
@@ -1111,7 +1114,6 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             soTienVayLaiLanNay = tienSo;
         }
         duNoSau = duNoTruoc + soTienVayLaiLanNay;
-
         System.err.println("tien vay lai --> " + formatCurrency(soTienVayLaiLanNay));
         safePutReplacement("{{duNoTruoc}}", formatCurrency(duNoTruoc));
         safePutReplacement("{{duNoTruocChu}}", numberToVietnameseWordsMoney(duNoTruoc));
@@ -1166,6 +1168,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
                     || text.contains("{{TABLE_CP_PLACEHOLDER}}")
                     || text.contains("{{TABLE_TN_PLACEHOLDER}}")
                     || text.contains("{{TABLE_PLHM_PLACEHOLDER}}")
+                    || text.contains("{{TABLE_NTN_PLACEHOLDER}}")
             ) {
                 targets.add(para);
             }
@@ -1184,7 +1187,6 @@ public class CreditContractServiceIMPL implements ICreditContractService {
                     doc.removeBodyElement(paraPos);
                 }
             }
-
             if (text.contains("{{TABLE_TN_PLACEHOLDER}}")) {
                 insertTableAtPlaceholder(doc, para, request.getThuNhapDuKienTable(), false, replacements, request);
                 int paraPos = doc.getPosOfParagraph(para);
@@ -1225,6 +1227,17 @@ public class CreditContractServiceIMPL implements ICreditContractService {
 
             if (text.contains("{{TABLE_CP_PLACEHOLDER}}")) {
                 insertTableAtPlaceholder(doc, para, request.getChiPhiTable(), false, replacements, request);
+                int paraPos = doc.getPosOfParagraph(para);
+                if (paraPos >= 0) doc.removeBodyElement(paraPos);
+            }
+            if (text.contains("{{TABLE_NTN_PLACEHOLDER}}")) {
+                boolean coBang = "trung_han".equalsIgnoreCase(request.getLoaiVay())
+                        && request.getNguonTraNoTable() != null
+                        && request.getNguonTraNoTable().isDrawTable();
+                if (coBang) {
+                    insertTableAtPlaceholder(doc, para, request.getNguonTraNoTable(), true, replacements, request);
+                }
+                // luôn xóa placeholder để không để lại dòng trống
                 int paraPos = doc.getPosOfParagraph(para);
                 if (paraPos >= 0) doc.removeBodyElement(paraPos);
             }
@@ -2039,8 +2052,66 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             case "phuluchanmuc":
                 fillPhuLucHanMucTable(table, tableRequest);
                 break;
+            case "nguontrano":
+                fillNguonTraNoTable(table, tableRequest);
+                break;
             default:
                 fillGenericTable(table, tableRequest);
+        }
+    }
+
+    private void fillNguonTraNoTable(XWPFTable table, TableRequest tableRequest) {
+        if (table == null || tableRequest == null || !tableRequest.isDrawTable()) return;
+        List<String> headers = tableRequest.getHeaders();
+        if (headers == null || headers.isEmpty()) return;
+        int colCount = headers.size();
+
+        // Border toàn bảng
+        CTTblBorders tblBorders = table.getCTTbl().getTblPr().isSetTblBorders()
+                ? table.getCTTbl().getTblPr().getTblBorders()
+                : table.getCTTbl().getTblPr().addNewTblBorders();
+        setBorder(tblBorders.addNewInsideH());
+        setBorder(tblBorders.addNewInsideV());
+        setBorder(tblBorders.addNewTop());
+        setBorder(tblBorders.addNewBottom());
+        setBorder(tblBorders.addNewLeft());
+        setBorder(tblBorders.addNewRight());
+
+        // Header: cột 2 (Nội dung) căn trái, còn lại căn giữa
+        XWPFTableRow headerRow = table.createRow();
+        ensureCells(headerRow, colCount);
+        ensureParagraphsInRow(headerRow);
+        for (int c = 0; c < colCount; c++) {
+            setCellTextSized(headerRow.getCell(c), headers.get(c), true, c != 1, 12);
+        }
+        applyBordersToRow(headerRow);
+
+        // Dữ liệu: các dòng I, II, III in đậm
+        if (tableRequest.getRows() != null) {
+            for (List<String> rowData : tableRequest.getRows()) {
+                XWPFTableRow row = table.createRow();
+                ensureCells(row, colCount);
+                ensureParagraphsInRow(row);
+                String stt = rowData.isEmpty() ? "" : rowData.get(0);
+                boolean boldRow = stt != null && stt.matches("I{1,3}");
+                for (int c = 0; c < colCount; c++) {
+                    String value = c < rowData.size() && rowData.get(c) != null ? rowData.get(c) : "";
+                    setCellTextSized(row.getCell(c), value, boldRow, c != 1, 12);
+                }
+                applyBordersToRow(row);
+            }
+        }
+
+        rebuildTableGrid(table, colCount);
+    }
+
+    // Như setCellText nhưng chọn được cỡ chữ (bảng có nhiều cột năm nên dùng 12)
+    private void setCellTextSized(XWPFTableCell cell, String text, boolean bold, boolean alignCenter, int fontSize) {
+        setCellText(cell, text, false, bold, alignCenter);
+        for (XWPFParagraph p : cell.getParagraphs()) {
+            for (XWPFRun r : p.getRuns()) {
+                r.setFontSize(fontSize);
+            }
         }
     }
 
@@ -2863,7 +2934,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy hợp đồng với id: " + id));
 // Kiểm tra quyền (bỏ nếu chưa cần)
         // 1. Chỉ ADMIN được xóa
-        User current = userDetailService.getCurrentUser();
+        User current = requireCurrentUser();
         boolean isAdmin = current.getRoles().stream()
                 .anyMatch(role -> role.getName() == RoleName.ADMIN);
         if (!isAdmin) {
@@ -2884,6 +2955,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         }
 
         // 2. Xóa DB (cascade xóa avatars, tables, tài sản, PAVV)
+        auditService.log(entity.getId(), current, AuditAction.DELETE);
         creditContractRepository.delete(entity);
 
         // 3. Xóa file vật lý sau khi transaction commit thành công
@@ -2989,5 +3061,38 @@ public class CreditContractServiceIMPL implements ICreditContractService {
                 }
             }
         }
+    }
+    /**
+     * Tổng cột "Số dư gốc hiện tại" (index 3) của bảng phụ lục hạn mức,
+     * bỏ qua dòng "Tổng cộng".
+     */
+    private long tinhTongPhuLucHanMuc(TableRequest table) {
+        if (table == null || table.getRows() == null) {
+            return 0L;
+        }
+        long tong = 0L;
+        for (List<String> row : table.getRows()) {
+            if (row == null || row.size() < 4) continue;
+
+            String stt = row.get(0);
+            if (stt != null && stt.trim().equalsIgnoreCase("Tổng cộng")) continue;
+
+            tong += parseLongSafePL(row.get(3));
+        }
+        return tong;
+    }
+    private long parseLongSafePL(String s) {
+        if (s == null) return 0L;
+        String digits = s.replaceAll("[^\\d]", "");
+        return digits.isEmpty() ? 0L : Long.parseLong(digits);
+    }
+    // CreditContractServiceIMPL
+    @Override
+    @Transactional(readOnly = true)
+    public Page<CreditContractListItemDto> search(String keyword, int page, int size) {
+        String kw = keyword == null ? "" : keyword.trim();
+        String pattern = "%" + kw.toLowerCase() + "%";
+        int safeSize = Math.min(Math.max(size, 1), 200);
+        return creditContractRepository.search(kw, pattern, PageRequest.of(Math.max(page, 0), safeSize));
     }
 }

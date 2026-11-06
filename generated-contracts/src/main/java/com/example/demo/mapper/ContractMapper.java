@@ -29,7 +29,9 @@ public class ContractMapper {
                                    LocalDate date,
                                    LocalDate dateTC
                                    ) throws JsonProcessingException {
-        entity.setUser(user);
+        if (entity.getUser() == null) {
+            entity.setUser(user);
+        }
         entity.setContractDate(date);
         entity.setNguoiDaiDien(request.getNguoiDaiDien());
         entity.setGtkh(request.getGtkh());
@@ -219,6 +221,7 @@ public class ContractMapper {
             pavv.setNoiDungTuLuong(dto.getNoiDungTuLuong());
             pavv.setNoiDungCIC(dto.getNoiDungCIC());
             pavv.setNhanXetCIC(dto.getNhanXetCIC());
+            pavv.setChiPhiHangThangTHTD(dto.getChiPhiHangThangTHTD());
             entity.setContractPAVV(pavv); // liên kết xuôi
         }
 
@@ -421,10 +424,14 @@ public class ContractMapper {
             pavvDto.setNoiDungTuLuong(pavv.getNoiDungTuLuong());
             pavvDto.setNoiDungCIC(pavv.getNoiDungCIC());
             pavvDto.setNhanXetCIC(pavv.getNhanXetCIC());
+            pavvDto.setChiPhiHangThangTHTD(pavv.getChiPhiHangThangTHTD());
             request.setPavvRequest(pavvDto);
         }
         // map các field cơ bản
         request.setId(entity.getId());
+        request.setCreatedByUsername(entity.getUser() != null ? entity.getUser().getUsername() : null);
+        request.setCreatedAt(entity.getCreatedAt());
+        request.setContractDate(entity.getContractDate() != null ? entity.getContractDate().toString() : null);
         request.setContractDate(entity.getContractDate() != null ? entity.getContractDate().toString() : null);
         request.setNguoiDaiDien(entity.getNguoiDaiDien());
         request.setGtkh(entity.getGtkh());

@@ -17,6 +17,7 @@ public class UserPrinciple implements UserDetails {
     private String email;
     @JsonIgnore
     private String password;
+    private boolean locked;
     private String avatar;
     private Collection<? extends GrantedAuthority> roles;
 
@@ -31,12 +32,13 @@ public class UserPrinciple implements UserDetails {
     public UserPrinciple() {
     }
 
-    public UserPrinciple(Long id, String name, String username, String email, String password, String avatar, Collection<? extends GrantedAuthority> roles) {
+    public UserPrinciple(Long id, String name, String username, String email, String password, Boolean locked, String avatar, Collection<? extends GrantedAuthority> roles) {
         this.id = id;
         this.name = name;
         this.username = username;
         this.email = email;
         this.password = password;
+         this.locked = locked;
         this.avatar = avatar;
         this.roles = roles;
     }
@@ -49,6 +51,7 @@ public class UserPrinciple implements UserDetails {
                 user.getUsername(),
                 user.getEmail(),
                 user.getPassword(),
+                user.isLocked(),
                 user.getAvatar(),
                 authorities
         );
@@ -83,7 +86,7 @@ public class UserPrinciple implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return !locked;
     }
 
     @Override

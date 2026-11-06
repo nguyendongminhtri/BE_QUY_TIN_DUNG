@@ -6,6 +6,7 @@ import com.example.demo.repository.IRoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -15,5 +16,9 @@ public class RoleServiceImpl implements IRoleService {
     @Override
     public Optional<Role> findByName(RoleName name) {
         return roleRepository.findByName(name);
+    }
+    @Override
+    public List<Role> findAll() {
+        return roleRepository.findAll();
     }
 }
