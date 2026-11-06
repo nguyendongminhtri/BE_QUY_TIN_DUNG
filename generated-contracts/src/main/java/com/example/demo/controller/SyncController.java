@@ -19,23 +19,26 @@ public class SyncController {
     private final IGiaoDichRepository repo;
     private final String token;
 
-    public SyncController(IGiaoDichRepository repo, @Value("${sync.token:QTDTH_Sync_SecretKey_Secure_998877}") String token) {
+    public SyncController(IGiaoDichRepository repo, @Value("${sync.token}") String token) {
         this.repo = repo;
         this.token = token;
     }
 
     @PostMapping("/giao-dich")
     @Transactional
-    public ResponseEntity<?> sync(@RequestHeader(value = "Authorization", required = false) String auth,
+    public ResponseEntity<?> sync(@RequestHeader(value = "X-Sync-Token", required = false) String key,
                                   @RequestBody List<GiaoDichEntity> rows) {
-        byte[] expected = ("Bearer " + token).getBytes(StandardCharsets.UTF_8);
-        byte[] actual = (auth == null ? "" : auth).getBytes(StandardCharsets.UTF_8);
-        if (token.isBlank() || !MessageDigest.isEqual(expected, actual)) {
-            return ResponseEntity.status(401).build();
+        System.out.println("[sync] header=" + (key == null ? "null" : key.length())
+                + ", token cấu hình=" + token.length() + ", số dòng=" + rows.size());
+
+        if (token.isBlank() || key == null
+                || !MessageDigest.isEqual(token.getBytes(StandardCharsets.UTF_8),
+                key.getBytes(StandardCharsets.UTF_8))) {
+            return ResponseEntity.status(401).body(Map.of("error", "sync token sai hoac chua cau hinh"));
         }
         LocalDateTime now = LocalDateTime.now();
         rows.forEach(r -> r.setSyncedAt(now));
-        repo.saveAll(rows);   // soCt đã có thì cập nhật, chưa có thì thêm
+        repo.saveAll(rows);
         return ResponseEntity.ok(Map.of("received", rows.size()));
     }
 }

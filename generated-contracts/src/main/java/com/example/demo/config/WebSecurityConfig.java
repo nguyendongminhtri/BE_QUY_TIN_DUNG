@@ -45,7 +45,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     }
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity.cors().and().csrf().ignoringAntMatchers("/api/sync/**").disable().
+        httpSecurity.cors().and().csrf().disable().
                 authorizeRequests()
                 .antMatchers("/api/sync/**").permitAll() // <--- Thêm dòng này để mở đường dẫn sync
                 .anyRequest().authenticated()
