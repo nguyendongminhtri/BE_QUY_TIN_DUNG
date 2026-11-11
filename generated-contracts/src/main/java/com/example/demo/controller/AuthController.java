@@ -1,9 +1,6 @@
 package com.example.demo.controller;
 
-import com.example.demo.dto.request.ChangeAvatar;
-import com.example.demo.dto.request.ChangePasswordRequest;
-import com.example.demo.dto.request.SignInForm;
-import com.example.demo.dto.request.SignUpForm;
+import com.example.demo.dto.request.*;
 import com.example.demo.dto.response.JwtResponse;
 import com.example.demo.dto.response.ResponMessage;
 import com.example.demo.model.Role;
@@ -13,9 +10,11 @@ import com.example.demo.security.jwt.JwtProvider;
 import com.example.demo.security.jwt.JwtTokenFilter;
 import com.example.demo.security.userprincal.UserPrinciple;
 import com.example.demo.service.role.RoleServiceImpl;
+import com.example.demo.service.user.FileStorageService;
 import com.example.demo.service.user.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.LockedException;
@@ -25,11 +24,13 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -49,6 +50,8 @@ public class AuthController {
     JwtProvider jwtProvider;
     @Autowired
     JwtTokenFilter jwtTokenFilter;
+    @Autowired
+    private FileStorageService fileStorageService;
     @PostMapping("/signup")
     public ResponseEntity<?> register(@Valid @RequestBody SignUpForm signUpForm) {
         if (userService.existsByUsername(signUpForm.getUsername())) {
@@ -107,23 +110,32 @@ public class AuthController {
             SecurityContextHolder.getContext().setAuthentication(authentication);
             String token = jwtProvider.createToken(authentication);
             UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
-            return ResponseEntity.ok(new JwtResponse(token, userPrinciple.getName(),
+            return ResponseEntity.ok(new JwtResponse(token, userPrinciple.getName(), userPrinciple.getEmail(),
                     userPrinciple.getAvatar(), userPrinciple.getAuthorities()));
         } catch (LockedException e) {
             return new ResponseEntity<>(new ResponMessage("locked"), HttpStatus.FORBIDDEN);
         }
     }
-    @PutMapping("/change-avatar")
-    public ResponseEntity<?> changeAvatar(HttpServletRequest request, @Valid @RequestBody ChangeAvatar changeAvatar){
-        String token =jwtTokenFilter.getJwt(request);
+    @PutMapping(value = "/change-avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> changeAvatar(HttpServletRequest request,
+                                          @RequestParam("file") MultipartFile file) {
+        String token = jwtTokenFilter.getJwt(request);
         String username = jwtProvider.getUerNameFromToken(token);
-        User user = userService.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("username not f"));
-        if (changeAvatar.getAvatar() == null|| changeAvatar.getAvatar().trim().equals("")){
-            return  new ResponseEntity<>(new ResponMessage("no"),HttpStatus.OK);
-        }else {
-            user.setAvatar(changeAvatar.getAvatar());
+        User user = userService.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("username not found"));
+
+        try {
+            String newUrl = fileStorageService.saveAvatar(file);
+            String oldUrl = user.getAvatar();
+
+            user.setAvatar(newUrl);
             userService.save(user);
-            return new ResponseEntity<>(new ResponMessage("yes"), HttpStatus.OK);
+
+            fileStorageService.deleteAvatar(oldUrl); // xóa ảnh cũ sau khi lưu DB thành công
+
+            return ResponseEntity.ok(Map.of("avatar", newUrl));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }
     }
     @PutMapping("/change-password")
@@ -146,6 +158,31 @@ public class AuthController {
 
         user.setPassword(passwordEncoder.encode(form.getNewPassword()));
         userService.save(user);
+        return new ResponseEntity<>(new ResponMessage("yes"), HttpStatus.OK);
+    }
+    @PutMapping("/update-profile")
+    public ResponseEntity<?> updateProfile(HttpServletRequest request, @Valid @RequestBody UpdateProfileRequest updateProfileRequest) {
+        // Lấy token từ request giống như các hàm change-avatar / change-password
+        String token = jwtTokenFilter.getJwt(request);
+        String username = jwtProvider.getUerNameFromToken(token);
+
+        User user = userService.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("username not found"));
+
+        // Kiểm tra nếu người dùng thay đổi email mới thì check xem email đó đã tồn tại trong DB chưa
+        if (!user.getEmail().equals(updateProfileRequest.getEmail())) {
+            if (userService.existsByEmail(updateProfileRequest.getEmail())) {
+                return new ResponseEntity<>(new ResponMessage("no_email"), HttpStatus.OK);
+                // Hoặc trả về message báo trùng email tùy ý bạn (ở đây dùng "no_email" tương tự lúc đăng ký)
+            }
+            user.setEmail(updateProfileRequest.getEmail());
+        }
+
+        // Cập nhật tên mới
+        user.setName(updateProfileRequest.getName());
+
+        userService.save(user);
+
         return new ResponseEntity<>(new ResponMessage("yes"), HttpStatus.OK);
     }
 }

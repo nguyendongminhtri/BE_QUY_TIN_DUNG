@@ -1121,6 +1121,7 @@ public class CreditContractServiceIMPL implements ICreditContractService {
         safePutReplacement("{{tienVayLaiChu}}", numberToVietnameseWordsMoney(soTienVayLaiLanNay));
         safePutReplacement("{{duNoSau}}", formatCurrency(duNoSau));
         safePutReplacement("{{duNoSauChu}}", numberToVietnameseWordsMoney(duNoSau));
+        String phuong = "";
         if (request.getNguoiDaiDien().equalsIgnoreCase("gd")) {
             safePutReplacement("{{dcpgd1}}", "- Trụ sở tại: Số 178, TDP Ninh Chấp, phường Chu Văn An, thành phố Hải Phòng.");
             safePutReplacement("{{dcpgd2}}", "- Giấy phép đăng ký kinh doanh: 0800001806; Điện thoại: 02203.882.700");
@@ -1128,7 +1129,8 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             safePutReplacement("{{ndd1}}", "Bà: " + capitalizeWords("PHÙNG THỊ LOAN") + " - Chức vụ: Giám Đốc điều hành.");
             safePutReplacement("{{pgd}}", "");
             safePutReplacement("{{pgdvt}}", "");
-            safePutReplacement("{{phuong}}", "Chu Văn An");
+            phuong = "Chu Văn An";
+            safePutReplacement("{{phuong}}", phuong);
             safePutReplacement("{{chuTichPhuong}}", "..........................");
             safePutReplacement("{{nguoiTiepNhanHoSo}}", "Đinh Hương Nga");
             safePutReplacement("{{diaChiLienHe}}", "Số 178 TDP Ninh Chấp, phường Chu Văn An,");
@@ -1146,7 +1148,8 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             safePutReplacement("{{nddPGD1}}", "CCCD số: 030087002460; (Theo văn bản ủy quyền số: 02/UQ-TN Ngày 15 tháng ");
             safePutReplacement("{{nddPGD2}}", "07 năm 2026 của Giám Đốc Quỹ Tín Dụng Nhân Dân Thái Học).");
             safePutReplacement("{{ndd1}}", "Ông: " + capitalizeWords("DƯƠNG QUANG TUẤN") + " - Chức vụ: Giám Đốc PGD An Lạc.");
-            safePutReplacement("{{phuong}}", "Lê Đại Hành");
+            phuong = "Lê Đại Hành";
+            safePutReplacement("{{phuong}}", phuong);
             safePutReplacement("{{chuTichPhuong}}", "Phương Quốc Luyện");
             safePutReplacement("{{nguoiTiepNhanHoSo}}", "Nguyễn Văn Chiến");
             safePutReplacement("{{diaChiLienHe}}", "TDP Lạc Đạo, phường Lê Đại Hành,");
@@ -1154,6 +1157,32 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             safePutReplacement("{{nddpl}}", "Giám Đốc PGD");
             safePutReplacement("{{gdpgd}}", "Dương Quang Tuấn");
         }
+        if (tienSo <= 500000000) {
+            String day = String.format("%02d", date.getDayOfMonth());
+            String month = String.format("%02d", date.getMonthValue());
+            String year = String.valueOf(date.getYear());
+            safePutReplacement("{{bctd1}}", "IV. Ý KIẾN CỦA GIÁM ĐỐC/NGƯỜI CÓ THẨM QUYỀN");
+            safePutReplacement("{{bctd2}}", "Sau khi xem xét Báo cáo thẩm định và đề xuất cho vay của cán bộ thẩm định cùng hồ sơ, tài liệu có liên quan, ý kiến như sau:");
+            safePutReplacement("{{bctd3}}", "□ Đồng ý phê duyệt cho vay theo đề xuất.");
+            safePutReplacement("{{bctd4}}", "□ Đồng ý phê duyệt cho vay với nội dung điều chỉnh/bổ sung dưới đây.");
+            safePutReplacement("{{bctd5}}", "□ Yêu cầu bổ sung, làm rõ hồ sơ trước khi xem quyết định.");
+            safePutReplacement("{{bctd6}}", "□ Không phê duyệt cho vay.");
+            safePutReplacement("{{bctd7}}", "Số tiền cho vay được phê duyệt: "+ request.getTienSo()+" đồng.");
+            safePutReplacement("{{bctd8}}", "Bằng chữ: "+request.getTienChu()+".");
+            safePutReplacement("{{bctd9}}", "Thời hạn vay: "+request.getHanMuc()+" tháng. Lãi suất: "+request.getLaiSuat()+".");
+            safePutReplacement("{{bctd10}}", "Điều kiện phê duyệt/ý kiến khác: ……………………………………………………………...");
+            safePutReplacement("{{bctd11}}", phuong + ", ngày " + day + " tháng " + month + " năm " + year);
+            safePutReplacement("{{bctd12}}", "GIÁM ĐỐC");
+            safePutReplacement("{{bctd13}}", "(Ký, ghi rõ họ tên)");
+            safePutReplacement("{{bctd14}}", "Phùng Thị Loan");
+            safePutReplacement("{{bctd15}}", "………………………………………………………………………………………………….");
+        } else {
+            for (int i = 1; i <= 14; i++) {
+                safePutReplacement("{{bctd" + i + "}}", "");
+            }
+        }
+
+
         // Bước 1: tìm tất cả paragraph chứa placeholder
         List<XWPFParagraph> targets = new ArrayList<>();
         for (XWPFParagraph para : doc.getParagraphs()) {
@@ -1491,6 +1520,41 @@ public class CreditContractServiceIMPL implements ICreditContractService {
                 }
             }
         }
+//      if(parseLongSafe(request.getTienSo())<=500000000){
+//          System.err.println("-------NHO HON -----");
+//          safePutReplacement("{{bctd1}}", "IV. Ý KIẾN CỦA GIÁM ĐỐC/NGƯỜI CÓ THẨM QUYỀN");
+//          safePutReplacement("{{bctd2}}", "Sau khi xem xét Báo cáo thẩm định và để xuất cho vay của cán bộ thẩm định cùng hồ sơ, tài liệu có liên quan, ý kiến như sau:");
+//          safePutReplacement("{{bctd3}}", "□ Đồng ý phê duyệt cho vay theo đề xuất.");
+//          safePutReplacement("{{bctd4}}", "□ Đồng ý phê duyệt cho vay với nội dung điều chỉnh/bổ sung dưới đây.");
+//          safePutReplacement("{{bctd5}}", "□ Yêu cầu bổ sung, làm rõ hồ sơ trước khi xem quyết định.");
+//          safePutReplacement("{{bctd6}}", "□ Không phê duyệt cho vay.");
+//          safePutReplacement("{{bctd7}}", "Số tiền cho vay được phê duyệt: "+ request.getTienSo()+" đồng.");
+//          safePutReplacement("{{bctd8}}", "Bằng chữ: "+request.getTienChu()+".");
+//          safePutReplacement("{{bctd9}}", "Thời hạn vay: "+request.getHanMuc()+"tháng. Lãi suất: "+request.getLaiSuat()+".");
+//          safePutReplacement("{{bctd10}}", "Điều kiện phê duyệt/ý kiến khác: .............................................................................................................................................................................................");
+//          String day = String.format("%02d", date.getDayOfMonth());
+//          String month = String.format("%02d", date.getMonthValue());
+//          String year = String.valueOf(date.getYear());
+//          safePutReplacement("{{bctd11}}", phuong+", ngày "+day+ " tháng "+month+ " năm "+year);
+//          safePutReplacement("{{bctd12}}", "GIÁM ĐỐC");
+//          safePutReplacement("{{bctd13}}", "(Ký, ghi rõ họ tên)");
+//          safePutReplacement("{{bctd14}}", "Phùng Thị Loan");
+//      } else {
+//          safePutReplacement("{{bctd1}}", "");
+//          safePutReplacement("{{bctd2}}", "");
+//          safePutReplacement("{{bctd3}}", "");
+//          safePutReplacement("{{bctd4}}", "");
+//          safePutReplacement("{{bctd5}}", "");
+//          safePutReplacement("{{bctd6}}", "");
+//          safePutReplacement("{{bctd7}}", "");
+//          safePutReplacement("{{bctd8}}", "");
+//          safePutReplacement("{{bctd9}}", "");
+//          safePutReplacement("{{bctd10}}", "");
+//          safePutReplacement("{{bctd11}}", "");
+//          safePutReplacement("{{bctd12}}", "");
+//          safePutReplacement("{{bctd13}}", "");
+//          safePutReplacement("{{bctd14}}", "");
+//      }
 
     }
 
@@ -2305,7 +2369,6 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             ensureParagraphsInRow(row);
             for (int c = 0; c < colCount; c++) {
                 String cellValue = c < rowData.size() ? rowData.get(c) : "";
-
                 // Format số cho các cột số lượng, đơn giá, thành tiền
                 if (c == 2 || c == 3 || c == 4) {
                     long number = parseLongSafe(cellValue);
@@ -2318,22 +2381,6 @@ public class CreditContractServiceIMPL implements ICreditContractService {
             }
             applyBordersToRow(row);
         }
-
-        // ===== Tính tổng và gán vào hàng cuối =====
-//        long tongThuNhap = 0;
-//        for (List<String> rowData : tableRequest.getRows()) {
-//            if (rowData.size() > 4 && !"Tổng cộng:".equals(rowData.get(0))) {
-//                tongThuNhap += parseLongSafe(rowData.get(4));
-//            }
-//        }
-//        List<String> lastRow = tableRequest.getRows().get(tableRequest.getRows().size() - 1);
-//        lastRow.set(4, formatCurrency(tongThuNhap));
-//        System.err.println("tong doanh thu --> " + tongThuNhap);
-//
-//        // 👉 Gán vào replacements để dùng cho placeholder {{tongDoanhThu}}
-//        safePutReplacement("{{tongDoanhThu}}", formatCurrency(tongThuNhap));
-
-
         // ===== Merge hàng cuối (Tổng cộng) =====
         Map<String, Integer> colIndexMap = new HashMap<>();
         colIndexMap.put("noiDung", 0);
@@ -2704,64 +2751,6 @@ public class CreditContractServiceIMPL implements ICreditContractService {
 
         // ===== Rebuild grid =====
         rebuildTableGrid(table, colCount);
-
-        // ===== Tính toán {{tongNCV}}, {{tongChiPhi}}, {{vonTuCo}}, {{phanTramVTC}}, {{phanTramVV}} =====
-//        long tongChiPhi = 0;
-//        long chiPhiGianTiep = 0;
-//
-//        if (tableRequest.getMerges() != null) {
-//            for (MergeInfoRequest merge : tableRequest.getMerges()) {
-//                String mergedValue = merge.getMergedValue();
-//                if (mergedValue != null) {
-//                    if (mergedValue.toLowerCase().contains("tổng chi phí")) {
-//                        List<String> row = tableRequest.getRows().get(merge.getRowIndex());
-//                        tongChiPhi = parseLongSafe(row.get(5));
-//                    }
-//                    if (mergedValue.toLowerCase().contains("chi phí gián tiếp")) {
-//                        List<String> row = tableRequest.getRows().get(merge.getRowIndex());
-//                        chiPhiGianTiep = parseLongSafe(row.get(5));
-//                    }
-//                }
-//            }
-//        }
-//        System.err.println("tổng chi phí: " + tongChiPhi);
-//        long tongNCV = tongChiPhi - chiPhiGianTiep;
-//        safePutReplacement("{{tongNCV}}", formatCurrency(tongNCV));
-//        safePutReplacement("{{tongChiPhi}}", formatCurrency(tongChiPhi));
-//
-//        long tienSo = parseLongSafe(request.getTienSo());
-//
-//// Lấy hệ số vonTuCo từ Frontend (ví dụ: 40 nghĩa là 40%)
-//        double heSoVonKhac = request.getPavvRequest() != null && request.getPavvRequest().getHeSoVonKhac() != null
-//                ? request.getPavvRequest().getHeSoVonKhac()
-//                : 0.0;
-//        long vonTuCo = 0;
-//        long vonKhac = 0;
-//        double phanTramVV = 0.0;
-//        long vonLuuDong = 0;
-//        System.err.println("loai vay ---> "+request.getLoaiVay());
-//        System.err.println("loai vay ---> "+request.getLoaiVay().equalsIgnoreCase(getAnotherString()));
-//        if (request.getLoaiVay().equalsIgnoreCase(getAnotherString())) {
-//            vonLuuDong = Math.round(tongNCV / 1.2);
-//            vonKhac = Math.round(vonLuuDong * heSoVonKhac / 100.0);
-//            vonTuCo = Math.max(0, vonLuuDong - tienSo - vonKhac);
-//            phanTramVV = vonLuuDong > 0 ? (double) tienSo / vonLuuDong * 100 : 0;
-//            System.err.println("vonLuuDongHM --> "+vonLuuDong);
-//            safePutReplacement("{{vonLuuDong}}", formatCurrency(vonLuuDong));
-//        } else {
-//            vonKhac = Math.round(tongNCV * heSoVonKhac / 100.0);
-//            vonTuCo = Math.max(0, tongNCV - tienSo - vonKhac);
-//            phanTramVV = tongNCV > 0 ? (double) tienSo / tongNCV * 100 : 0;
-//            safePutReplacement("{{vonLuuDong}}", "");
-//        }
-//        double phanTramVonKhac = heSoVonKhac; // lấy trực tiếp từ Frontend
-//        double phanTramVTC = Math.max(0, 100 - phanTramVV - phanTramVonKhac);
-//// Gán placeholders
-//        safePutReplacement("{{vonTuCo}}", formatCurrency(vonTuCo));
-//        safePutReplacement("{{vonKhac}}", formatCurrency(vonKhac));
-//        safePutReplacement("{{phanTramVTC}}", String.format("%.1f", phanTramVTC) + "%");
-//        safePutReplacement("{{phanTramVV}}", String.format("%.1f", phanTramVV) + "%");
-//        safePutReplacement("{{phanTramVonKhac}}", String.format("%.1f", phanTramVonKhac) + "%");
         calculateChiPhiDerivedValues(request);
     }
 

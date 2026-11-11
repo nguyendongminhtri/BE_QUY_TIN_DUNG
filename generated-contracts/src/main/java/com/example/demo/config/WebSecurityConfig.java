@@ -6,6 +6,7 @@ import com.example.demo.security.userprincal.UserDetailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -45,9 +46,17 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     }
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity.cors().and().csrf().disable().
-                authorizeRequests()
-                .antMatchers("/api/sync/**").permitAll() // <--- Thêm dòng này để mở đường dẫn sync
+        httpSecurity.cors().and().csrf().disable()
+                .authorizeRequests()
+                // Ảnh avatar: public để thẻ <img> tải được (không gửi được JWT)
+                .antMatchers(HttpMethod.GET, "/avatars/**").permitAll()
+
+                // Các API cần đăng nhập: PHẢI đặt TRƯỚC "/api/auth/**"
+                .antMatchers("/api/auth/change-avatar",
+                        "/api/auth/change-password",
+                        "/api/auth/update-profile").authenticated()
+
+                .antMatchers("/api/sync/**", "/api/auth/**").permitAll()
                 .anyRequest().authenticated()
                 .and().exceptionHandling()
                 .authenticationEntryPoint(jwtEntryPoint)
@@ -55,4 +64,5 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
         httpSecurity.addFilterBefore(jwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
     }
+
 }

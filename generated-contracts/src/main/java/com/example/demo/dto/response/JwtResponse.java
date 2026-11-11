@@ -1,14 +1,16 @@
 package com.example.demo.dto.response;
 
+import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 
 import java.util.Collection;
-
+@Data
 public class JwtResponse {
     //    private Long id;
     private String token;
     private String type = "Bearer";
     private String name;
+    private String email;
     private String avatar;
     private Collection<? extends GrantedAuthority> roles;
 
@@ -32,20 +34,13 @@ public class JwtResponse {
         this.roles = roles;
     }
 
-    public JwtResponse(String token, String name, String avatar, Collection<? extends GrantedAuthority> authorities) {
+    public JwtResponse(String token, String name, String email, String avatar, Collection<? extends GrantedAuthority> authorities) {
         this.token = token;
         this.name = name;
+        this.email = email;
         this.avatar = avatar;
         this.roles = authorities;
     }
-
-//    public Long getId() {
-//        return id;
-//    }
-//
-//    public void setId(Long id) {
-//        this.id = id;
-//    }
 
     public String getToken() {
         return token;
