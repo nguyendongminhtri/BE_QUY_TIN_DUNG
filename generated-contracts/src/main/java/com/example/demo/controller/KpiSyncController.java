@@ -1,8 +1,11 @@
 package com.example.demo.controller;
 
+import com.example.demo.dto.request.SyncHuyDongRequest;
 import com.example.demo.model.KpiKyEntity;
 import com.example.demo.repository.IKpiKyRepository;
+import com.example.demo.service.huydongKPI.SyncHuyDongService;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,10 +23,11 @@ import java.util.Map;
 public class KpiSyncController {
     private final IKpiKyRepository kpiRepo;
     private final String token;
-
-    public KpiSyncController(IKpiKyRepository kpiRepo, @Value("${sync.token}") String token) {
+    private final SyncHuyDongService service;
+    public KpiSyncController(IKpiKyRepository kpiRepo, @Value("${sync.token}") String token,SyncHuyDongService service) {
         this.kpiRepo = kpiRepo;
         this.token = token;
+        this.service = service;
     }
 
     @PostMapping("/kpi-ky")
@@ -67,5 +71,22 @@ public class KpiSyncController {
     @GetMapping("/kpi-ky")
     public List<KpiKyEntity> xem(@RequestParam String ky) {
         return kpiRepo.findByKyOrderBySoLuotDesc(ky);
+    }
+    @PostMapping("/huy-dong-ky")
+    public ResponseEntity<?> huyDongKy(
+            @RequestHeader(value = "X-Sync-Token", required = false) String token,
+            @RequestBody SyncHuyDongRequest req) {
+
+        if (token == null || !MessageDigest.isEqual(
+                token.getBytes(StandardCharsets.UTF_8),
+                token.getBytes(StandardCharsets.UTF_8))) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Sai token"));
+        }
+        try {
+            int n = service.replaceKy(req);
+            return ResponseEntity.ok(Map.of("ky", req.ky(), "saved", n));
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.badRequest().body(Map.of("error", ex.getMessage()));
+        }
     }
 }
